@@ -29,7 +29,7 @@ const customCss = `
     }
 `;
 
-const customSiteTitle = '{jc-develop Auth API-REST}'; //add site title to swagger for nice SEO
+const customSiteTitle = 'API -  Cho thuê thiết bị'; //add site title to swagger for nice SEO
 
 const customJs = 'script url'; //uncomment this line to add a custom script file
 const customJsStr = "alert('prueba')"; //uncomment this line to add a custom script
