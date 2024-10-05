@@ -1,25 +1,19 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
 } from '@nestjs/common';
-import { UserService } from './user.service';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
+import { Auth, GetUser } from 'src/auth/decorators';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import {
-  ApiBearerAuth,
-  ApiOkResponse,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
-import { Auth, GetUser } from 'src/auth/decorators';
 import { User } from './entities/user.entity';
-import { Role } from '@prisma/client';
+import { UserService } from './user.service';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -31,12 +25,8 @@ export class UserController {
   @ApiOperation({
     summary: 'CREATE USER',
     description:
-      'Private endpoint to Create a new User. It is allowed only by "admin" users, and allows the creation of users with "admin" Role.',
+      'Endpoint for admins to create new users, including those with admin roles.',
   })
-  @ApiResponse({ status: 201, description: 'Created', type: User })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Server error' }) //Swagger
   @Auth(Role.admin)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
@@ -45,13 +35,8 @@ export class UserController {
   @Get()
   @ApiOperation({
     summary: 'GET ALL USERS',
-    description:
-      'Private endpoint to list all Users. It is allowed only by "admin" users.',
+    description: 'Endpoint for admins to retrieve a list of all users.',
   })
-  @ApiResponse({ status: 200, description: 'Ok', type: User, isArray: true })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
-  @ApiResponse({ status: 500, description: 'Server error' }) //Swagger
   @Auth(Role.admin)
   findAll() {
     return this.userService.findAll();
@@ -61,11 +46,8 @@ export class UserController {
   @ApiOperation({
     summary: 'GET USER BY ID',
     description:
-      'Private endpoint to get user data by a specific ID. <ul><li>The "user" role is permitted to access only their own information.</li><li>The "admin" role has the privilege to access information of any user</li></ul>',
+      'Retrieve user information by ID. Admins can access any user; users can access their own info.',
   })
-  @ApiResponse({ status: 200, description: 'Ok', type: User })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Server error' }) //Swagger
   @Auth(Role.admin, Role.user)
   findOne(@Param('id') id: string, @GetUser() user: User) {
     return this.userService.findOne('id', id, user);
@@ -75,11 +57,8 @@ export class UserController {
   @ApiOperation({
     summary: 'GET USER BY EMAIL',
     description:
-      'Private endpoint to get user data by Email. <ul><li>The "user" role is permitted to access only their own information.</li><li>The "admin" role has the privilege to access information of any user</li></ul>',
+      'Retrieve user information by email. Admins can access any user; users can access their own info.',
   })
-  @ApiResponse({ status: 200, description: 'Ok', type: User })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Server error' }) //Swagger
   @Auth(Role.admin, Role.user)
   findOneByEmail(@Param('email') email: string, @GetUser() user: User) {
     return this.userService.findOne('email', email, user);
@@ -89,12 +68,8 @@ export class UserController {
   @ApiOperation({
     summary: 'UPDATE USER BY ID',
     description:
-      'Private endpoint to update user data by Id. <ul><li>The "user" role is permitted to update only their own information.</li><li>The "admin" role has the privilege to update information of any user</li><li>Only the "admin" role can update the "role" field</li></ul>',
+      'Update user data by ID. Admins can update any user; users can update their own info.',
   })
-  @ApiResponse({ status: 200, description: 'Ok', type: User })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Server error' }) //Swagger
   @Auth(Role.admin, Role.user)
   update(
     @Param('id') id: string,
@@ -108,12 +83,8 @@ export class UserController {
   @ApiOperation({
     summary: 'UPDATE USER BY EMAIL',
     description:
-      'Private endpoint to update user data by email. <ul><li>The "user" role is permitted to update only their own information.</li><li>The "admin" role has the privilege to update information of any user</li><li>Only the "admin" role can update the "role" field</li></ul>',
+      'Update user data by email. Admins can update any user; users can update their own info.',
   })
-  @ApiResponse({ status: 200, description: 'Ok', type: User })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Server error' }) //Swagger
   @Auth(Role.admin, Role.user)
   updateByEmail(
     @Param('email') email: string,
@@ -127,14 +98,8 @@ export class UserController {
   @ApiOperation({
     summary: 'DELETE USER BY ID',
     description:
-      'Private endpoint to delete user by Id. <ul><li>The "user" role is permitted to remove only their own information.</li><li>The "admin" role has the privilege to delete any user</li></ul>',
+      'Delete user by ID. Admins can delete any user; users can delete their own info.',
   })
-  @ApiOkResponse({
-    content: { 'application/json': { example: { message: 'User deleted' } } },
-  })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Server error' }) //Swagger
   @Auth(Role.admin, Role.user)
   remove(@Param('id') id: string, @GetUser() user: User) {
     return this.userService.remove('id', id, user);
@@ -144,14 +109,8 @@ export class UserController {
   @ApiOperation({
     summary: 'DELETE USER BY EMAIL',
     description:
-      'Private endpoint to delete user by Email. <ul><li>The "user" role is permitted to remove only their own information.</li><li>The "admin" role has the privilege to delete any user</li></ul>',
+      'Delete user by email. Admins can delete any user; users can delete their own info.',
   })
-  @ApiOkResponse({
-    content: { 'application/json': { example: { message: 'User deleted' } } },
-  })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 500, description: 'Server error' }) //Swagger
   @Auth(Role.admin, Role.user)
   removeByEmail(@Param('email') email: string, @GetUser() user: User) {
     return this.userService.remove('email', email, user);

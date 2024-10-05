@@ -7,7 +7,7 @@ export class LoginUserDto {
     nullable: false,
     required: true,
     type: 'string',
-    example: 'youremail@example.com',
+    example: 'admin@gmail.com',
   })
   @IsEmail()
   email: string;
@@ -17,7 +17,7 @@ export class LoginUserDto {
     nullable: false,
     required: true,
     type: 'string',
-    example: 'Password123',
+    example: 'admin@123',
   })
   @IsString()
   password: string;

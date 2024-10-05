@@ -23,19 +23,14 @@ export class UserService {
   async create(dto: CreateUserDto) {
     this.logger.log(`POST: user/register: Register user started`);
 
-    // Check if password and passwordConfirmation match
     if (dto.password !== dto.passwordconf)
       throw new BadRequestException('Passwords do not match');
 
-    // Check Role
     if (dto.role && !Role[dto.role])
       throw new BadRequestException('Invalid role');
 
-    //Data to lower case
     dto.email = dto.email.toLowerCase().trim();
-    // dto.name = dto.name.toLowerCase();
 
-    //Hash the password
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     try {
@@ -120,11 +115,10 @@ export class UserService {
 
     const { passwordconf, ...newUserData } = dto;
 
-    // Check if password and passwordConfirmation match
     if (dto.password) {
       if (dto.password !== passwordconf)
         throw new BadRequestException('Passwords do not match');
-      //Hash the password
+
       newUserData.password = await bcrypt.hash(dto.password, 10);
     }
 

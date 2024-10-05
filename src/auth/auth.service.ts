@@ -25,15 +25,12 @@ export class AuthService {
 
   async registerUser(dto: RegisterUserDto): Promise<any> {
     this.logger.log(`POST: user/register: Register user started`);
-    // Check if password and passwordConfirmation match
+
     if (dto.password !== dto.passwordconf)
       throw new BadRequestException('Passwords do not match');
 
-    //Data to lower case
     dto.email = dto.email.toLowerCase().trim();
-    // dto.name = dto.name.toLowerCase();
 
-    //Hash the password
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     try {
@@ -93,7 +90,6 @@ export class AuthService {
       throw new BadRequestException('Wrong credentials');
     }
 
-    // Compare the provided password with the hashed password
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
