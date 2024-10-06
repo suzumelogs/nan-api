@@ -15,7 +15,7 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({
-    summary: 'REGISTER',
+    summary: 'Register',
     description: 'Public endpoint to register a new user with "user" role.',
   })
   register(@Body() createUserDto: RegisterUserDto) {
@@ -24,7 +24,7 @@ export class AuthController {
 
   @Post('login')
   @ApiOperation({
-    summary: 'LOGIN',
+    summary: 'Login',
     description: 'Public endpoint to login and obtain an access token.',
   })
   async login(@Res() response, @Body() loginUserDto: LoginUserDto) {
@@ -37,7 +37,7 @@ export class AuthController {
 
   @Get('refresh-token')
   @ApiOperation({
-    summary: 'REFRESH TOKEN',
+    summary: 'Refresh token',
     description:
       'Private endpoint for logged-in users to refresh their access token.',
   })
