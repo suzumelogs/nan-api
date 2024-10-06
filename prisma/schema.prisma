@@ -30,3 +30,15 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Discount {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  code      String   @unique
+  value     Float // Giá trị giảm giá
+  validFrom DateTime // Thời gian bắt đầu
+  validTo   DateTime // Thời gian kết thúc
+  limit     Int? // Giới hạn số lượng mã
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

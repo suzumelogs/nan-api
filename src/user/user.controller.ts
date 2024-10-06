@@ -23,7 +23,7 @@ export class UserController {
 
   @Post()
   @ApiOperation({
-    summary: 'CREATE USER',
+    summary: 'Create a new user',
     description:
       'Endpoint for admins to create new users, including those with admin roles.',
   })
@@ -34,7 +34,7 @@ export class UserController {
 
   @Get()
   @ApiOperation({
-    summary: 'GET ALL USERS',
+    summary: 'Get all users',
     description: 'Endpoint for admins to retrieve a list of all users.',
   })
   @Auth(Role.admin)
@@ -44,7 +44,7 @@ export class UserController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'GET USER BY ID',
+    summary: 'Get user by ID',
     description:
       'Retrieve user information by ID. Admins can access any user; users can access their own info.',
   })
@@ -55,7 +55,7 @@ export class UserController {
 
   @Get('email/:email')
   @ApiOperation({
-    summary: 'GET USER BY EMAIL',
+    summary: 'Get user by EMAIL',
     description:
       'Retrieve user information by email. Admins can access any user; users can access their own info.',
   })
@@ -66,7 +66,7 @@ export class UserController {
 
   @Patch(':id')
   @ApiOperation({
-    summary: 'UPDATE USER BY ID',
+    summary: 'Update user by ID',
     description:
       'Update user data by ID. Admins can update any user; users can update their own info.',
   })
@@ -81,7 +81,7 @@ export class UserController {
 
   @Patch('email/:email')
   @ApiOperation({
-    summary: 'UPDATE USER BY EMAIL',
+    summary: 'Update user by EMAIL',
     description:
       'Update user data by email. Admins can update any user; users can update their own info.',
   })
@@ -96,7 +96,7 @@ export class UserController {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'DELETE USER BY ID',
+    summary: 'Delete user by ID',
     description:
       'Delete user by ID. Admins can delete any user; users can delete their own info.',
   })
@@ -107,7 +107,7 @@ export class UserController {
 
   @Delete('email/:email')
   @ApiOperation({
-    summary: 'DELETE USER BY EMAIL',
+    summary: 'Delete user by EMAIL',
     description:
       'Delete user by email. Admins can delete any user; users can delete their own info.',
   })
