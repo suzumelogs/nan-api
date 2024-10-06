@@ -9,12 +9,18 @@ import {
 import { initializeApp } from 'firebase/app';
 import { v4 as uuidv4 } from 'uuid';
 import { firebaseConfig } from '../common/firebase/firebase.config';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class FirebaseService {
-  private readonly storage = getStorage(initializeApp(firebaseConfig));
+  private readonly storage;
   private readonly MAX_FILE_SIZE = 5 * 1024 * 1024;
   private readonly ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png'];
+
+  constructor(private configService: ConfigService) {
+    const config = firebaseConfig(this.configService);
+    this.storage = getStorage(initializeApp(config));
+  }
 
   async uploadFile(file: Express.Multer.File): Promise<string> {
     this.validateFile(file);

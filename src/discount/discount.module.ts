@@ -6,6 +6,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Module({
   controllers: [DiscountController],
-  providers: [DiscountService, FirebaseService, PrismaService],
+  providers: [DiscountService, PrismaService],
 })
 export class DiscountModule {}

@@ -9,7 +9,13 @@ import { FirebaseService } from './firebase/firebase.service';
 import { DiscountModule } from './discount/discount.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), AuthModule, PrismaModule, UserModule, DiscountModule],
+  imports: [
+    ConfigModule.forRoot(),
+    AuthModule,
+    PrismaModule,
+    UserModule,
+    DiscountModule,
+  ],
   controllers: [AppController],
   providers: [AppService, FirebaseService],
 })
