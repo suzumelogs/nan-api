@@ -16,6 +16,40 @@ datasource db {
 enum Role {
   user
   admin
+  super_admin
+}
+
+enum DeviceStatus {
+  available
+  rented
+  maintenance
+  broken
+}
+
+enum RentalStatus {
+  pending
+  approved
+  rejected
+  completed
+  cancelled
+}
+
+enum IssueStatus {
+  pending
+  in_progress
+  resolved
+}
+
+enum MaintenanceType {
+  regular_check
+  repair
+  part_replacement
+}
+
+enum RentalDuration {
+  day
+  week
+  month
 }
 
 model User {
@@ -25,12 +59,15 @@ model User {
   emailVerified DateTime?
   password      String
   role          Role      @default(user)
-  image         String?
+  identityDoc   String? // CCCD hoặc giấy tờ tùy thân
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("users")
 }
 
+// Discount: Quản lý mã giảm giá với thời gian hiệu lực và giới hạn số lượng.
 model Discount {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   code      String   @unique
@@ -41,4 +78,6 @@ model Discount {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@map("discounts")
 }

@@ -60,15 +60,4 @@ export class RegisterUserDto {
   })
   @IsString()
   passwordconf: string;
-
-  @ApiProperty({
-    description: 'User Avatar Image',
-    nullable: true,
-    required: false,
-    type: 'string',
-    example: 'https://picsum.photos/200/300',
-  })
-  @IsString()
-  @IsOptional()
-  image: string;
 }

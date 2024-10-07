@@ -58,15 +58,6 @@ export class User {
   role: Role;
 
   @ApiProperty({
-    description: 'Image URL',
-    nullable: true,
-    required: false,
-    type: 'string',
-    example: 'https://picsum.photos/200',
-  })
-  image?: string;
-
-  @ApiProperty({
     description: 'Created At',
     nullable: true,
     required: false,

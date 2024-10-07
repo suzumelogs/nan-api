@@ -7,7 +7,6 @@ const users = [
   {
     name: 'User',
     email: 'user@gmail.com',
-    image: 'https://example.com/user1.png',
     password: 'user@123',
     role: Role.user,
     emailVerified: new Date(),
@@ -15,7 +14,6 @@ const users = [
   {
     name: 'Admin',
     email: 'admin@gmail.com',
-    image: 'https://example.com/admin.png',
     password: 'admin@123',
     role: Role.admin,
     emailVerified: new Date(),
@@ -34,7 +32,6 @@ const seedUser = async (user: (typeof users)[number]) => {
     create: {
       name: user.name,
       email: user.email,
-      image: user.image,
       password: hashedPassword,
       role: user.role,
       emailVerified: user.emailVerified,

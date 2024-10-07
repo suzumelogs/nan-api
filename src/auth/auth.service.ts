@@ -2,30 +2,22 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
-  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-
 import * as bcrypt from 'bcryptjs';
-
 import { RegisterUserDto } from './dto/register-user.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
-
 import { PrismaService } from 'src/prisma/prisma.service';
 import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger('AuthService');
-
   constructor(
     private prisma: PrismaService,
     private readonly jwtService: JwtService,
   ) {}
 
   async registerUser(dto: RegisterUserDto): Promise<any> {
-    this.logger.log(`POST: user/register: Register user started`);
-
     if (dto.password !== dto.passwordconf)
       throw new BadRequestException('Passwords do not match');
 
@@ -43,7 +35,6 @@ export class AuthService {
           id: true,
           name: true,
           email: true,
-          image: true,
           role: true,
           createdAt: true,
         },
@@ -57,18 +48,13 @@ export class AuthService {
       };
     } catch (error) {
       if (error.code === 'P2002') {
-        this.logger.warn(
-          `POST: auth/register: User already exists: ${dto.email}`,
-        );
         throw new BadRequestException('User already exists');
       }
-      this.logger.error(`POST: auth/register: error: ${error}`);
       throw new InternalServerErrorException('Server error');
     }
   }
 
   async loginUser(email: string, password: string): Promise<any> {
-    this.logger.log(`POST: auth/login: Login iniciado: ${email}`);
     let user;
     try {
       user = await this.prisma.user.findUniqueOrThrow({
@@ -80,13 +66,11 @@ export class AuthService {
           name: true,
           email: true,
           password: true,
-          image: true,
           role: true,
           createdAt: true,
         },
       });
     } catch (error) {
-      this.logger.error(`POST: auth/login: error: ${error}`);
       throw new BadRequestException('Wrong credentials');
     }
 
@@ -98,7 +82,6 @@ export class AuthService {
 
     delete user.password;
 
-    this.logger.log(`POST: auth/login: Usuario aceptado: ${user.email}`);
     return {
       user,
       token: this.getJwtToken({
