@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { DeviceStatus, Device as PrismaDevice } from '@prisma/client';
+import { DeviceStatus } from '@prisma/client';
 
 export class Device {
   @ApiProperty({
@@ -27,34 +27,10 @@ export class Device {
   description: string;
 
   @ApiProperty({
-    description: 'Daily rental price of the device',
-    example: 50.0,
-  })
-  dailyPrice: number;
-
-  @ApiProperty({
-    description: 'Weekly rental price of the device',
-    example: 300.0,
-  })
-  weeklyPrice: number;
-
-  @ApiProperty({
-    description: 'Monthly rental price of the device',
-    example: 1200.0,
-  })
-  monthlyPrice: number;
-
-  @ApiProperty({
-    description: 'Deposit rate as a percentage of the device’s value',
-    example: 0.2,
-  })
-  depositRate: number;
-
-  @ApiProperty({
     description: 'Original value of the device',
     example: 2000.0,
   })
-  value: number;
+  price: number;
 
   @ApiProperty({
     description: 'Current status of the device',

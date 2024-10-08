@@ -5,37 +5,42 @@ const prisma = new PrismaClient();
 const discounts = [
   {
     code: 'SUMMER2024',
-    value: 20.0,
-    validFrom: new Date('2024-06-01T00:00:00.000Z'),
-    validTo: new Date('2024-08-31T00:00:00.000Z'),
-    limit: 100,
+    discountPercentage: 20.0,
+    startTime: new Date('2024-06-01T00:00:00.000Z'),
+    endTime: new Date('2024-08-31T00:00:00.000Z'),
+    maxUses: 100,
   },
   {
     code: 'WINTER2024',
-    value: 15.0,
-    validFrom: new Date('2024-12-01T00:00:00.000Z'),
-    validTo: new Date('2025-02-28T00:00:00.000Z'),
-    limit: 50,
+    discountPercentage: 15.0,
+    startTime: new Date('2024-12-01T00:00:00.000Z'),
+    endTime: new Date('2025-02-28T00:00:00.000Z'),
+    maxUses: 50,
   },
   {
     code: 'BLACKFRIDAY',
-    value: 30.0,
-    validFrom: new Date('2024-11-01T00:00:00.000Z'),
-    validTo: new Date('2024-11-30T00:00:00.000Z'),
-    limit: 200,
+    discountPercentage: 30.0,
+    startTime: new Date('2024-11-01T00:00:00.000Z'),
+    endTime: new Date('2024-11-30T00:00:00.000Z'),
+    maxUses: 200,
   },
 ];
 
 const seedDiscount = async (discount: (typeof discounts)[number]) => {
   await prisma.discount.upsert({
     where: { code: discount.code },
-    update: {},
+    update: {
+      discountPercentage: discount.discountPercentage,
+      startTime: discount.startTime,
+      endTime: discount.endTime,
+      maxUses: discount.maxUses,
+    },
     create: {
       code: discount.code,
-      value: discount.value,
-      validFrom: discount.validFrom,
-      validTo: discount.validTo,
-      limit: discount.limit,
+      discountPercentage: discount.discountPercentage,
+      startTime: discount.startTime,
+      endTime: discount.endTime,
+      maxUses: discount.maxUses,
     },
   });
 

@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Discount as PrismaDiscount } from '@prisma/client';
 
 export class Discount {
   @ApiProperty({
@@ -15,29 +14,29 @@ export class Discount {
   code: string;
 
   @ApiProperty({
-    description: 'Discount value',
+    description: 'Discount percentage',
     example: 20.0,
   })
-  value: number;
+  discountPercentage: number;
 
   @ApiProperty({
-    description: 'Discount valid from date',
+    description: 'Discount start time',
     example: '2024-06-01T00:00:00.000Z',
   })
-  validFrom: Date;
+  startTime: Date;
 
   @ApiProperty({
-    description: 'Discount valid to date',
+    description: 'Discount end time',
     example: '2024-08-31T00:00:00.000Z',
   })
-  validTo: Date;
+  endTime: Date;
 
   @ApiProperty({
-    description: 'Limit on the number of uses for the discount code',
+    description: 'Maximum number of uses for the discount code',
     example: 100,
     required: false,
   })
-  limit?: number;
+  maxUses?: number;
 
   @ApiProperty({
     description: 'Timestamp when the discount was created',

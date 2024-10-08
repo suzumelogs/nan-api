@@ -70,16 +70,12 @@ model User {
 
 // Thiết bị
 model Device {
-  id           String       @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  image        String
-  description  String
-  dailyPrice   Float // Giá thuê theo ngày
-  weeklyPrice  Float // Giá thuê theo tuần
-  monthlyPrice Float // Giá thuê theo tháng
-  depositRate  Float // Tiền cọc (% giá trị gốc VD 0.2 là 20%)
-  value        Float // Giá trị gốc của thiết bị
-  status       DeviceStatus
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  image       String
+  price       Float // Giá trị gốc của thiết bị
+  description String
+  status      DeviceStatus
 
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
@@ -104,12 +100,12 @@ model Category {
 
 // Mã giảm giá
 model Discount {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  code      String   @unique
-  value     Float // Giá trị giảm giá
-  validFrom DateTime // Thời gian bắt đầu
-  validTo   DateTime // Thời gian kết thúc
-  limit     Int? // Giới hạn số lượng mã
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  code               String   @unique
+  discountPercentage Float // Phần trăm giảm giá
+  startTime          DateTime // Thời gian bắt đầu
+  endTime            DateTime // Thời gian kết thúc
+  maxUses            Int // Số lần sử dụng tối đa
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

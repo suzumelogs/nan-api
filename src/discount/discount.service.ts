@@ -18,10 +18,10 @@ export class DiscountService {
         select: {
           id: true,
           code: true,
-          value: true,
-          validFrom: true,
-          validTo: true,
-          limit: true,
+          discountPercentage: true,
+          startTime: true,
+          endTime: true,
+          maxUses: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -33,20 +33,19 @@ export class DiscountService {
 
   async findOne(id: string): Promise<Discount> {
     try {
-      const discount = await this.prisma.discount.findUniqueOrThrow({
+      return await this.prisma.discount.findUniqueOrThrow({
         where: { id },
         select: {
           id: true,
           code: true,
-          value: true,
-          validFrom: true,
-          validTo: true,
-          limit: true,
+          discountPercentage: true,
+          startTime: true,
+          endTime: true,
+          maxUses: true,
           createdAt: true,
           updatedAt: true,
         },
       });
-      return discount;
     } catch (error) {
       throw new NotFoundException('Discount not found');
     }
@@ -59,10 +58,10 @@ export class DiscountService {
         select: {
           id: true,
           code: true,
-          value: true,
-          validFrom: true,
-          validTo: true,
-          limit: true,
+          discountPercentage: true,
+          startTime: true,
+          endTime: true,
+          maxUses: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -75,21 +74,20 @@ export class DiscountService {
 
   async update(id: string, dto: UpdateDiscountDto): Promise<Discount> {
     try {
-      const updatedDiscount = await this.prisma.discount.update({
+      return await this.prisma.discount.update({
         where: { id },
         data: dto,
         select: {
           id: true,
           code: true,
-          value: true,
-          validFrom: true,
-          validTo: true,
-          limit: true,
+          discountPercentage: true,
+          startTime: true,
+          endTime: true,
+          maxUses: true,
           createdAt: true,
           updatedAt: true,
         },
       });
-      return updatedDiscount;
     } catch (error) {
       if (error.code === 'P2025') {
         throw new NotFoundException('Discount not found');
