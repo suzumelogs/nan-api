@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,6 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Enums
 enum Role {
   user
   admin
@@ -34,25 +32,24 @@ enum RentalStatus {
   cancelled
 }
 
-enum IssueStatus {
+enum DepositStatus {
+  paid
+  refunded
+}
+
+enum FeedbackStatus {
   pending
   in_progress
   resolved
 }
 
-enum MaintenanceType {
-  regular_check
-  repair
-  part_replacement
+enum DamageLevel {
+  minor
+  major
+  lost
 }
 
-enum RentalDuration {
-  day
-  week
-  month
-}
-
-// Người dùng
+// User Model
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   name          String
@@ -60,35 +57,49 @@ model User {
   emailVerified DateTime?
   password      String
   role          Role      @default(user)
-  identityDoc   String? // CCCD hoặc giấy tờ tùy thân
+  identityDoc   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  notifications Notification[]
+  rentals       Rental[]
+  deposits      Deposit[]
+  feedbacks     Feedback[]
+  addresses     Address[]
+
   @@map("users")
 }
 
-// Thiết bị
+// Device Model
 model Device {
   id          String       @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   image       String
-  price       Float // Giá trị gốc của thiết bị
+  price       Float
   description String
   status      DeviceStatus
 
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  Category   Category? @relation(fields: [categoryId], references: [id])
-  categoryId String?   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  categoryId      String? @db.ObjectId
+  rentalPackageId String? @db.ObjectId
+  rentalId        String? @db.ObjectId
+
+  maintenances Maintenance[]
+
+  category      Category?      @relation(fields: [categoryId], references: [id])
+  rentalPackage RentalPackage? @relation(fields: [rentalPackageId], references: [id])
+  rental        Rental?        @relation(fields: [rentalId], references: [id])
 
   @@map("devices")
 }
 
-// Danh mục 
+// Category Model
 model Category {
   id   String @id @default(auto()) @map("_id") @db.ObjectId
-  name String @unique // Loa, Đài, Quạt, Điều hòa, Máy chiếu, v.v.
+  name String @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -98,17 +109,165 @@ model Category {
   @@map("categories")
 }
 
-// Mã giảm giá
+// Rental Package Model
+model RentalPackage {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  pricePerDay   Float
+  pricePerWeek  Float
+  pricePerMonth Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  devices Device[]
+
+  @@map("rental_packages")
+}
+
+// Rental Model
+model Rental {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String       @db.ObjectId
+  rentalDate DateTime
+  returnDate DateTime?
+  totalCost  Float
+  deposit    Float
+  status     RentalStatus
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id])
+  devices       Device[]
+  deposits      Deposit[]
+  feedbacks     Feedback[]
+  damageReports DamageReport[]
+
+  @@map("rentals")
+}
+
+// Deposit Model
+model Deposit {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String        @db.ObjectId
+  rentalId  String        @db.ObjectId
+  amount    Float
+  status    DepositStatus
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  rental Rental @relation(fields: [rentalId], references: [id])
+
+  @@map("deposits")
+}
+
+// Maintenance Model
+model Maintenance {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  deviceId        String   @db.ObjectId
+  maintenanceDate DateTime
+  details         String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  device Device @relation(fields: [deviceId], references: [id])
+
+  @@map("maintenances")
+}
+
+// Feedback Model
+model Feedback {
+  id       String         @id @default(auto()) @map("_id") @db.ObjectId
+  userId   String         @db.ObjectId
+  rentalId String?        @db.ObjectId
+  message  String
+  status   FeedbackStatus @default(pending)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id])
+  rental Rental? @relation(fields: [rentalId], references: [id])
+
+  @@map("feedbacks")
+}
+
+// Damage Report Model
+model DamageReport {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  rentalId    String      @db.ObjectId
+  damageLevel DamageLevel
+  description String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rental Rental @relation(fields: [rentalId], references: [id])
+
+  @@map("damage_reports")
+}
+
+// Address Model
+model Address {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String @db.ObjectId
+  street  String
+  city    String
+  state   String
+  zipCode String
+  country String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("addresses")
+}
+
+// Discount Model
 model Discount {
   id                 String   @id @default(auto()) @map("_id") @db.ObjectId
   code               String   @unique
-  discountPercentage Float // Phần trăm giảm giá
-  startTime          DateTime // Thời gian bắt đầu
-  endTime            DateTime // Thời gian kết thúc
-  maxUses            Int // Số lần sử dụng tối đa
+  discountPercentage Float
+  startTime          DateTime
+  endTime            DateTime
+  maxUses            Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("discounts")
 }
+
+// Notification Model
+model Notification {
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId  String  @db.ObjectId
+  message String
+  read    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+// Mô tả chi tiết:
+// User: Mô hình người dùng chứa thông tin cá nhân và quyền hạn.
+// Device: Mô hình thiết bị chứa thông tin về tên, hình ảnh, giá cả và trạng thái của thiết bị.
+// Category: Mô hình danh mục chứa danh sách các thiết bị thuộc danh mục cụ thể.
+// RentalPackage: Mô hình gói thuê chứa thông tin về tên gói và giá thuê cho từng khoảng thời gian.
+// Rental: Mô hình cho thuê lưu trữ thông tin về yêu cầu thuê thiết bị, trạng thái và các chi phí liên quan.
+// Deposit: Mô hình đặt cọc để lưu thông tin về số tiền và trạng thái của đặt cọc.
+// Maintenance: Mô hình bảo trì để quản lý lịch sử và thông tin bảo trì thiết bị.
+// Feedback: Mô hình phản hồi cho phép người dùng gửi ý kiến hoặc báo cáo về thiết bị.
+// DamageReport: Mô hình báo cáo hư hỏng cho phép người dùng báo cáo các vấn đề với thiết bị đã thuê.
+// Address: Mô hình địa chỉ cho người dùng để lưu trữ thông tin địa chỉ giao hàng hoặc nhận thiết bị.
+// Discount: Mô hình giảm giá quản lý các mã giảm giá có sẵn cho người dùng.
+// Notification: Mô hình thông báo để lưu trữ thông tin về các thông báo gửi cho người dùng.
