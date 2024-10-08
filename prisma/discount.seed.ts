@@ -38,6 +38,7 @@ const seedDiscount = async (discount: (typeof discounts)[number]) => {
       limit: discount.limit,
     },
   });
+
   console.log(`Discount ${discount.code} seeded successfully.`);
 };
 

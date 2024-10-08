@@ -52,6 +52,7 @@ enum RentalDuration {
   month
 }
 
+// Người dùng
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   name          String
@@ -67,7 +68,7 @@ model User {
   @@map("users")
 }
 
-// Device: Đại diện cho từng thiết bị cho thuê.
+// Thiết bị
 model Device {
   id           String       @id @default(auto()) @map("_id") @db.ObjectId
   name         String
@@ -80,13 +81,28 @@ model Device {
   value        Float // Giá trị gốc của thiết bị
   status       DeviceStatus
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  Category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?   @db.ObjectId
 
   @@map("devices")
 }
 
-// Discount: Quản lý mã giảm giá với thời gian hiệu lực và giới hạn số lượng.
+// Danh mục 
+model Category {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String @unique // Loa, Đài, Quạt, Điều hòa, Máy chiếu, v.v.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  devices Device[]
+
+  @@map("categories")
+}
+
+// Mã giảm giá
 model Discount {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   code      String   @unique

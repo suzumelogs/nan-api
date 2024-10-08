@@ -11,7 +11,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DeviceService } from './device.service';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
-import { Device } from '@prisma/client';
+import { Device } from './entities/device.entity';
 
 @ApiBearerAuth()
 @ApiTags('Devices')

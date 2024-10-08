@@ -37,6 +37,7 @@ const seedUser = async (user: (typeof users)[number]) => {
       emailVerified: user.emailVerified,
     },
   });
+
   console.log(`User ${user.email} seeded successfully.`);
 };
 
