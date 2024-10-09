@@ -21,10 +21,10 @@ const users = [
 ];
 
 const hashPassword = async (password: string): Promise<string> => {
-  return await bcrypt.hash(password, 10);
+  return bcrypt.hash(password, 10);
 };
 
-const seedUser = async (user: (typeof users)[number]) => {
+const upsertUser = async (user: (typeof users)[number]): Promise<void> => {
   const hashedPassword = await hashPassword(user.password);
   await prisma.user.upsert({
     where: { email: user.email },
@@ -41,11 +41,9 @@ const seedUser = async (user: (typeof users)[number]) => {
   console.log(`User ${user.email} seeded successfully.`);
 };
 
-const userSeed = async () => {
+const userSeed = async (): Promise<void> => {
   try {
-    for (const user of users) {
-      await seedUser(user);
-    }
+    await Promise.all(users.map((user) => upsertUser(user)));
   } catch (error) {
     console.error('Error seeding users: ', error);
   } finally {

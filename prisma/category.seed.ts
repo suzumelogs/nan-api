@@ -4,19 +4,19 @@ const prisma = new PrismaClient();
 
 const categories = [
   {
-    name: 'Loa',
+    name: 'Máy tính xách tay',
+    description:
+      'Dòng máy tính xách tay với hiệu suất cao, phù hợp cho cả công việc và giải trí.',
   },
   {
-    name: 'Đài',
+    name: 'Máy ảnh kỹ thuật số',
+    description:
+      'Máy ảnh chất lượng cao với nhiều tính năng, lý tưởng cho nhiếp ảnh gia chuyên nghiệp và nghiệp dư.',
   },
   {
-    name: 'Quạt',
-  },
-  {
-    name: 'Điều hòa',
-  },
-  {
-    name: 'Máy chiếu',
+    name: 'Thiết bị âm thanh',
+    description:
+      'Các thiết bị âm thanh chuyên dụng như loa, tai nghe và ampli, phục vụ cho nhu cầu giải trí và nghe nhạc.',
   },
 ];
 
