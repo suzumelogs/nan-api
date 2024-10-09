@@ -10,6 +10,7 @@ import { DiscountModule } from './discount/discount.module';
 import { DeviceModule } from './device/device.module';
 import { CategoryModule } from './category/category.module';
 import { RentalModule } from './rental/rental.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { RentalModule } from './rental/rental.module';
     DeviceModule,
     CategoryModule,
     RentalModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService, FirebaseService],

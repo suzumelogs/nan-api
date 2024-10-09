@@ -14,22 +14,7 @@ export class DeviceService {
 
   async findAll(): Promise<Device[]> {
     try {
-      return await this.prisma.device.findMany({
-        select: {
-          id: true,
-          name: true,
-          image: true,
-          description: true,
-          priceDay: true,
-          priceWeek: true,
-          priceMonth: true,
-          status: true,
-          categoryId: true,
-          cartId: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
+      return await this.prisma.device.findMany();
     } catch (error) {
       throw new InternalServerErrorException('Failed to retrieve devices');
     }
@@ -39,20 +24,6 @@ export class DeviceService {
     try {
       return await this.prisma.device.findUniqueOrThrow({
         where: { id },
-        select: {
-          id: true,
-          name: true,
-          image: true,
-          description: true,
-          priceDay: true,
-          priceWeek: true,
-          priceMonth: true,
-          status: true,
-          categoryId: true,
-          cartId: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       });
     } catch (error) {
       throw new NotFoundException('Device not found');
@@ -63,20 +34,6 @@ export class DeviceService {
     try {
       return await this.prisma.device.create({
         data: dto,
-        select: {
-          id: true,
-          name: true,
-          image: true,
-          description: true,
-          priceDay: true,
-          priceWeek: true,
-          priceMonth: true,
-          status: true,
-          categoryId: true,
-          cartId: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       });
     } catch (error) {
       throw new InternalServerErrorException('Failed to create device');
@@ -88,20 +45,6 @@ export class DeviceService {
       return await this.prisma.device.update({
         where: { id },
         data: dto,
-        select: {
-          id: true,
-          name: true,
-          image: true,
-          description: true,
-          priceDay: true,
-          priceWeek: true,
-          priceMonth: true,
-          status: true,
-          categoryId: true,
-          cartId: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       });
     } catch (error) {
       if (error.code === 'P2025') {

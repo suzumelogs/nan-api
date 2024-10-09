@@ -14,21 +14,7 @@ export class RentalService {
 
   async findAll(): Promise<Rental[]> {
     try {
-      return await this.prisma.rental.findMany({
-        select: {
-          id: true,
-          rentalStartDate: true,
-          rentalEndDate: true,
-          totalPrice: true,
-          depositAmount: true,
-          damageFee: true,
-          status: true,
-          userId: true,
-          deviceId: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
+      return await this.prisma.rental.findMany();
     } catch (error) {
       throw new InternalServerErrorException('Failed to retrieve rentals');
     }
@@ -38,19 +24,6 @@ export class RentalService {
     try {
       const rental = await this.prisma.rental.findUniqueOrThrow({
         where: { id },
-        select: {
-          id: true,
-          rentalStartDate: true,
-          rentalEndDate: true,
-          totalPrice: true,
-          depositAmount: true,
-          damageFee: true,
-          status: true,
-          userId: true,
-          deviceId: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       });
       return rental;
     } catch (error) {
@@ -62,19 +35,6 @@ export class RentalService {
     try {
       const newRental = await this.prisma.rental.create({
         data: dto,
-        select: {
-          id: true,
-          rentalStartDate: true,
-          rentalEndDate: true,
-          totalPrice: true,
-          depositAmount: true,
-          damageFee: true,
-          status: true,
-          userId: true,
-          deviceId: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       });
       return newRental;
     } catch (error) {
@@ -87,19 +47,6 @@ export class RentalService {
       const updatedRental = await this.prisma.rental.update({
         where: { id },
         data: dto,
-        select: {
-          id: true,
-          rentalStartDate: true,
-          rentalEndDate: true,
-          totalPrice: true,
-          depositAmount: true,
-          damageFee: true,
-          status: true,
-          userId: true,
-          deviceId: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       });
       return updatedRental;
     } catch (error) {

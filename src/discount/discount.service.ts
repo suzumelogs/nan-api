@@ -12,20 +12,9 @@ import { Discount } from './entities/discount.entity';
 export class DiscountService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private selectFields = {
-    id: true,
-    code: true,
-    discountRate: true,
-    validFrom: true,
-    validTo: true,
-    maxUsage: true,
-    createdAt: true,
-    updatedAt: true,
-  };
-
   async findAll(): Promise<Discount[]> {
     try {
-      return await this.prisma.discount.findMany({ select: this.selectFields });
+      return await this.prisma.discount.findMany();
     } catch (error) {
       throw new InternalServerErrorException('Failed to retrieve discounts');
     }
@@ -35,7 +24,6 @@ export class DiscountService {
     try {
       return await this.prisma.discount.findUniqueOrThrow({
         where: { id },
-        select: this.selectFields,
       });
     } catch (error) {
       throw new NotFoundException('Discount not found');
@@ -46,7 +34,6 @@ export class DiscountService {
     try {
       return await this.prisma.discount.create({
         data: dto,
-        select: this.selectFields,
       });
     } catch (error) {
       throw new InternalServerErrorException('Failed to create discount');
@@ -58,7 +45,6 @@ export class DiscountService {
       return await this.prisma.discount.update({
         where: { id },
         data: dto,
-        select: this.selectFields,
       });
     } catch (error) {
       if (error.code === 'P2025') {

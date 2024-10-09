@@ -14,15 +14,7 @@ export class CategoryService {
 
   async findAll(): Promise<Category[]> {
     try {
-      return await this.prisma.category.findMany({
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
+      return await this.prisma.category.findMany();
     } catch (error) {
       throw new InternalServerErrorException('Failed to retrieve categories');
     }
@@ -32,13 +24,6 @@ export class CategoryService {
     try {
       const category = await this.prisma.category.findUniqueOrThrow({
         where: { id },
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       });
       return category;
     } catch (error) {
@@ -50,13 +35,6 @@ export class CategoryService {
     try {
       const newCategory = await this.prisma.category.create({
         data: dto,
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       });
       return newCategory;
     } catch (error) {
@@ -69,13 +47,6 @@ export class CategoryService {
       const updatedCategory = await this.prisma.category.update({
         where: { id },
         data: dto,
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       });
       return updatedCategory;
     } catch (error) {
