@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DeviceStatus } from '@prisma/client';
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateDeviceDto {
   @ApiProperty({
@@ -22,18 +28,35 @@ export class CreateDeviceDto {
   @ApiProperty({
     description: 'Description of the device',
     example: 'A high-quality DSLR camera for professional photography.',
+    required: false,
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  description: string;
+  description?: string;
 
   @ApiProperty({
-    description: 'Original value of the device',
-    example: 2000.0,
+    description: 'Daily rental price of the device',
+    example: 50.0,
   })
   @IsNotEmpty()
   @IsNumber()
-  price: number;
+  priceDay: number;
+
+  @ApiProperty({
+    description: 'Weekly rental price of the device',
+    example: 300.0,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  priceWeek: number;
+
+  @ApiProperty({
+    description: 'Monthly rental price of the device',
+    example: 1000.0,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  priceMonth: number;
 
   @ApiProperty({
     description: 'Current status of the device',
@@ -43,4 +66,21 @@ export class CreateDeviceDto {
   @IsNotEmpty()
   @IsEnum(DeviceStatus)
   status: DeviceStatus;
+
+  @ApiProperty({
+    description: 'Category ID to which the device belongs',
+    example: '60b9c3f3b236d17a10b76e6f',
+  })
+  @IsNotEmpty()
+  @IsString()
+  categoryId: string;
+
+  @ApiProperty({
+    description: 'Cart ID if the device is added to a cart',
+    example: '60b9c3f3b236d17a10b76e6f',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  cartId?: string;
 }

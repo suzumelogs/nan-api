@@ -12,20 +12,20 @@ import { Discount } from './entities/discount.entity';
 export class DiscountService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private selectFields = {
+    id: true,
+    code: true,
+    discountRate: true,
+    validFrom: true,
+    validTo: true,
+    maxUsage: true,
+    createdAt: true,
+    updatedAt: true,
+  };
+
   async findAll(): Promise<Discount[]> {
     try {
-      return await this.prisma.discount.findMany({
-        select: {
-          id: true,
-          code: true,
-          discountPercentage: true,
-          startTime: true,
-          endTime: true,
-          maxUses: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
+      return await this.prisma.discount.findMany({ select: this.selectFields });
     } catch (error) {
       throw new InternalServerErrorException('Failed to retrieve discounts');
     }
@@ -35,16 +35,7 @@ export class DiscountService {
     try {
       return await this.prisma.discount.findUniqueOrThrow({
         where: { id },
-        select: {
-          id: true,
-          code: true,
-          discountPercentage: true,
-          startTime: true,
-          endTime: true,
-          maxUses: true,
-          createdAt: true,
-          updatedAt: true,
-        },
+        select: this.selectFields,
       });
     } catch (error) {
       throw new NotFoundException('Discount not found');
@@ -53,20 +44,10 @@ export class DiscountService {
 
   async create(dto: CreateDiscountDto): Promise<Discount> {
     try {
-      const newDiscount = await this.prisma.discount.create({
+      return await this.prisma.discount.create({
         data: dto,
-        select: {
-          id: true,
-          code: true,
-          discountPercentage: true,
-          startTime: true,
-          endTime: true,
-          maxUses: true,
-          createdAt: true,
-          updatedAt: true,
-        },
+        select: this.selectFields,
       });
-      return newDiscount;
     } catch (error) {
       throw new InternalServerErrorException('Failed to create discount');
     }
@@ -77,16 +58,7 @@ export class DiscountService {
       return await this.prisma.discount.update({
         where: { id },
         data: dto,
-        select: {
-          id: true,
-          code: true,
-          discountPercentage: true,
-          startTime: true,
-          endTime: true,
-          maxUses: true,
-          createdAt: true,
-          updatedAt: true,
-        },
+        select: this.selectFields,
       });
     } catch (error) {
       if (error.code === 'P2025') {
@@ -98,12 +70,13 @@ export class DiscountService {
 
   async remove(id: string): Promise<{ message: string }> {
     try {
-      await this.prisma.discount.delete({
-        where: { id },
-      });
+      await this.prisma.discount.delete({ where: { id } });
       return { message: 'Discount deleted successfully' };
     } catch (error) {
-      throw new NotFoundException('Discount not found');
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Discount not found');
+      }
+      throw new InternalServerErrorException('Failed to delete discount');
     }
   }
 }

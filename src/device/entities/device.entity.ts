@@ -15,22 +15,35 @@ export class Device {
   name: string;
 
   @ApiProperty({
+    description: 'Description of the device',
+    example: 'A high-quality DSLR camera for professional photography.',
+    required: false,
+  })
+  description?: string;
+
+  @ApiProperty({
     description: 'Image URL of the device',
     example: 'https://example.com/image.jpg',
   })
   image: string;
 
   @ApiProperty({
-    description: 'Description of the device',
-    example: 'A high-quality DSLR camera for professional photography.',
+    description: 'Daily rental price of the device',
+    example: 50.0,
   })
-  description: string;
+  priceDay: number;
 
   @ApiProperty({
-    description: 'Original value of the device',
-    example: 2000.0,
+    description: 'Weekly rental price of the device',
+    example: 300.0,
   })
-  price: number;
+  priceWeek: number;
+
+  @ApiProperty({
+    description: 'Monthly rental price of the device',
+    example: 1000.0,
+  })
+  priceMonth: number;
 
   @ApiProperty({
     description: 'Current status of the device',
@@ -38,6 +51,19 @@ export class Device {
     example: DeviceStatus.available,
   })
   status: DeviceStatus;
+
+  @ApiProperty({
+    description: 'Category ID to which the device belongs',
+    example: '60b9c3f3b236d17a10b76e6f',
+  })
+  categoryId: string;
+
+  @ApiProperty({
+    description: 'Cart ID if the device is added to a cart',
+    example: '60b9c3f3b236d17a10b76e6f',
+    required: false,
+  })
+  cartId: string;
 
   @ApiProperty({
     description: 'Timestamp when the device was created',

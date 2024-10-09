@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsNotEmpty,
-  IsString,
   IsDateString,
-  IsOptional,
+  IsNotEmpty,
   IsNumber,
+  IsOptional,
+  IsString,
 } from 'class-validator';
 
 export class CreateDiscountDto {
@@ -17,12 +17,12 @@ export class CreateDiscountDto {
   code: string;
 
   @ApiProperty({
-    description: 'Discount percentage value',
+    description: 'Discount rate in percentage',
     example: 20.0,
   })
   @IsNotEmpty()
   @IsNumber()
-  discountPercentage: number;
+  discountRate: number;
 
   @ApiProperty({
     description: 'Discount start time',
@@ -30,7 +30,7 @@ export class CreateDiscountDto {
   })
   @IsNotEmpty()
   @IsDateString()
-  startTime: Date;
+  validFrom: Date;
 
   @ApiProperty({
     description: 'Discount end time',
@@ -38,7 +38,7 @@ export class CreateDiscountDto {
   })
   @IsNotEmpty()
   @IsDateString()
-  endTime: Date;
+  validTo: Date;
 
   @ApiProperty({
     description: 'Limit on the number of uses for the discount code',
@@ -47,5 +47,5 @@ export class CreateDiscountDto {
   })
   @IsOptional()
   @IsNumber()
-  maxUses: number;
+  maxUsage: number;
 }

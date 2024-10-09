@@ -17,26 +17,26 @@ export class Discount {
     description: 'Discount percentage',
     example: 20.0,
   })
-  discountPercentage: number;
+  discountRate: number;
 
   @ApiProperty({
     description: 'Discount start time',
     example: '2024-06-01T00:00:00.000Z',
   })
-  startTime: Date;
+  validFrom: Date;
 
   @ApiProperty({
     description: 'Discount end time',
     example: '2024-08-31T00:00:00.000Z',
   })
-  endTime: Date;
+  validTo: Date;
 
   @ApiProperty({
     description: 'Maximum number of uses for the discount code',
     example: 100,
     required: false,
   })
-  maxUses?: number;
+  maxUsage?: number;
 
   @ApiProperty({
     description: 'Timestamp when the discount was created',

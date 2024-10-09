@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
-import { DiscountService } from './discount.service';
-import { DiscountController } from './discount.controller';
-import { FirebaseService } from 'src/firebase/firebase.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { DiscountController } from './discount.controller';
+import { DiscountService } from './discount.service';
 
 @Module({
   controllers: [DiscountController],
