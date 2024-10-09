@@ -14,6 +14,7 @@ import { CartModule } from './cart/cart.module';
 import { PolicyModule } from './policy/policy.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { MaintenanceModule } from './maintenance/maintenance.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { MaintenanceModule } from './maintenance/maintenance.module';
     PolicyModule,
     FeedbackModule,
     MaintenanceModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService, FirebaseService],
