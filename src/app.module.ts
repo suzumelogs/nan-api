@@ -13,6 +13,7 @@ import { RentalModule } from './rental/rental.module';
 import { CartModule } from './cart/cart.module';
 import { PolicyModule } from './policy/policy.module';
 import { FeedbackModule } from './feedback/feedback.module';
+import { MaintenanceModule } from './maintenance/maintenance.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { FeedbackModule } from './feedback/feedback.module';
     CartModule,
     PolicyModule,
     FeedbackModule,
+    MaintenanceModule,
   ],
   controllers: [AppController],
   providers: [AppService, FirebaseService],
