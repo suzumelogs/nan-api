@@ -9,6 +9,7 @@ import { FirebaseService } from './firebase/firebase.service';
 import { DiscountModule } from './discount/discount.module';
 import { DeviceModule } from './device/device.module';
 import { CategoryModule } from './category/category.module';
+import { RentalModule } from './rental/rental.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { CategoryModule } from './category/category.module';
     DiscountModule,
     DeviceModule,
     CategoryModule,
+    RentalModule,
   ],
   controllers: [AppController],
   providers: [AppService, FirebaseService],
