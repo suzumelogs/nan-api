@@ -9,7 +9,7 @@ import {
 
 export class CreateDiscountDto {
   @ApiProperty({
-    description: 'Unique discount code',
+    description: 'Mã giảm giá',
     example: 'SUMMER2024',
   })
   @IsNotEmpty()
@@ -17,7 +17,7 @@ export class CreateDiscountDto {
   code: string;
 
   @ApiProperty({
-    description: 'Discount rate in percentage',
+    description: 'Tỷ lệ giảm giá (%)',
     example: 20.0,
   })
   @IsNotEmpty()
@@ -25,7 +25,7 @@ export class CreateDiscountDto {
   discountRate: number;
 
   @ApiProperty({
-    description: 'Discount start time',
+    description: 'Thời gian bắt đầu',
     example: '2024-06-01T00:00:00.000Z',
   })
   @IsNotEmpty()
@@ -33,7 +33,7 @@ export class CreateDiscountDto {
   validFrom: Date;
 
   @ApiProperty({
-    description: 'Discount end time',
+    description: 'Thời gian kết thúc',
     example: '2024-08-31T00:00:00.000Z',
   })
   @IsNotEmpty()
@@ -41,7 +41,7 @@ export class CreateDiscountDto {
   validTo: Date;
 
   @ApiProperty({
-    description: 'Limit on the number of uses for the discount code',
+    description: 'Giới hạn số lần sử dụng',
     example: 100,
     required: false,
   })

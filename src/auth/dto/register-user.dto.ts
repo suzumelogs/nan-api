@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-
 import {
   IsEmail,
-  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -12,10 +10,7 @@ import {
 
 export class RegisterUserDto {
   @ApiProperty({
-    description: 'Name',
-    nullable: false,
-    required: true,
-    type: 'string',
+    description: 'Tên người dùng',
     example: 'John Sample',
   })
   @IsString()
@@ -23,11 +18,8 @@ export class RegisterUserDto {
   name: string;
 
   @ApiProperty({
-    description: 'Email',
+    description: 'Email người dùng',
     uniqueItems: true,
-    nullable: false,
-    required: true,
-    type: 'string',
     example: 'youremail@example.com',
   })
   @IsEmail()
@@ -35,10 +27,7 @@ export class RegisterUserDto {
 
   @ApiProperty({
     description:
-      'Password: Min 6 characters, 1 uppercase, 1 lowercase and 1 number',
-    nullable: false,
-    required: true,
-    type: 'string',
+      'Mật khẩu: Tối thiểu 6 ký tự, 1 chữ cái viết hoa, 1 chữ cái viết thường và 1 số',
     example: 'Password123',
   })
   @IsString()
@@ -46,16 +35,13 @@ export class RegisterUserDto {
   @MaxLength(16)
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/, {
     message:
-      'Password must contain at least one uppercase, one lowercase and one number',
+      'Mật khẩu phải chứa ít nhất một chữ cái viết hoa, một chữ cái viết thường và một số',
   })
-  @NotContains(' ', { message: 'El password no debe contener espacios' })
+  @NotContains(' ', { message: 'Mật khẩu không được chứa khoảng trắng' })
   password: string;
 
   @ApiProperty({
-    description: 'Confirm Password, it must be the same as the password',
-    nullable: false,
-    required: true,
-    type: 'string',
+    description: 'Xác nhận mật khẩu, phải giống với mật khẩu',
     example: 'Password123',
   })
   @IsString()

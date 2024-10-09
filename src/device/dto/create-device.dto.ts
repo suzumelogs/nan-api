@@ -10,7 +10,7 @@ import {
 
 export class CreateDeviceDto {
   @ApiProperty({
-    description: 'Name of the device',
+    description: 'Tên thiết bị',
     example: 'Canon EOS 90D DSLR Camera',
   })
   @IsNotEmpty()
@@ -18,7 +18,7 @@ export class CreateDeviceDto {
   name: string;
 
   @ApiProperty({
-    description: 'Image URL of the device',
+    description: 'URL hình ảnh',
     example: 'https://example.com/image.jpg',
   })
   @IsNotEmpty()
@@ -26,8 +26,8 @@ export class CreateDeviceDto {
   image: string;
 
   @ApiProperty({
-    description: 'Description of the device',
-    example: 'A high-quality DSLR camera for professional photography.',
+    description: 'Mô tả thiết bị',
+    example: 'Máy ảnh DSLR chất lượng cao.',
     required: false,
   })
   @IsOptional()
@@ -35,7 +35,7 @@ export class CreateDeviceDto {
   description?: string;
 
   @ApiProperty({
-    description: 'Daily rental price of the device',
+    description: 'Giá thuê hàng ngày',
     example: 50.0,
   })
   @IsNotEmpty()
@@ -43,7 +43,7 @@ export class CreateDeviceDto {
   priceDay: number;
 
   @ApiProperty({
-    description: 'Weekly rental price of the device',
+    description: 'Giá thuê hàng tuần',
     example: 300.0,
   })
   @IsNotEmpty()
@@ -51,7 +51,7 @@ export class CreateDeviceDto {
   priceWeek: number;
 
   @ApiProperty({
-    description: 'Monthly rental price of the device',
+    description: 'Giá thuê hàng tháng',
     example: 1000.0,
   })
   @IsNotEmpty()
@@ -59,7 +59,7 @@ export class CreateDeviceDto {
   priceMonth: number;
 
   @ApiProperty({
-    description: 'Current status of the device',
+    description: 'Trạng thái thiết bị',
     enum: DeviceStatus,
     example: DeviceStatus.available,
   })
@@ -68,7 +68,7 @@ export class CreateDeviceDto {
   status: DeviceStatus;
 
   @ApiProperty({
-    description: 'Category ID to which the device belongs',
+    description: 'ID danh mục',
     example: '60b9c3f3b236d17a10b76e6f',
   })
   @IsNotEmpty()
@@ -76,7 +76,7 @@ export class CreateDeviceDto {
   categoryId: string;
 
   @ApiProperty({
-    description: 'Cart ID if the device is added to a cart',
+    description: 'ID giỏ hàng (nếu có)',
     example: '60b9c3f3b236d17a10b76e6f',
     required: false,
   })

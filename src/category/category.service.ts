@@ -18,6 +18,7 @@ export class CategoryService {
         select: {
           id: true,
           name: true,
+          description: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -34,6 +35,7 @@ export class CategoryService {
         select: {
           id: true,
           name: true,
+          description: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -51,6 +53,7 @@ export class CategoryService {
         select: {
           id: true,
           name: true,
+          description: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -69,6 +72,7 @@ export class CategoryService {
         select: {
           id: true,
           name: true,
+          description: true,
           createdAt: true,
           updatedAt: true,
         },

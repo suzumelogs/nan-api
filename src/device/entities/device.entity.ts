@@ -3,76 +3,76 @@ import { DeviceStatus } from '@prisma/client';
 
 export class Device {
   @ApiProperty({
-    description: 'Unique identifier for the device',
+    description: 'Mã ID',
     example: '60b9c3f3b236d17a10b76e6f',
   })
   id: string;
 
   @ApiProperty({
-    description: 'Name of the device',
+    description: 'Tên thiết bị',
     example: 'Canon EOS 90D DSLR Camera',
   })
   name: string;
 
   @ApiProperty({
-    description: 'Description of the device',
-    example: 'A high-quality DSLR camera for professional photography.',
+    description: 'Mô tả thiết bị',
+    example: 'Máy ảnh DSLR chất lượng cao.',
     required: false,
   })
   description?: string;
 
   @ApiProperty({
-    description: 'Image URL of the device',
+    description: 'URL hình ảnh',
     example: 'https://example.com/image.jpg',
   })
   image: string;
 
   @ApiProperty({
-    description: 'Daily rental price of the device',
+    description: 'Giá thuê hàng ngày',
     example: 50.0,
   })
   priceDay: number;
 
   @ApiProperty({
-    description: 'Weekly rental price of the device',
+    description: 'Giá thuê hàng tuần',
     example: 300.0,
   })
   priceWeek: number;
 
   @ApiProperty({
-    description: 'Monthly rental price of the device',
+    description: 'Giá thuê hàng tháng',
     example: 1000.0,
   })
   priceMonth: number;
 
   @ApiProperty({
-    description: 'Current status of the device',
+    description: 'Trạng thái thiết bị',
     enum: DeviceStatus,
     example: DeviceStatus.available,
   })
   status: DeviceStatus;
 
   @ApiProperty({
-    description: 'Category ID to which the device belongs',
+    description: 'ID danh mục thiết bị',
     example: '60b9c3f3b236d17a10b76e6f',
   })
   categoryId: string;
 
   @ApiProperty({
-    description: 'Cart ID if the device is added to a cart',
+    description: 'ID giỏ hàng (nếu có)',
     example: '60b9c3f3b236d17a10b76e6f',
     required: false,
   })
-  cartId: string;
+  cartId?: string;
 
   @ApiProperty({
-    description: 'Timestamp when the device was created',
+    description: 'Thời gian tạo',
     example: '2024-01-01T00:00:00.000Z',
   })
   createdAt: Date;
 
   @ApiProperty({
-    description: 'Timestamp when the device was last updated',
+    description: 'Thời gian cập nhật',
     example: '2024-01-10T00:00:00.000Z',
   })
   updatedAt: Date;
