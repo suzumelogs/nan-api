@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
-  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 
@@ -16,13 +15,9 @@ import { Role } from '@prisma/client';
 
 @Injectable()
 export class UserService {
-  private readonly logger = new Logger('UserService');
-
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateUserDto) {
-    this.logger.log(`POST: user/register: Register user started`);
-
     if (dto.password !== dto.passwordconf)
       throw new BadRequestException('Passwords do not match');
 
@@ -51,7 +46,6 @@ export class UserService {
       return newuser;
     } catch (error) {
       this.prismaErrorHanler(error, 'POST', dto.email);
-      this.logger.error(`POST: error: ${error}`);
       throw new InternalServerErrorException('Server error');
     }
   }
@@ -70,7 +64,6 @@ export class UserService {
       });
       return users;
     } catch (error) {
-      this.logger.error(`GET: error: ${error}`);
       throw new InternalServerErrorException('Server error');
     }
   }
@@ -97,7 +90,6 @@ export class UserService {
       return user;
     } catch (error) {
       this.prismaErrorHanler(error, 'GET', value);
-      this.logger.error(`GET/{id}: error: ${error}`);
       throw new InternalServerErrorException('Server error');
     }
   }
@@ -135,7 +127,6 @@ export class UserService {
       return updatedUser;
     } catch (error) {
       this.prismaErrorHanler(error, 'PATCH', value);
-      this.logger.error(`PATCH: error: ${error}`);
       throw new InternalServerErrorException('Server error');
     }
   }
@@ -156,22 +147,18 @@ export class UserService {
         },
       });
 
-      this.logger.warn(`DELETE: ${JSON.stringify(deletedUser)}`);
       return { message: 'User deleted' };
     } catch (error) {
       this.prismaErrorHanler(error, 'DELETE', value);
-      this.logger.error(`DELETE: error: ${error}`);
       throw new InternalServerErrorException('Server error');
     }
   }
 
   prismaErrorHanler = (error: any, method: string, value: string = null) => {
     if (error.code === 'P2002') {
-      this.logger.warn(`${method}: User already exists: ${value}`);
       throw new BadRequestException('User already exists');
     }
     if (error.code === 'P2025') {
-      this.logger.warn(`${method}: User not found: ${value}`);
       throw new BadRequestException('User not found');
     }
   };

@@ -46,4 +46,15 @@ export class AuthController {
   refreshToken(@GetUser() user: User) {
     return this.authService.refreshToken(user);
   }
+
+  @Get('me')
+  @ApiOperation({
+    summary: 'Get current user',
+    description: 'Private endpoint to retrieve current logged-in user data.',
+  })
+  @ApiBearerAuth()
+  @Auth()
+  async getMe(@GetUser() user: User) {
+    return await this.authService.getMe(user.id);
+  }
 }

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -95,6 +96,31 @@ export class AuthService {
       user: user,
       token: this.getJwtToken({ id: user.id }),
     };
+  }
+
+  async getMe(userId: string): Promise<any> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          createdAt: true,
+        },
+      });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException('Error retrieving user');
+    }
   }
 
   private getJwtToken(payload: JwtPayload) {

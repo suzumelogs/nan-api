@@ -79,6 +79,6 @@ export class RentalController {
   })
   @Auth(Role.user)
   getHistoryByMe(@GetUser() user: User) {
-    return this.rentalService.getHistoryByMe(user?.id);
+    return this.rentalService.getHistoryByMe(user.id);
   }
 }
