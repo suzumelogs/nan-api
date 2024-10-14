@@ -1,17 +1,19 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Delete,
-  Param,
   Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { RentalService } from './rental.service';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Role, User } from '@prisma/client';
+import { Auth, GetUser } from 'src/auth/decorators';
 import { CreateRentalDto } from './dto/create-rental.dto';
 import { UpdateRentalDto } from './dto/update-rental.dto';
 import { Rental } from './entities/rental.entity';
+import { RentalService } from './rental.service';
 
 @ApiBearerAuth()
 @ApiTags('Rentals')
@@ -65,5 +67,15 @@ export class RentalController {
   })
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.rentalService.remove(id);
+  }
+
+  @Get('history/by-me')
+  @ApiOperation({
+    summary: 'Get rental history',
+    description: 'Retrieve rental history for a specific user.',
+  })
+  @Auth(Role.user)
+  getHistoryByMe(@GetUser() user: User) {
+    return this.rentalService.getHistoryByMe(user?.id);
   }
 }

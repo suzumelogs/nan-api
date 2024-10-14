@@ -3,6 +3,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { RentalStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRentalDto } from './dto/create-rental.dto';
 import { UpdateRentalDto } from './dto/update-rental.dto';
@@ -65,6 +66,26 @@ export class RentalService {
       return { message: 'Rental deleted successfully' };
     } catch (error) {
       throw new NotFoundException('Rental not found');
+    }
+  }
+
+  async getHistoryByMe(userId: string): Promise<Rental[]> {
+    try {
+      return await this.prisma.rental.findMany({
+        where: {
+          userId: userId,
+          status: {
+            in: [RentalStatus.completed, RentalStatus.canceled],
+          },
+        },
+        include: {
+          device: true,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to retrieve rental history',
+      );
     }
   }
 }
