@@ -44,6 +44,7 @@ export class RentalController {
     summary: 'Create a new rental',
     description: 'Create a new rental with the provided details.',
   })
+  @Auth(Role.admin)
   create(@Body() createRentalDto: CreateRentalDto): Promise<Rental> {
     return this.rentalService.create(createRentalDto);
   }
@@ -53,6 +54,7 @@ export class RentalController {
     summary: 'Update rental by ID',
     description: 'Update the details of an existing rental by its ID.',
   })
+  @Auth(Role.admin)
   update(
     @Param('id') id: string,
     @Body() updateRentalDto: UpdateRentalDto,
@@ -65,6 +67,7 @@ export class RentalController {
     summary: 'Delete rental by ID',
     description: 'Delete a rental by its ID.',
   })
+  @Auth(Role.admin)
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.rentalService.remove(id);
   }
