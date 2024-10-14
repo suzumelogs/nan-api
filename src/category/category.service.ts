@@ -7,6 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
+import { LabelValueResponse } from 'src/common';
 
 @Injectable()
 export class CategoryService {
@@ -24,6 +25,9 @@ export class CategoryService {
     try {
       const category = await this.prisma.category.findUniqueOrThrow({
         where: { id },
+        include: {
+          devices: true,
+        },
       });
       return category;
     } catch (error) {
@@ -65,6 +69,20 @@ export class CategoryService {
       return { message: 'Category deleted successfully' };
     } catch (error) {
       throw new NotFoundException('Category not found');
+    }
+  }
+
+  async getLabelValue(): Promise<LabelValueResponse[]> {
+    try {
+      const categories = await this.prisma.category.findMany();
+      return categories.map((category) => ({
+        label: category.name,
+        value: category.id,
+      }));
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to retrieve label-value pairs',
+      );
     }
   }
 }

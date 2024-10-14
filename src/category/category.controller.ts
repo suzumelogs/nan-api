@@ -12,6 +12,7 @@ import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
+import { LabelValueResponse } from 'src/common';
 
 @ApiBearerAuth()
 @ApiTags('Categories')
@@ -65,5 +66,14 @@ export class CategoryController {
   })
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.categoryService.remove(id);
+  }
+
+  @Get('label-value')
+  @ApiOperation({
+    summary: 'Get label-value pairs of categories',
+    description: 'Retrieve label-value pairs for all categories.',
+  })
+  getLabelValue(): Promise<LabelValueResponse[]> {
+    return this.categoryService.getLabelValue();
   }
 }
