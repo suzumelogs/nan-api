@@ -6,18 +6,29 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DiscountService } from './discount.service';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
 import { Discount } from './entities/discount.entity';
+import { QueryDto } from './dto/query.dto';
 
 @ApiBearerAuth()
 @ApiTags('Discounts')
 @Controller('discount')
 export class DiscountController {
   constructor(private readonly discountService: DiscountService) {}
+
+  @Get('pagination')
+  @ApiOperation({
+    summary: 'Get discounts with pagination',
+    description: 'Retrieve a paginated list of discounts with optional search.',
+  })
+  findAllWithPagination(@Query() paginationDto: QueryDto): Promise<any> {
+    return this.discountService.findAllWithPagination(paginationDto);
+  }
 
   @Get()
   @ApiOperation({

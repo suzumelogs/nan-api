@@ -7,10 +7,34 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
 import { Discount } from './entities/discount.entity';
+import { QueryService } from 'src/common/services/query.service';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { QueryDto } from './dto/query.dto';
 
 @Injectable()
 export class DiscountService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly queryService: QueryService,
+  ) {}
+
+  async findAllWithPagination(paginationDto: QueryDto) {
+    const searchConfig = {
+      user: ['code', 'discountRate'],
+    };
+
+    const filterConfig = {
+      code: paginationDto.code,
+      discountRate: paginationDto.discountRate,
+    };
+
+    return this.queryService.list(
+      'discount',
+      paginationDto,
+      searchConfig,
+      filterConfig,
+    );
+  }
 
   async findAll(): Promise<Discount[]> {
     try {
