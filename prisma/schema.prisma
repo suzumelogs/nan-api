@@ -153,7 +153,7 @@ model Cart {
   rentalDuration Int // thời gian thuê
   totalPrice     Float // tổng giá đã tính toán
 
-  userId String @db.ObjectId
+  userId String @unique @db.ObjectId
 
   user User @relation(fields: [userId], references: [id])
 
