@@ -83,30 +83,36 @@ export class CartService {
     }
   }
 
-  async findCartByUserId(userId: string): Promise<Cart[]> {
+  async findByUserId(userId: string): Promise<Cart> {
     try {
-      return await this.prisma.cart.findMany({
+      const cart = await this.prisma.cart.findUnique({
         where: { userId },
-        include: {
-          devices: true,
-        },
+        include: { devices: true },
       });
+
+      if (!cart) {
+        throw new NotFoundException('Cart not found for this user');
+      }
+
+      return cart;
     } catch (error) {
-      console.error(error);
-      throw new InternalServerErrorException(
-        'Failed to retrieve carts for user',
-      );
+      throw new InternalServerErrorException('Failed to retrieve user cart');
     }
   }
 
-  async addDeviceToCartByMe(
+  async addDeviceToCart(
     userId: string,
     dto: AddDeviceToCartDto,
   ): Promise<Cart> {
     try {
-      const cart = await this.prisma.cart.findUniqueOrThrow({
+      const cart = await this.prisma.cart.findUnique({
         where: { userId },
+        include: { devices: true },
       });
+
+      if (!cart) {
+        throw new NotFoundException('Cart not found for this user');
+      }
 
       const updatedCart = await this.prisma.cart.update({
         where: { id: cart.id },
@@ -115,61 +121,60 @@ export class CartService {
             connect: { id: dto.deviceId },
           },
         },
-        include: {
-          devices: true,
-        },
+        include: { devices: true },
       });
 
       return updatedCart;
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Cart not found');
-      }
       throw new InternalServerErrorException('Failed to add device to cart');
     }
   }
 
-  async updateDeviceToCartByMe(
+  async updateDeviceToCart(
     userId: string,
     dto: UpdateDeviceToCartDto,
   ): Promise<Cart> {
     try {
-      const cart = await this.prisma.cart.findUniqueOrThrow({
+      const cart = await this.prisma.cart.findUnique({
         where: { userId },
+        include: { devices: true },
       });
+
+      if (!cart) {
+        throw new NotFoundException('Cart not found for this user');
+      }
 
       const updatedCart = await this.prisma.cart.update({
         where: { id: cart.id },
         data: {
-          devices: {
-            set: dto.devices.map((deviceId) => ({ id: deviceId })),
-          },
+          ...dto,
         },
-        include: {
-          devices: true,
-        },
+        include: { devices: true },
       });
 
       return updatedCart;
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Cart not found');
-      }
       throw new InternalServerErrorException('Failed to update cart');
     }
   }
 
-  async removeDeviceFromCartByMe(
-    userId: string,
-    deviceId: string,
-  ): Promise<Cart> {
+  async removeDeviceFromCart(userId: string, deviceId: string): Promise<Cart> {
     try {
-      const cart = await this.prisma.cart.findUniqueOrThrow({
+      const cart = await this.prisma.cart.findUnique({
         where: { userId },
-        include: {
-          devices: true,
-        },
+        include: { devices: true },
       });
+
+      if (!cart) {
+        throw new NotFoundException('Cart not found for this user');
+      }
+
+      const deviceExists = cart.devices.some(
+        (device) => device.id === deviceId,
+      );
+      if (!deviceExists) {
+        throw new NotFoundException('Device not found in cart');
+      }
 
       const updatedCart = await this.prisma.cart.update({
         where: { id: cart.id },
@@ -178,16 +183,11 @@ export class CartService {
             disconnect: { id: deviceId },
           },
         },
-        include: {
-          devices: true,
-        },
+        include: { devices: true },
       });
 
       return updatedCart;
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Cart not found');
-      }
       throw new InternalServerErrorException(
         'Failed to remove device from cart',
       );

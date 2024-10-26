@@ -69,4 +69,16 @@ export class NotificationService {
       throw new NotFoundException('Notification not found');
     }
   }
+
+  async findByUserId(userId: string): Promise<Notification[]> {
+    try {
+      return await this.prisma.notification.findMany({
+        where: { userId },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to retrieve notifications for the user',
+      );
+    }
+  }
 }

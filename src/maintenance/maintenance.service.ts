@@ -67,4 +67,22 @@ export class MaintenanceService {
       throw new NotFoundException('Maintenance not found');
     }
   }
+
+  async findByDeviceId(deviceId: string): Promise<Maintenance[]> {
+    try {
+      const maintenances = await this.prisma.maintenance.findMany({
+        where: { deviceId },
+      });
+      if (maintenances.length === 0) {
+        throw new NotFoundException(
+          'No maintenance records found for this device',
+        );
+      }
+      return maintenances;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to retrieve maintenances for the device',
+      );
+    }
+  }
 }

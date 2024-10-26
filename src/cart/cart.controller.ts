@@ -73,53 +73,51 @@ export class CartController {
 
   @Get('by-me')
   @ApiOperation({
-    summary: 'Get current user cart',
-    description: 'Retrieve the shopping cart of the authenticated user',
+    summary: 'Get my cart',
+    description: 'Retrieve the cart associated with the current user.',
   })
   @Auth(Role.user)
-  findCartByUserId(@GetUser() user: User) {
-    return this.cartService.findCartByUserId(user.id);
+  async findMyCart(@GetUser() user: User) {
+    return this.cartService.findByUserId(user.id);
   }
 
-  @Post('add-device/by-me')
+  @Post('by-me')
   @ApiOperation({
-    summary: 'Add device to user cart',
-    description:
-      'Add a specified device to the shopping cart of the user identified by userId.',
+    summary: 'Add device to my cart',
+    description: "Add a specified device to the current user's cart.",
   })
   @Auth(Role.user)
-  async addDeviceToCartByMe(
+  async addDeviceToMyCart(
     @GetUser() user: User,
     @Body() dto: AddDeviceToCartDto,
   ): Promise<Cart> {
-    return this.cartService.addDeviceToCartByMe(user.id, dto);
+    return this.cartService.addDeviceToCart(user.id, dto);
   }
 
-  @Patch('update-device/by-me')
+  @Patch('by-me')
   @ApiOperation({
-    summary: 'Update device to user cart',
+    summary: 'Update my cart',
     description:
-      'Update the shopping cart for the user identified by userId with the specified devices.',
+      "Update the current user's cart with specified device details.",
   })
   @Auth(Role.user)
-  async updateDeviceToCartByMe(
+  async updateDeviceToCart(
     @GetUser() user: User,
     @Body() dto: UpdateDeviceToCartDto,
   ): Promise<Cart> {
-    return this.cartService.updateDeviceToCartByMe(user.id, dto);
+    return this.cartService.updateDeviceToCart(user.id, dto);
   }
 
-  @Delete('remove-device/:deviceId/by-me')
+  @Delete('by-me/:deviceId')
   @ApiOperation({
-    summary: 'Remove device from user cart',
-    description:
-      'Remove a specified device from the shopping cart of the user identified by userId.',
+    summary: 'Remove device from my cart',
+    description: "Remove a specified device from the current user's cart.",
   })
   @Auth(Role.user)
-  async removeDeviceFromCartByMe(
-    @GetUser() user: User,
+  async removeDeviceFromMyCart(
     @Param('deviceId') deviceId: string,
-  ): Promise<Cart> {
-    return this.cartService.removeDeviceFromCartByMe(user.id, deviceId);
+    @GetUser() user: User,
+  ) {
+    return this.cartService.removeDeviceFromCart(user.id, deviceId);
   }
 }

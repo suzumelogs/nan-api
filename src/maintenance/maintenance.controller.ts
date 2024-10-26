@@ -69,4 +69,14 @@ export class MaintenanceController {
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.maintenanceService.remove(id);
   }
+
+  @Get('device/:deviceId')
+  @ApiOperation({
+    summary: 'Get maintenances by Device ID',
+    description:
+      'Retrieve a list of all maintenance records for a specific device.',
+  })
+  findByDeviceId(@Param('deviceId') deviceId: string): Promise<Maintenance[]> {
+    return this.maintenanceService.findByDeviceId(deviceId);
+  }
 }

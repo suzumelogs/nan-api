@@ -12,6 +12,8 @@ import { NotificationService } from './notification.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { Notification } from './entities/notification.entity';
+import { GetUser } from 'src/auth/decorators';
+import { User } from '@prisma/client';
 
 @ApiBearerAuth()
 @ApiTags('Notifications')
@@ -67,5 +69,14 @@ export class NotificationController {
   })
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.notificationService.remove(id);
+  }
+
+  @Get('by-me')
+  @ApiOperation({
+    summary: 'Get notifications by me',
+    description: 'Retrieve a list of all notifications for a specific by me.',
+  })
+  findByUserId(@GetUser() user: User): Promise<Notification[]> {
+    return this.notificationService.findByUserId(user.id);
   }
 }
