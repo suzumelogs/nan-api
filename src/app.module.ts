@@ -15,10 +15,12 @@ import { PolicyModule } from './policy/policy.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { MaintenanceModule } from './maintenance/maintenance.module';
 import { NotificationModule } from './notification/notification.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     AuthModule,
     PrismaModule,
     UserModule,

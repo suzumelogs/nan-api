@@ -23,8 +23,7 @@ export class NotificationController {
 
   @Get()
   @ApiOperation({
-    summary: 'Get all notifications',
-    description: 'Retrieve a list of all notifications available.',
+    summary: 'Lấy tất cả thông báo',
   })
   findAll(): Promise<Notification[]> {
     return this.notificationService.findAll();
@@ -32,8 +31,7 @@ export class NotificationController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Get notification by ID',
-    description: 'Retrieve notification details by its ID.',
+    summary: 'Lấy thông báo theo ID',
   })
   findOne(@Param('id') id: string): Promise<Notification> {
     return this.notificationService.findOne(id);
@@ -41,8 +39,7 @@ export class NotificationController {
 
   @Post()
   @ApiOperation({
-    summary: 'Create a new notification',
-    description: 'Create a new notification with the provided details.',
+    summary: 'Tạo một thông báo mới',
   })
   create(
     @Body() createNotificationDto: CreateNotificationDto,
@@ -52,8 +49,7 @@ export class NotificationController {
 
   @Patch(':id')
   @ApiOperation({
-    summary: 'Update notification by ID',
-    description: 'Update the details of an existing notification by its ID.',
+    summary: 'Cập nhật thông báo theo ID',
   })
   update(
     @Param('id') id: string,
@@ -64,26 +60,15 @@ export class NotificationController {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'Delete notification by ID',
-    description: 'Delete a notification by its ID.',
+    summary: 'Xóa thông báo theo ID',
   })
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.notificationService.remove(id);
   }
 
-  @Get('all/by-me')
-  @ApiOperation({
-    summary: 'Get notifications all by me',
-    description: 'Retrieve all notifications for a specific by me.',
-  })
-  findAllByUserId(@GetUser() user: User): Promise<Notification[]> {
-    return this.notificationService.findAllByUserId(user.id);
-  }
-
   @Get('by-me')
   @ApiOperation({
-    summary: 'Get notifications by me',
-    description: 'Retrieve a list of all notifications for a specific by me.',
+    summary: 'Lấy thông báo của tôi',
   })
   findByUserId(@GetUser() user: User): Promise<Notification[]> {
     return this.notificationService.findByUserId(user.id);
@@ -91,8 +76,7 @@ export class NotificationController {
 
   @Patch(':id/read')
   @ApiOperation({
-    summary: 'Mark notification as read',
-    description: 'Update the notification status to read.',
+    summary: 'Đánh dấu thông báo là đã đọc',
   })
   markAsRead(@Param('id') id: string): Promise<Notification> {
     return this.notificationService.markAsRead(id);
