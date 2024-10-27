@@ -67,6 +67,8 @@ model User {
   role          Role      @default(user)
   identityDoc   String? // Tài liệu nhận dạng (CCCD/CMND)
 
+  googleId String?
+
   rentals        Rental[]
   feedbacks      Feedback[]
   carts          Cart[]

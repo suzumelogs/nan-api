@@ -127,4 +127,34 @@ export class AuthService {
     const token = this.jwtService.sign(payload);
     return token;
   }
+
+  async validateGoogleUser(user: any) {
+    let existingUser = await this.prisma.user.findUnique({
+      where: { email: user.email },
+    });
+
+    if (!existingUser) {
+      existingUser = await this.prisma.user.create({
+        data: {
+          name: user.name,
+          email: user.email,
+          googleId: user.id,
+          password: '',
+          role: 'user',
+        },
+      });
+    } else {
+      if (!existingUser.googleId) {
+        existingUser = await this.prisma.user.update({
+          where: { email: user.email },
+          data: { googleId: user.id },
+        });
+      }
+    }
+
+    return {
+      user: existingUser,
+      token: this.getJwtToken({ id: existingUser.id }),
+    };
+  }
 }
