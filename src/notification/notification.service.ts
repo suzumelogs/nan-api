@@ -7,6 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { Notification } from './entities/notification.entity';
+import { NotificationStatus } from '@prisma/client';
 
 @Injectable()
 export class NotificationService {
@@ -78,6 +79,24 @@ export class NotificationService {
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to retrieve notifications for the user',
+      );
+    }
+  }
+
+  async markAsRead(id: string): Promise<Notification> {
+    try {
+      return await this.prisma.notification.update({
+        where: { id },
+        data: {
+          status: NotificationStatus.read,
+        },
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Notification not found');
+      }
+      throw new InternalServerErrorException(
+        'Failed to mark notification as read',
       );
     }
   }

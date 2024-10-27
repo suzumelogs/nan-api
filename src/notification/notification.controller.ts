@@ -79,4 +79,13 @@ export class NotificationController {
   findByUserId(@GetUser() user: User): Promise<Notification[]> {
     return this.notificationService.findByUserId(user.id);
   }
+
+  @Patch(':id/read')
+  @ApiOperation({
+    summary: 'Mark notification as read',
+    description: 'Update the notification status to read.',
+  })
+  markAsRead(@Param('id') id: string): Promise<Notification> {
+    return this.notificationService.markAsRead(id);
+  }
 }
