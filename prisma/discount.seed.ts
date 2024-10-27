@@ -5,10 +5,10 @@ const prisma = new PrismaClient();
 const discounts = [
   {
     code: 'SUMMER2024',
-    discountRate: 20.0, // Phần trăm giảm giá
-    validFrom: new Date('2024-06-01T00:00:00.000Z'), // Thời gian bắt đầu
-    validTo: new Date('2024-08-31T00:00:00.000Z'), // Thời gian kết thúc
-    maxUsage: 100, // Số lần sử dụng tối đa
+    discountRate: 20.0,
+    validFrom: new Date('2024-06-01T00:00:00.000Z'),
+    validTo: new Date('2024-08-31T00:00:00.000Z'),
+    maxUsage: 100,
   },
   {
     code: 'WINTER2024',
@@ -26,7 +26,6 @@ const discounts = [
   },
 ];
 
-// Hàm để seed từng mã giảm giá
 const seedDiscount = async (discount) => {
   await prisma.discount.upsert({
     where: { code: discount.code },
@@ -48,7 +47,6 @@ const seedDiscount = async (discount) => {
   console.log(`Discount ${discount.code} seeded successfully.`);
 };
 
-// Hàm để thực hiện quá trình seed
 const discountSeed = async () => {
   try {
     for (const discount of discounts) {

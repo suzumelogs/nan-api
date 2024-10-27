@@ -71,6 +71,15 @@ export class NotificationController {
     return this.notificationService.remove(id);
   }
 
+  @Get('all/by-me')
+  @ApiOperation({
+    summary: 'Get notifications all by me',
+    description: 'Retrieve all notifications for a specific by me.',
+  })
+  findAllByUserId(@GetUser() user: User): Promise<Notification[]> {
+    return this.notificationService.findAllByUserId(user.id);
+  }
+
   @Get('by-me')
   @ApiOperation({
     summary: 'Get notifications by me',

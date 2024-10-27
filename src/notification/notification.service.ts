@@ -71,6 +71,18 @@ export class NotificationService {
     }
   }
 
+  async findAllByUserId(userId: string): Promise<Notification[]> {
+    try {
+      return await this.prisma.notification.findMany({
+        where: { userId },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to retrieve notifications for the user',
+      );
+    }
+  }
+
   async findByUserId(userId: string): Promise<Notification[]> {
     try {
       return await this.prisma.notification.findMany({
