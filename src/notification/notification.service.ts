@@ -18,7 +18,7 @@ export class NotificationService {
       return await this.prisma.notification.findMany();
     } catch (error) {
       throw new InternalServerErrorException(
-        'Failed to retrieve notifications',
+        'Lấy danh sách thông báo thất bại',
       );
     }
   }
@@ -30,7 +30,7 @@ export class NotificationService {
       });
       return notification;
     } catch (error) {
-      throw new NotFoundException('Notification not found');
+      throw new NotFoundException('Không tìm thấy thông báo');
     }
   }
 
@@ -41,7 +41,7 @@ export class NotificationService {
       });
       return newNotification;
     } catch (error) {
-      throw new InternalServerErrorException('Failed to create notification');
+      throw new InternalServerErrorException('Tạo thông báo thất bại');
     }
   }
 
@@ -54,9 +54,9 @@ export class NotificationService {
       return updatedNotification;
     } catch (error) {
       if (error.code === 'P2025') {
-        throw new NotFoundException('Notification not found');
+        throw new NotFoundException('Không tìm thấy thông báo');
       }
-      throw new InternalServerErrorException('Failed to update notification');
+      throw new InternalServerErrorException('Cập nhật thông báo thất bại');
     }
   }
 
@@ -65,9 +65,9 @@ export class NotificationService {
       await this.prisma.notification.delete({
         where: { id },
       });
-      return { message: 'Notification deleted successfully' };
+      return { message: 'Xóa thông báo thành công' };
     } catch (error) {
-      throw new NotFoundException('Notification not found');
+      throw new NotFoundException('Không tìm thấy thông báo');
     }
   }
 
@@ -78,7 +78,7 @@ export class NotificationService {
       });
     } catch (error) {
       throw new InternalServerErrorException(
-        'Failed to retrieve notifications for the user',
+        'Lấy danh sách thông báo cho người dùng thất bại',
       );
     }
   }
@@ -90,7 +90,51 @@ export class NotificationService {
       });
     } catch (error) {
       throw new InternalServerErrorException(
-        'Failed to retrieve notifications for the user',
+        'Lấy danh sách thông báo cho người dùng thất bại',
+      );
+    }
+  }
+
+  async createByUserId(
+    userId: string,
+    dto: CreateNotificationDto,
+  ): Promise<Notification> {
+    try {
+      const notificationData: CreateNotificationDto = {
+        ...dto,
+        userId,
+      };
+      return await this.create(notificationData);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Tạo thông báo cho người dùng thất bại',
+      );
+    }
+  }
+
+  async updateByUserId(
+    userId: string,
+    notificationId: string,
+    dto: UpdateNotificationDto,
+  ): Promise<Notification> {
+    try {
+      const notification = await this.prisma.notification.findUniqueOrThrow({
+        where: { id: notificationId },
+      });
+
+      if (notification.userId !== userId) {
+        throw new NotFoundException(
+          'Không tìm thấy thông báo cho người dùng này',
+        );
+      }
+
+      return await this.update(notificationId, dto);
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Không tìm thấy thông báo');
+      }
+      throw new InternalServerErrorException(
+        'Cập nhật thông báo cho người dùng thất bại',
       );
     }
   }
@@ -105,11 +149,27 @@ export class NotificationService {
       });
     } catch (error) {
       if (error.code === 'P2025') {
-        throw new NotFoundException('Notification not found');
+        throw new NotFoundException('Không tìm thấy thông báo');
       }
       throw new InternalServerErrorException(
-        'Failed to mark notification as read',
+        'Đánh dấu thông báo là đã đọc thất bại',
       );
     }
+  }
+
+  async sendNotification({
+    message,
+    userId,
+  }: {
+    message: string;
+    userId: string;
+  }): Promise<Notification> {
+    const notificationDto: CreateNotificationDto = {
+      message,
+      userId,
+      status: NotificationStatus.unread,
+    };
+
+    return await this.create(notificationDto);
   }
 }

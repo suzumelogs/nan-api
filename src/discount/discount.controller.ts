@@ -21,8 +21,7 @@ export class DiscountController {
 
   @Get()
   @ApiOperation({
-    summary: 'Get all discounts',
-    description: 'Retrieve a list of all discounts available.',
+    summary: 'Lấy tất cả mã giảm giá (Không phân trang)',
   })
   findAll(): Promise<Discount[]> {
     return this.discountService.findAll();
@@ -30,8 +29,7 @@ export class DiscountController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Get discount by ID',
-    description: 'Retrieve discount details by its ID.',
+    summary: 'Lấy mã giảm giá theo ID.',
   })
   findOne(@Param('id') id: string): Promise<Discount> {
     return this.discountService.findOne(id);
@@ -39,8 +37,7 @@ export class DiscountController {
 
   @Post()
   @ApiOperation({
-    summary: 'Create a new discount',
-    description: 'Create a new discount with the provided details.',
+    summary: 'Tạo mã giảm giá mới',
   })
   create(@Body() createDiscountDto: CreateDiscountDto): Promise<Discount> {
     return this.discountService.create(createDiscountDto);
@@ -48,8 +45,7 @@ export class DiscountController {
 
   @Patch(':id')
   @ApiOperation({
-    summary: 'Update discount by ID',
-    description: 'Update the details of an existing discount by its ID.',
+    summary: 'Cập nhật mã giảm giá theo ID',
   })
   update(
     @Param('id') id: string,
@@ -60,8 +56,7 @@ export class DiscountController {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'Delete discount by ID',
-    description: 'Delete a discount by its ID.',
+    summary: 'Xóa mã giảm giá theo ID',
   })
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.discountService.remove(id);
