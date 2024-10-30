@@ -111,9 +111,9 @@ model Category {
   name        String  @unique
   description String?
 
-  priceDay   Float
-  priceWeek  Float
-  priceMonth Float
+  priceDay   Float?
+  priceWeek  Float?
+  priceMonth Float?
 
   devices Device[]
 
