@@ -57,7 +57,7 @@ enum MaintenanceStatus {
   completed
 }
 
-// User information
+// Người dùng
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   name          String
@@ -65,11 +65,11 @@ model User {
   emailVerified DateTime?
   password      String
   role          Role      @default(user)
-  identityDoc   String? // Tài liệu nhận dạng (CCCD/CMND)
+  identityDoc   String?
 
   rentals        Rental[]
   feedbacks      Feedback[]
-  carts          Cart[]
+  cart           Cart?
   notifications  Notification[]
   paymentMethods PaymentMethod[]
   supports       Support[]
@@ -80,7 +80,7 @@ model User {
   @@map("users")
 }
 
-// Device information
+// Thiết bị
 model Device {
   id          String       @id @default(auto()) @map("_id") @db.ObjectId
   name        String
@@ -91,29 +91,29 @@ model Device {
   priceMonth  Float
   status      DeviceStatus @default(available)
 
-  categoryId String  @db.ObjectId
-  cartId     String? @db.ObjectId
+  categoryId String @db.ObjectId
 
-  category Category @relation(fields: [categoryId], references: [id])
-  cart     Cart?    @relation(fields: [cartId], references: [id])
-
+  category           Category      @relation(fields: [categoryId], references: [id])
   rentals            Rental[]
   maintenanceRecords Maintenance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Cart      Cart?    @relation(fields: [cartId], references: [id])
+  cartId    String?  @db.ObjectId
 
   @@map("devices")
 }
 
-// Category for devices or rental packages
+// Danh mục (Gói)
 model Category {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
   name        String  @unique
   description String?
-  priceDay    Float
-  priceWeek   Float
-  priceMonth  Float
+
+  priceDay   Float
+  priceWeek  Float
+  priceMonth Float
 
   devices Device[]
 
@@ -123,7 +123,7 @@ model Category {
   @@map("categories")
 }
 
-// Rental details
+// Thuê
 model Rental {
   id              String       @id @default(auto()) @map("_id") @db.ObjectId
   rentalStartDate DateTime
@@ -147,7 +147,7 @@ model Rental {
   @@map("rentals")
 }
 
-// Cart details
+// Giỏ hàng
 model Cart {
   id             String @id @default(auto()) @map("_id") @db.ObjectId
   rentalDuration Int // thời gian thuê
@@ -155,9 +155,9 @@ model Cart {
 
   userId String @unique @db.ObjectId
 
-  user User @relation(fields: [userId], references: [id])
-
-  devices Device[]
+  user             User     @relation(fields: [userId], references: [id])
+  devices          Device[] // danh sách thiết bị trong giỏ hàng
+  deviceQuantities Int[] // danh sách số lượng thiết bị trong giỏ hàng
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -165,7 +165,7 @@ model Cart {
   @@map("carts")
 }
 
-// Policies for deposits and damages
+// Chính sách
 model Policy {
   id                  String @id @default(auto()) @map("_id") @db.ObjectId
   description         String
@@ -178,12 +178,13 @@ model Policy {
   @@map("policies")
 }
 
-// Feedback details
+// Phản hồi
 model Feedback {
-  id            String  @id @default(auto()) @map("_id") @db.ObjectId
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
   rating        Int // đánh giá từ 1 đến 5
   comment       String?
   adminResponse String? // phản hồi từ admin
+  replyDate     DateTime? // ngày phản hồi
 
   userId   String @db.ObjectId
   rentalId String @db.ObjectId
@@ -197,13 +198,14 @@ model Feedback {
   @@map("feedbacks")
 }
 
-// Maintenance records for each device
+// Bảo trì
 model Maintenance {
   id                       String            @id @default(auto()) @map("_id") @db.ObjectId
   maintenanceDate          DateTime
   description              String?
   suggestedNextMaintenance DateTime? // đề xuất lần bảo trì tiếp theo
   status                   MaintenanceStatus @default(pending)
+  maintenanceCost          Float? // chi phí bảo trì
 
   deviceId String @db.ObjectId
 
@@ -215,7 +217,7 @@ model Maintenance {
   @@map("maintenances")
 }
 
-// Notifications for system events
+// Thông báo
 model Notification {
   id      String             @id @default(auto()) @map("_id") @db.ObjectId
   message String
@@ -231,7 +233,7 @@ model Notification {
   @@map("notifications")
 }
 
-// Discount codes for promotions
+// Mã giảm giá
 model Discount {
   id           String   @id @default(auto()) @map("_id") @db.ObjectId
   code         String   @unique
@@ -247,7 +249,7 @@ model Discount {
   @@map("discounts")
 }
 
-// Payment methods for users
+// Phương thức thanh toán
 model PaymentMethod {
   id         String      @id @default(auto()) @map("_id") @db.ObjectId
   methodType PaymentType
@@ -263,7 +265,7 @@ model PaymentMethod {
   @@map("payment_methods")
 }
 
-// Support requests from users
+// Hỗ trợ
 model Support {
   id          String           @id @default(auto()) @map("_id") @db.ObjectId
   issueType   SupportIssueType
