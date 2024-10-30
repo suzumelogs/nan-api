@@ -23,9 +23,7 @@ export class UserController {
 
   @Post()
   @ApiOperation({
-    summary: 'Create a new user',
-    description:
-      'Endpoint for admins to create new users, including those with admin roles.',
+    summary: 'Tạo mới người dùng',
   })
   @Auth(Role.admin)
   create(@Body() createUserDto: CreateUserDto) {
@@ -34,8 +32,7 @@ export class UserController {
 
   @Get()
   @ApiOperation({
-    summary: 'Get all users',
-    description: 'Endpoint for admins to retrieve a list of all users.',
+    summary: 'Tìm tất cả người dùng (Không phân trang)',
   })
   @Auth(Role.admin)
   findAll() {
@@ -44,9 +41,7 @@ export class UserController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Get user by ID',
-    description:
-      'Retrieve user information by ID. Admins can access any user; users can access their own info.',
+    summary: 'Tìm người dùng theo ID',
   })
   @Auth(Role.admin, Role.user)
   findOne(@Param('id') id: string, @GetUser() user: User) {
@@ -55,9 +50,7 @@ export class UserController {
 
   @Get('email/:email')
   @ApiOperation({
-    summary: 'Get user by EMAIL',
-    description:
-      'Retrieve user information by email. Admins can access any user; users can access their own info.',
+    summary: 'Tìm người dùng theo EMAIL',
   })
   @Auth(Role.admin, Role.user)
   findOneByEmail(@Param('email') email: string, @GetUser() user: User) {
@@ -66,9 +59,7 @@ export class UserController {
 
   @Patch(':id')
   @ApiOperation({
-    summary: 'Update user by ID',
-    description:
-      'Update user data by ID. Admins can update any user; users can update their own info.',
+    summary: 'Cập nhật người dùng theo ID',
   })
   @Auth(Role.admin, Role.user)
   update(
@@ -81,9 +72,7 @@ export class UserController {
 
   @Patch('email/:email')
   @ApiOperation({
-    summary: 'Update user by EMAIL',
-    description:
-      'Update user data by email. Admins can update any user; users can update their own info.',
+    summary: 'Cập nhật người dùng theo EMAIL',
   })
   @Auth(Role.admin, Role.user)
   updateByEmail(
@@ -96,9 +85,7 @@ export class UserController {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'Delete user by ID',
-    description:
-      'Delete user by ID. Admins can delete any user; users can delete their own info.',
+    summary: 'Xoá người dùng theo ID',
   })
   @Auth(Role.admin, Role.user)
   remove(@Param('id') id: string, @GetUser() user: User) {
@@ -107,12 +94,19 @@ export class UserController {
 
   @Delete('email/:email')
   @ApiOperation({
-    summary: 'Delete user by EMAIL',
-    description:
-      'Delete user by email. Admins can delete any user; users can delete their own info.',
+    summary: 'Xoá người dùng theo EMAIL',
   })
   @Auth(Role.admin, Role.user)
   removeByEmail(@Param('email') email: string, @GetUser() user: User) {
     return this.userService.remove('email', email, user);
+  }
+
+  @Get('rentals/by-me')
+  @ApiOperation({
+    summary: 'Tìm tất cả lịch sử thuê của tôi',
+  })
+  @Auth(Role.user)
+  getRentals(@GetUser() user: User) {
+    return this.userService.getRentals(user);
   }
 }

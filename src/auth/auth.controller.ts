@@ -15,8 +15,7 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({
-    summary: 'Register',
-    description: 'Public endpoint to register a new user with "user" role.',
+    summary: 'Đăng ký',
   })
   register(@Body() createUserDto: RegisterUserDto) {
     return this.authService.registerUser(createUserDto);
@@ -24,8 +23,7 @@ export class AuthController {
 
   @Post('login')
   @ApiOperation({
-    summary: 'Login',
-    description: 'Public endpoint to login and obtain an access token.',
+    summary: 'Đăng nhập',
   })
   async login(@Res() response, @Body() loginUserDto: LoginUserDto) {
     const data = await this.authService.loginUser(
@@ -38,8 +36,6 @@ export class AuthController {
   @Get('refresh-token')
   @ApiOperation({
     summary: 'Refresh token',
-    description:
-      'Private endpoint for logged-in users to refresh their access token.',
   })
   @ApiBearerAuth()
   @Auth()
@@ -49,8 +45,7 @@ export class AuthController {
 
   @Get('me')
   @ApiOperation({
-    summary: 'Get current user',
-    description: 'Private endpoint to retrieve current logged-in user data.',
+    summary: 'Thông tin của tôi',
   })
   @ApiBearerAuth()
   @Auth()

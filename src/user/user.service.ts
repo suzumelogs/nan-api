@@ -62,7 +62,7 @@ export class UserService {
           updatedAt: true,
         },
       });
-      return users;
+      return { data: users };
     } catch (error) {
       throw new InternalServerErrorException('Server error');
     }
@@ -87,7 +87,7 @@ export class UserService {
         },
       });
 
-      return user;
+      return { data: user };
     } catch (error) {
       this.prismaErrorHanler(error, 'GET', value);
       throw new InternalServerErrorException('Server error');
@@ -162,4 +162,30 @@ export class UserService {
       throw new BadRequestException('User not found');
     }
   };
+
+  async getRentals(user: User) {
+    try {
+      const rentals = await this.prisma.rental.findMany({
+        where: {
+          userId: user.id,
+        },
+        include: {
+          device: {
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              image: true,
+              priceDay: true,
+              priceWeek: true,
+              priceMonth: true,
+            },
+          },
+        },
+      });
+      return { data: rentals };
+    } catch (error) {
+      throw new InternalServerErrorException('Server error');
+    }
+  }
 }

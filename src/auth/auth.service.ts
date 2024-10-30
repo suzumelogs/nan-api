@@ -93,8 +93,10 @@ export class AuthService {
 
   async refreshToken(user: User) {
     return {
-      user: user,
-      token: this.getJwtToken({ id: user.id }),
+      data: {
+        user: user,
+        token: this.getJwtToken({ id: user.id }),
+      },
     };
   }
 
@@ -117,7 +119,7 @@ export class AuthService {
         throw new NotFoundException('User not found');
       }
 
-      return user;
+      return { data: user };
     } catch (error) {
       throw new InternalServerErrorException('Error retrieving user');
     }
