@@ -6,11 +6,13 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role, User } from '@prisma/client';
 import { Auth, GetUser } from 'src/auth/decorators';
 import { CreateRentalDto } from './dto/create-rental.dto';
+import { RentalFilterDto } from './dto/rental-filter.dto';
 import { UpdateRentalDto } from './dto/update-rental.dto';
 import { Rental } from './entities/rental.entity';
 import { RentalService } from './rental.service';
@@ -21,10 +23,20 @@ import { RentalService } from './rental.service';
 export class RentalController {
   constructor(private readonly rentalService: RentalService) {}
 
+  @Get('pagination')
+  @ApiOperation({
+    summary: 'Lấy tất cả các thuê (Có phân trang và tìm kiếm)',
+  })
+  async findAllPagination(
+    @Query() filterDto: RentalFilterDto,
+  ): Promise<{ data: Rental[]; total: number; page: number; limit: number }> {
+    const { page, limit, ...filters } = filterDto;
+    return this.rentalService.findAllPagination(page, limit, filters);
+  }
+
   @Get()
   @ApiOperation({
-    summary: 'Get all rentals',
-    description: 'Retrieve a list of all rentals available.',
+    summary: 'Lấy tất cả các thuê (Không phân trang)',
   })
   findAll(): Promise<Rental[]> {
     return this.rentalService.findAll();
@@ -32,8 +44,7 @@ export class RentalController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Get rental by ID',
-    description: 'Retrieve rental details by its ID.',
+    summary: 'Lấy thuê theo ID',
   })
   findOne(@Param('id') id: string): Promise<Rental> {
     return this.rentalService.findOne(id);
@@ -41,8 +52,7 @@ export class RentalController {
 
   @Post()
   @ApiOperation({
-    summary: 'Create a new rental',
-    description: 'Create a new rental with the provided details.',
+    summary: 'Tạo thuê mới',
   })
   @Auth(Role.admin)
   create(@Body() createRentalDto: CreateRentalDto): Promise<Rental> {
@@ -51,8 +61,7 @@ export class RentalController {
 
   @Patch(':id')
   @ApiOperation({
-    summary: 'Update rental by ID',
-    description: 'Update the details of an existing rental by its ID.',
+    summary: 'Cập nhật thuê theo ID',
   })
   @Auth(Role.admin)
   update(
@@ -64,8 +73,7 @@ export class RentalController {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'Delete rental by ID',
-    description: 'Delete a rental by its ID.',
+    summary: 'Xóa thuê theo ID',
   })
   @Auth(Role.admin)
   remove(@Param('id') id: string): Promise<{ message: string }> {
@@ -74,8 +82,7 @@ export class RentalController {
 
   @Get('history/by-me')
   @ApiOperation({
-    summary: 'Get rental history',
-    description: 'Retrieve rental history for a specific user.',
+    summary: 'Lấy tất cả lịch sử thuê của tôi',
   })
   @Auth(Role.user)
   getHistoryByMe(@GetUser() user: User) {

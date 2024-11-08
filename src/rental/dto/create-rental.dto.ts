@@ -2,10 +2,10 @@ import { ApiProperty } from '@nestjs/swagger';
 import { RentalStatus } from '@prisma/client';
 import {
   IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsDate,
   IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
 } from 'class-validator';
 
 export class CreateRentalDto {
@@ -14,7 +14,6 @@ export class CreateRentalDto {
     example: '2024-01-01T10:00:00.000Z',
   })
   @IsNotEmpty()
-  @IsDate()
   rentalStartDate: Date;
 
   @ApiProperty({
@@ -22,7 +21,6 @@ export class CreateRentalDto {
     example: '2024-01-10T10:00:00.000Z',
   })
   @IsNotEmpty()
-  @IsDate()
   rentalEndDate: Date;
 
   @ApiProperty({
@@ -31,6 +29,7 @@ export class CreateRentalDto {
   })
   @IsNotEmpty()
   @IsNumber()
+  @IsPositive()
   totalPrice: number;
 
   @ApiProperty({
@@ -39,6 +38,7 @@ export class CreateRentalDto {
   })
   @IsNotEmpty()
   @IsNumber()
+  @IsPositive()
   depositAmount: number;
 
   @ApiProperty({
@@ -48,7 +48,8 @@ export class CreateRentalDto {
   })
   @IsOptional()
   @IsNumber()
-  damageFee: number;
+  @IsPositive()
+  damageFee?: number;
 
   @ApiProperty({
     description: 'Trạng thái của giao dịch thuê',
