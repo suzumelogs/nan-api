@@ -1,17 +1,19 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Delete,
-  Param,
   Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { PolicyService } from './policy.service';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreatePolicyDto } from './dto/create-policy.dto';
+import { PolicyFilterDto } from './dto/policy-filter.dto';
 import { UpdatePolicyDto } from './dto/update-policy.dto';
 import { Policy } from './entities/policy.entity';
+import { PolicyService } from './policy.service';
 
 @ApiBearerAuth()
 @ApiTags('Policies')
@@ -19,10 +21,20 @@ import { Policy } from './entities/policy.entity';
 export class PolicyController {
   constructor(private readonly policyService: PolicyService) {}
 
+  @Get('pagination')
+  @ApiOperation({
+    summary: 'Lấy tất cả chính sách (Có phân trang và tìm kiếm)',
+  })
+  async findAllPagination(
+    @Query() filterDto: PolicyFilterDto,
+  ): Promise<{ data: Policy[]; total: number; page: number; limit: number }> {
+    const { page, limit, ...filters } = filterDto;
+    return this.policyService.findAllPagination(page, limit, filters);
+  }
+
   @Get()
   @ApiOperation({
-    summary: 'Get all policies',
-    description: 'Retrieve a list of all policies available.',
+    summary: 'Lấy tất cả chính sách (Không phân trang)',
   })
   async findAll(): Promise<Policy[]> {
     return this.policyService.findAll();
@@ -30,8 +42,7 @@ export class PolicyController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Get policy by ID',
-    description: 'Retrieve policy details by its ID.',
+    summary: 'Lấy chính sách theo ID',
   })
   async findOne(@Param('id') id: string): Promise<Policy> {
     return this.policyService.findOne(id);
@@ -39,8 +50,7 @@ export class PolicyController {
 
   @Post()
   @ApiOperation({
-    summary: 'Create a new policy',
-    description: 'Create a new policy with the provided details.',
+    summary: 'Tạo chính sách mới',
   })
   async create(@Body() createPolicyDto: CreatePolicyDto): Promise<Policy> {
     return this.policyService.create(createPolicyDto);
@@ -48,8 +58,7 @@ export class PolicyController {
 
   @Patch(':id')
   @ApiOperation({
-    summary: 'Update policy by ID',
-    description: 'Update the details of an existing policy by its ID.',
+    summary: 'Cập nhật chính sách theo ID',
   })
   async update(
     @Param('id') id: string,
@@ -60,8 +69,7 @@ export class PolicyController {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'Delete policy by ID',
-    description: 'Delete a policy by its ID.',
+    summary: 'Xóa chính sách theo ID',
   })
   async remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.policyService.remove(id);
