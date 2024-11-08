@@ -3,14 +3,59 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
+import { FeedbackFilterDto } from './dto/feedback-filter.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
 import { Feedback } from './entities/feedback.entity';
 
 @Injectable()
 export class FeedbackService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async findAllPagination(
+    page: number,
+    limit: number,
+    filters: Partial<FeedbackFilterDto>,
+  ): Promise<{ data: Feedback[]; total: number; page: number; limit: number }> {
+    try {
+      const whereClause: Prisma.FeedbackWhereInput = {
+        ...(filters.rating && { rating: filters.rating }),
+        ...(filters.comment && {
+          comment: { contains: filters.comment, mode: 'insensitive' },
+        }),
+        ...(filters.adminResponse && {
+          adminResponse: {
+            contains: filters.adminResponse,
+            mode: 'insensitive',
+          },
+        }),
+      };
+
+      const [data, total] = await Promise.all([
+        this.prisma.feedback.findMany({
+          where: whereClause,
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+        this.prisma.feedback.count({
+          where: whereClause,
+        }),
+      ]);
+
+      return {
+        data,
+        total,
+        page,
+        limit,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to retrieve feedback with pagination and filters',
+      );
+    }
+  }
 
   async findAll(): Promise<Feedback[]> {
     try {

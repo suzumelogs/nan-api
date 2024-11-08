@@ -1,17 +1,19 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Delete,
-  Param,
   Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { FeedbackService } from './feedback.service';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
+import { FeedbackFilterDto } from './dto/feedback-filter.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
 import { Feedback } from './entities/feedback.entity';
+import { FeedbackService } from './feedback.service';
 
 @ApiBearerAuth()
 @ApiTags('Feedbacks')
@@ -19,10 +21,20 @@ import { Feedback } from './entities/feedback.entity';
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
+  @Get('pagination')
+  @ApiOperation({
+    summary: 'Lấy tất cả phản hồi (Có phân trang và tìm kiếm)',
+  })
+  async findAllPagination(
+    @Query() filterDto: FeedbackFilterDto,
+  ): Promise<{ data: Feedback[]; total: number; page: number; limit: number }> {
+    const { page, limit, ...filters } = filterDto;
+    return this.feedbackService.findAllPagination(page, limit, filters);
+  }
+
   @Get()
   @ApiOperation({
-    summary: 'Get all feedbacks',
-    description: 'Retrieve a list of all feedbacks.',
+    summary: 'Lấy tất cả phản hồi (Không phân trang)',
   })
   findAll(): Promise<Feedback[]> {
     return this.feedbackService.findAll();
@@ -30,8 +42,7 @@ export class FeedbackController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Get feedback by ID',
-    description: 'Retrieve feedback details by its ID.',
+    summary: 'Lấy phản hồi theo ID',
   })
   findOne(@Param('id') id: string): Promise<Feedback> {
     return this.feedbackService.findOne(id);
@@ -39,8 +50,7 @@ export class FeedbackController {
 
   @Post()
   @ApiOperation({
-    summary: 'Create a new feedback',
-    description: 'Create a new feedback with the provided details.',
+    summary: 'Tạo phản hồi mới',
   })
   create(@Body() createFeedbackDto: CreateFeedbackDto): Promise<Feedback> {
     return this.feedbackService.create(createFeedbackDto);
@@ -48,8 +58,7 @@ export class FeedbackController {
 
   @Patch(':id')
   @ApiOperation({
-    summary: 'Update feedback by ID',
-    description: 'Update the details of an existing feedback by its ID.',
+    summary: 'Cập nhật phản hồi theo ID',
   })
   update(
     @Param('id') id: string,
@@ -60,8 +69,7 @@ export class FeedbackController {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'Delete feedback by ID',
-    description: 'Delete a feedback by its ID.',
+    summary: 'Xóa phản hồi theo ID',
   })
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.feedbackService.remove(id);
