@@ -7,15 +7,73 @@ import {
 
 import * as bcrypt from 'bcryptjs';
 
+import { Prisma, Role } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { UserFilterDto } from './dto/user-filter.dto';
 import { User } from './entities/user.entity';
-import { Role } from '@prisma/client';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
+
+  async findAllPagination(
+    page: number,
+    limit: number,
+    filters: UserFilterDto,
+  ): Promise<{ data: any[]; total: number; page: number; limit: number }> {
+    try {
+      const parsedPage = parseInt(page.toString(), 10);
+      const parsedLimit = parseInt(limit.toString(), 10);
+
+      if (isNaN(parsedPage) || parsedPage <= 0) {
+        throw new Error('Invalid page number');
+      }
+      if (isNaN(parsedLimit) || parsedLimit <= 0) {
+        throw new Error('Invalid limit number');
+      }
+
+      const whereClause: Prisma.UserWhereInput = {
+        ...(filters.name && {
+          name: { contains: filters.name, mode: Prisma.QueryMode.insensitive },
+        }),
+        ...(filters.email && {
+          email: {
+            contains: filters.email,
+            mode: Prisma.QueryMode.insensitive,
+          },
+        }),
+        ...(filters.role && {
+          role:
+            filters.role === 'user' || filters.role === 'admin'
+              ? filters.role
+              : undefined,
+        }),
+      };
+
+      const [data, total] = await Promise.all([
+        this.prisma.user.findMany({
+          where: whereClause,
+          skip: (parsedPage - 1) * parsedLimit,
+          take: parsedLimit,
+        }),
+        this.prisma.user.count({
+          where: whereClause,
+        }),
+      ]);
+
+      return {
+        data,
+        total,
+        page: parsedPage,
+        limit: parsedLimit,
+      };
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw new Error('Failed to retrieve users with pagination and filters');
+    }
+  }
 
   async create(dto: CreateUserDto) {
     if (dto.password !== dto.passwordconf)

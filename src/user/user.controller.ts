@@ -6,12 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { Auth, GetUser } from 'src/auth/decorators';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserFilterDto } from './dto/user-filter.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 
@@ -20,6 +22,17 @@ import { UserService } from './user.service';
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get('pagination')
+  @ApiOperation({
+    summary: 'Lất tất cả user (Có phân trang và tìm kiếm)',
+  })
+  async findAllPagination(
+    @Query() filterDto: UserFilterDto,
+  ): Promise<{ data: User[]; total: number; page: number; limit: number }> {
+    const { page, limit, ...filters } = filterDto;
+    return this.userService.findAllPagination(page, limit, filters);
+  }
 
   @Post()
   @ApiOperation({
