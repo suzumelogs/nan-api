@@ -6,10 +6,12 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DiscountService } from './discount.service';
 import { CreateDiscountDto } from './dto/create-discount.dto';
+import { DiscountFilterDto } from './dto/discount-filter.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
 import { Discount } from './entities/discount.entity';
 
@@ -18,6 +20,17 @@ import { Discount } from './entities/discount.entity';
 @Controller('discount')
 export class DiscountController {
   constructor(private readonly discountService: DiscountService) {}
+
+  @Get('pagination')
+  @ApiOperation({
+    summary: 'Lất tất cả mã giảm giá (Có phân trang và tìm kiếm)',
+  })
+  async findAllPagination(
+    @Query() filterDto: DiscountFilterDto,
+  ): Promise<{ data: Discount[]; total: number; page: number; limit: number }> {
+    const { page, limit, ...filters } = filterDto;
+    return this.discountService.findAllPagination(page, limit, filters);
+  }
 
   @Get()
   @ApiOperation({

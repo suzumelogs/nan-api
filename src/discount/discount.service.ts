@@ -3,12 +3,13 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma, Role } from '@prisma/client';
+import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateDiscountDto } from './dto/create-discount.dto';
+import { DiscountFilterDto } from './dto/discount-filter.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
 import { Discount } from './entities/discount.entity';
-import { NotificationService } from 'src/notification/notification.service';
-import { Role } from '@prisma/client';
 
 @Injectable()
 export class DiscountService {
@@ -16,6 +17,49 @@ export class DiscountService {
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService,
   ) {}
+
+  async findAllPagination(
+    page: number,
+    limit: number,
+    filters: Partial<DiscountFilterDto>,
+  ): Promise<{ data: Discount[]; total: number; page: number; limit: number }> {
+    try {
+      const whereClause: Prisma.DiscountWhereInput = {
+        ...(filters.code && {
+          code: { contains: filters.code, mode: Prisma.QueryMode.insensitive },
+        }),
+        ...(filters.discountRate && { discountRate: filters.discountRate }),
+        ...(filters.validFrom && {
+          validFrom: { gte: new Date(filters.validFrom) },
+        }),
+        ...(filters.validTo && { validTo: { lte: new Date(filters.validTo) } }),
+        ...(filters.maxUsage && { maxUsage: filters.maxUsage }),
+        ...(filters.currentUsage && { currentUsage: filters.currentUsage }),
+      };
+
+      const [data, total] = await Promise.all([
+        this.prisma.discount.findMany({
+          where: whereClause,
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+        this.prisma.discount.count({
+          where: whereClause,
+        }),
+      ]);
+
+      return {
+        data,
+        total,
+        page,
+        limit,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to retrieve discounts with pagination and filters',
+      );
+    }
+  }
 
   async findAll(): Promise<Discount[]> {
     try {
