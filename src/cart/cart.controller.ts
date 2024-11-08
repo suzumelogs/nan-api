@@ -1,21 +1,23 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Delete,
-  Param,
   Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Role, User } from '@prisma/client';
+import { Auth, GetUser } from 'src/auth/decorators';
 import { CartService } from './cart.service';
+import { AddDeviceToCartDto } from './dto/add-device-to-cart.dto';
+import { CartFilterDto } from './dto/cart-filter.dto';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
-import { Cart } from './entities/cart.entity';
-import { Auth, GetUser } from 'src/auth/decorators';
-import { Role, User } from '@prisma/client';
-import { AddDeviceToCartDto } from './dto/add-device-to-cart.dto';
 import { UpdateDeviceToCartDto } from './dto/update-device-to-cart.dto';
+import { Cart } from './entities/cart.entity';
 
 @ApiBearerAuth()
 @ApiTags('Carts')
@@ -23,10 +25,20 @@ import { UpdateDeviceToCartDto } from './dto/update-device-to-cart.dto';
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
+  @Get('pagination')
+  @ApiOperation({
+    summary: 'Lấy tất cả giỏ hàng (Có phân trang và tìm kiếm)',
+  })
+  async findAllPagination(
+    @Query() filterDto: CartFilterDto,
+  ): Promise<{ data: Cart[]; total: number; page: number; limit: number }> {
+    const { page, limit, ...filters } = filterDto;
+    return this.cartService.findAllPagination(page, limit, filters);
+  }
+
   @Get()
   @ApiOperation({
-    summary: 'Get all carts',
-    description: 'Retrieve a list of all carts available.',
+    summary: 'Lấy tất cả giỏ hàng (Không phân trang)',
   })
   findAll(): Promise<Cart[]> {
     return this.cartService.findAll();
@@ -34,8 +46,7 @@ export class CartController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Get cart by ID',
-    description: 'Retrieve cart details by its ID.',
+    summary: 'Lấy giỏ hàng theo ID',
   })
   findOne(@Param('id') id: string): Promise<Cart> {
     return this.cartService.findOne(id);
@@ -43,8 +54,7 @@ export class CartController {
 
   @Post()
   @ApiOperation({
-    summary: 'Create a new cart',
-    description: 'Create a new cart with the provided details.',
+    summary: 'Tạo giỏ hàng mới',
   })
   create(@Body() createCartDto: CreateCartDto): Promise<Cart> {
     return this.cartService.create(createCartDto);
@@ -52,8 +62,7 @@ export class CartController {
 
   @Patch(':id')
   @ApiOperation({
-    summary: 'Update cart by ID',
-    description: 'Update the details of an existing cart by its ID.',
+    summary: 'Cập nhật giỏ hàng theo ID',
   })
   update(
     @Param('id') id: string,
@@ -64,8 +73,7 @@ export class CartController {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'Delete cart by ID',
-    description: 'Delete a cart by its ID.',
+    summary: 'Xóa giỏ hàng theo ID',
   })
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.cartService.remove(id);
@@ -73,8 +81,7 @@ export class CartController {
 
   @Get('by-me')
   @ApiOperation({
-    summary: 'Get my cart',
-    description: 'Retrieve the cart associated with the current user.',
+    summary: 'Lấy giỏ hàng của tôi',
   })
   @Auth(Role.user)
   async findMyCart(@GetUser() user: User) {
@@ -83,8 +90,7 @@ export class CartController {
 
   @Post('by-me')
   @ApiOperation({
-    summary: 'Add device to my cart',
-    description: "Add a specified device to the current user's cart.",
+    summary: 'Tạo mới thiết bị trong giỏ hàng của tôi',
   })
   @Auth(Role.user)
   async addDeviceToMyCart(
@@ -96,9 +102,7 @@ export class CartController {
 
   @Patch('by-me')
   @ApiOperation({
-    summary: 'Update my cart',
-    description:
-      "Update the current user's cart with specified device details.",
+    summary: 'Cập nhật thiết bị trong giỏ hàng của tôi',
   })
   @Auth(Role.user)
   async updateDeviceToCart(
@@ -110,8 +114,7 @@ export class CartController {
 
   @Delete('by-me/:deviceId')
   @ApiOperation({
-    summary: 'Remove device from my cart',
-    description: "Remove a specified device from the current user's cart.",
+    summary: 'Xóa thiết bị trong giỏ hàng của tôi',
   })
   @Auth(Role.user)
   async removeDeviceFromMyCart(

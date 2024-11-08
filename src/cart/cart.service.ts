@@ -3,16 +3,60 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AddDeviceToCartDto } from './dto/add-device-to-cart.dto';
+import { CartFilterDto } from './dto/cart-filter.dto';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
-import { Cart } from './entities/cart.entity';
-import { AddDeviceToCartDto } from './dto/add-device-to-cart.dto';
 import { UpdateDeviceToCartDto } from './dto/update-device-to-cart.dto';
+import { Cart } from './entities/cart.entity';
 
 @Injectable()
 export class CartService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async findAllPagination(
+    page: number,
+    limit: number,
+    filters: Partial<CartFilterDto>,
+  ): Promise<{ data: Cart[]; total: number; page: number; limit: number }> {
+    try {
+      const whereClause: Prisma.CartWhereInput = {
+        ...(filters.userId && { userId: filters.userId }),
+        ...(filters.rentalDuration && {
+          rentalDuration: filters.rentalDuration,
+        }),
+        ...(filters.totalPrice && { totalPrice: filters.totalPrice }),
+      };
+
+      const [data, total] = await Promise.all([
+        this.prisma.cart.findMany({
+          where: whereClause,
+          skip: (page - 1) * limit,
+          take: limit,
+          include: {
+            user: true,
+            devices: true,
+          },
+        }),
+        this.prisma.cart.count({
+          where: whereClause,
+        }),
+      ]);
+
+      return {
+        data,
+        total,
+        page,
+        limit,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to retrieve carts with pagination and filters',
+      );
+    }
+  }
 
   async findAll(): Promise<Cart[]> {
     try {
