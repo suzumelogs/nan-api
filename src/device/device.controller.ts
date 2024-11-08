@@ -1,15 +1,17 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Delete,
-  Param,
   Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DeviceService } from './device.service';
 import { CreateDeviceDto } from './dto/create-device.dto';
+import { DeviceFilterDto } from './dto/device-filter.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 import { Device } from './entities/device.entity';
 
@@ -19,10 +21,20 @@ import { Device } from './entities/device.entity';
 export class DeviceController {
   constructor(private readonly deviceService: DeviceService) {}
 
+  @Get('pagination')
+  @ApiOperation({
+    summary: 'Lất tất cả thiết bị (Có phân trang và tìm kiếm)',
+  })
+  async findAllPagination(
+    @Query() filterDto: DeviceFilterDto,
+  ): Promise<{ data: Device[]; total: number; page: number; limit: number }> {
+    const { page, limit, ...filters } = filterDto;
+    return this.deviceService.findAllPagination(page, limit, filters);
+  }
+
   @Get()
   @ApiOperation({
-    summary: 'Get all devices',
-    description: 'Retrieve a list of all devices available.',
+    summary: 'Lấy tất cả thiết bị (Không phân trang)',
   })
   findAll(): Promise<Device[]> {
     return this.deviceService.findAll();
@@ -30,8 +42,7 @@ export class DeviceController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Get device by ID',
-    description: 'Retrieve device details by its ID.',
+    summary: 'Lấy thiết bị theo ID',
   })
   findOne(@Param('id') id: string): Promise<Device> {
     return this.deviceService.findOne(id);
@@ -39,8 +50,7 @@ export class DeviceController {
 
   @Post()
   @ApiOperation({
-    summary: 'Create a new device',
-    description: 'Create a new device with the provided details.',
+    summary: 'Tạo thiết bị mới',
   })
   create(@Body() createDeviceDto: CreateDeviceDto): Promise<Device> {
     return this.deviceService.create(createDeviceDto);
@@ -48,8 +58,7 @@ export class DeviceController {
 
   @Patch(':id')
   @ApiOperation({
-    summary: 'Update device by ID',
-    description: 'Update the details of an existing device by its ID.',
+    summary: 'Cập nhật thiết bị theo ID',
   })
   update(
     @Param('id') id: string,
@@ -60,8 +69,7 @@ export class DeviceController {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'Delete device by ID',
-    description: 'Delete a device by its ID.',
+    summary: 'Xóa thiết bị theo ID',
   })
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.deviceService.remove(id);
