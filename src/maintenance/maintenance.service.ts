@@ -3,14 +3,67 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
+import { MaintenanceFilterDto } from './dto/maintenance-filter.dto';
 import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
 import { Maintenance } from './entities/maintenance.entity';
 
 @Injectable()
 export class MaintenanceService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async findAllPagination(
+    page: number,
+    limit: number,
+    filters: Partial<MaintenanceFilterDto>,
+  ): Promise<{
+    data: Maintenance[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    try {
+      const whereClause: Prisma.MaintenanceWhereInput = {
+        ...(filters.maintenanceDate && {
+          maintenanceDate: new Date(filters.maintenanceDate),
+        }),
+        ...(filters.description && {
+          description: { contains: filters.description, mode: 'insensitive' },
+        }),
+        ...(filters.suggestedNextMaintenance && {
+          suggestedNextMaintenance: new Date(filters.suggestedNextMaintenance),
+        }),
+        ...(filters.status && { status: filters.status }),
+        ...(filters.maintenanceCost && {
+          maintenanceCost: filters.maintenanceCost,
+        }),
+      };
+
+      const [data, total] = await Promise.all([
+        this.prisma.maintenance.findMany({
+          where: whereClause,
+          skip: (page - 1) * limit,
+          take: limit,
+        }),
+        this.prisma.maintenance.count({
+          where: whereClause,
+        }),
+      ]);
+
+      return {
+        data,
+        total,
+        page,
+        limit,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to retrieve maintenance records with pagination and filters',
+      );
+    }
+  }
 
   async findAll(): Promise<Maintenance[]> {
     try {

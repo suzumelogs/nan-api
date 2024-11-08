@@ -1,12 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MaintenanceStatus } from '@prisma/client';
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsDate,
-  IsEnum,
-} from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateMaintenanceDto {
   @ApiProperty({
@@ -14,7 +8,6 @@ export class CreateMaintenanceDto {
     example: '2024-01-01T00:00:00.000Z',
   })
   @IsNotEmpty()
-  @IsDate()
   maintenanceDate: Date;
 
   @ApiProperty({
@@ -32,7 +25,6 @@ export class CreateMaintenanceDto {
     required: false,
   })
   @IsOptional()
-  @IsDate()
   suggestedNextMaintenance?: Date;
 
   @ApiProperty({

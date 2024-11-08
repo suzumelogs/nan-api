@@ -1,19 +1,19 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Delete,
-  Param,
   Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { NotificationService } from './notification.service';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { User } from '@prisma/client';
+import { GetUser } from 'src/auth/decorators';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { Notification } from './entities/notification.entity';
-import { GetUser } from 'src/auth/decorators';
-import { User } from '@prisma/client';
+import { NotificationService } from './notification.service';
 
 @ApiBearerAuth()
 @ApiTags('Notifications')
@@ -23,7 +23,7 @@ export class NotificationController {
 
   @Get()
   @ApiOperation({
-    summary: 'Lấy tất cả thông báo',
+    summary: 'Lấy tất cả thông báo (Không phân trang)',
   })
   findAll(): Promise<Notification[]> {
     return this.notificationService.findAll();

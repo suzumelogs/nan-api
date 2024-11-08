@@ -1,9 +1,9 @@
-import { IsString, IsNotEmpty, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class AddDeviceToCartDto {
   @ApiProperty({
-    description: 'The ID of the device to add to the cart',
+    description: 'ID của thiết bị để thêm vào giỏ hàng',
     type: String,
   })
   @IsString()
@@ -11,7 +11,7 @@ export class AddDeviceToCartDto {
   deviceId: string;
 
   @ApiProperty({
-    description: 'Rental duration in days',
+    description: 'Thời gian thuê tính theo ngày',
     type: Number,
     example: 7,
   })

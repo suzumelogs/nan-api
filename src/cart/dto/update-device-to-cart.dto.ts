@@ -1,9 +1,9 @@
-import { IsOptional, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateDeviceToCartDto {
   @ApiProperty({
-    description: 'The rental duration in days (optional)',
+    description: 'Thời gian thuê tính theo ngày (optinal)',
     type: Number,
     example: 14,
     required: false,
@@ -13,7 +13,7 @@ export class UpdateDeviceToCartDto {
   rentalDuration?: number;
 
   @ApiProperty({
-    description: 'The total price calculated (optional)',
+    description: 'Tổng giá tính toán (optional)',
     type: Number,
     example: 100.5,
     required: false,
