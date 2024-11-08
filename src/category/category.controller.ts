@@ -24,7 +24,7 @@ export class CategoryController {
 
   @Get('pagination')
   @ApiOperation({
-    summary: 'Get pagination categories',
+    summary: 'Lất tất cả gói (Có phân trang và tìm kiếm)',
   })
   async findAllPagination(
     @Query() filterDto: CategoryFilterDto,
@@ -35,7 +35,7 @@ export class CategoryController {
 
   @Get()
   @ApiOperation({
-    summary: 'Get all categories',
+    summary: 'Lấy tất cả gói (Không phân trang)',
   })
   findAll(): Promise<Category[]> {
     return this.categoryService.findAll();
@@ -43,7 +43,7 @@ export class CategoryController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Get category by ID',
+    summary: 'Lấy gói theo ID',
   })
   findOne(@Param('id') id: string): Promise<Category> {
     return this.categoryService.findOne(id);
@@ -51,7 +51,7 @@ export class CategoryController {
 
   @Post()
   @ApiOperation({
-    summary: 'Create a new category',
+    summary: 'Tạo gói mới',
   })
   create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
     return this.categoryService.create(createCategoryDto);
@@ -59,7 +59,7 @@ export class CategoryController {
 
   @Patch(':id')
   @ApiOperation({
-    summary: 'Update category by ID',
+    summary: 'Cập nhật gói theo ID',
   })
   update(
     @Param('id') id: string,
@@ -70,7 +70,7 @@ export class CategoryController {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'Delete category by ID',
+    summary: 'Xóa gói theo ID',
   })
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.categoryService.remove(id);
@@ -78,7 +78,7 @@ export class CategoryController {
 
   @Get('label-value')
   @ApiOperation({
-    summary: 'Get label-value pairs of categories',
+    summary: 'Lấy tất cả gói (Định dạng label value)',
   })
   getLabelValue(): Promise<LabelValueResponse[]> {
     return this.categoryService.getLabelValue();
