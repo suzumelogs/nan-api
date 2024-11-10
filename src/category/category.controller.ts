@@ -45,7 +45,7 @@ export class CategoryController {
   @ApiOperation({
     summary: 'Lấy gói theo ID',
   })
-  findOne(@Param('id') id: string): Promise<Category> {
+  findOne(@Param('id') id: string): Promise<{ data: Category }> {
     return this.categoryService.findOne(id);
   }
 

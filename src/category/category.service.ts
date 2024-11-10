@@ -68,7 +68,7 @@ export class CategoryService {
     }
   }
 
-  async findOne(id: string): Promise<Category> {
+  async findOne(id: string): Promise<{ data: Category }> {
     try {
       const category = await this.prisma.category.findUniqueOrThrow({
         where: { id },
@@ -76,7 +76,7 @@ export class CategoryService {
           devices: true,
         },
       });
-      return category;
+      return { data: category };
     } catch (error) {
       throw new NotFoundException('Category not found');
     }
