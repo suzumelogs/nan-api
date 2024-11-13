@@ -1,53 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class Category {
   @ApiProperty({
     description: 'Mã ID',
-    example: '60b9c3f3b236d17a10b76e6f',
   })
   id: string;
 
   @ApiProperty({
-    description: 'Tên của thể loại (ví dụ: Loa, Đài, Quạt)',
-    example: 'Loa',
+    description: 'Tên danh mục',
   })
   @IsNotEmpty()
   @IsString()
   name: string;
 
   @ApiProperty({
-    description: 'Mô tả của thể loại (tùy chọn)',
-    example: 'Thể loại thiết bị âm thanh',
+    description: 'Mô tả',
     required: false,
   })
   @IsOptional()
   @IsString()
-  description: string;
-
-  @ApiProperty({
-    description: 'Giá theo ngày',
-    example: 15.99,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  priceDay: number;
-
-  @ApiProperty({
-    description: 'Giá theo tuần',
-    example: 99.99,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  priceWeek: number;
-
-  @ApiProperty({
-    description: 'Giá theo tháng',
-    example: 399.99,
-  })
-  @IsNotEmpty()
-  @IsNumber()
-  priceMonth: number;
+  description?: string;
 
   @ApiProperty({
     description: 'Thời gian tạo',

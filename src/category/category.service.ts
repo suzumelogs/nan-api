@@ -31,9 +31,6 @@ export class CategoryService {
             mode: Prisma.QueryMode.insensitive,
           },
         }),
-        ...(filters.priceDay && { priceDay: filters.priceDay }),
-        ...(filters.priceWeek && { priceWeek: filters.priceWeek }),
-        ...(filters.priceMonth && { priceMonth: filters.priceMonth }),
       };
 
       const [data, total] = await Promise.all([
