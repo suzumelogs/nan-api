@@ -76,7 +76,7 @@ export class CategoryController {
     return this.categoryService.remove(id);
   }
 
-  @Get('label-value')
+  @Get('all/label-value')
   @ApiOperation({
     summary: 'Lấy tất cả danh mục (Định dạng label value)',
   })
