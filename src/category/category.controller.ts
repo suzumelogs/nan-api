@@ -80,7 +80,7 @@ export class CategoryController {
   @ApiOperation({
     summary: 'Lấy tất cả danh mục (Định dạng label value)',
   })
-  getLabelValue(): Promise<LabelValueResponse[]> {
+  getLabelValue(): Promise<{ data: LabelValueResponse[] }> {
     return this.categoryService.getLabelValue();
   }
 }

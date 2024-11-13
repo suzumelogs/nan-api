@@ -116,13 +116,18 @@ export class CategoryService {
     }
   }
 
-  async getLabelValue(): Promise<LabelValueResponse[]> {
+  async getLabelValue(): Promise<{ data: LabelValueResponse[] }> {
     try {
       const categories = await this.prisma.category.findMany();
-      return categories.map((category) => ({
-        label: category.name,
-        value: category.id,
-      }));
+      return {
+        data:
+          categories.length > 0
+            ? categories.map((category) => ({
+                label: category.name,
+                value: category.id,
+              }))
+            : [],
+      };
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to retrieve label-value pairs',
