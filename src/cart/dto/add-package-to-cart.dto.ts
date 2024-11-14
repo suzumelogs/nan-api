@@ -1,16 +1,16 @@
 import { IsNotEmpty, IsString, IsInt, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class AddDeviceToCartDto {
+export class AddPackageToCartDto {
   @ApiProperty({
-    description: 'ID của thiết bị',
+    description: 'ID của gói thiết bị',
   })
   @IsNotEmpty()
   @IsString()
-  deviceId: string;
+  packageId: string;
 
   @ApiProperty({
-    description: 'Số lượng thiết bị',
+    description: 'Số lượng gói thiết bị',
     minimum: 1,
   })
   @IsInt()
