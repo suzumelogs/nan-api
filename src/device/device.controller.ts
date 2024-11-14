@@ -13,7 +13,7 @@ import { DeviceService } from './device.service';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { DeviceFilterDto } from './dto/device-filter.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
-import { Device } from './entities/device.entity';
+import { Device } from '@prisma/client';
 
 @ApiBearerAuth()
 @ApiTags('Devices')
@@ -23,7 +23,7 @@ export class DeviceController {
 
   @Get('pagination')
   @ApiOperation({
-    summary: 'Lất tất cả thiết bị (Có phân trang và tìm kiếm)',
+    summary: 'Lấy tất cả thiết bị (Có phân trang và tìm kiếm)',
   })
   async findAllPagination(
     @Query() filterDto: DeviceFilterDto,

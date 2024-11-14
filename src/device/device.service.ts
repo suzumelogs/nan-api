@@ -3,12 +3,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { DeviceStatus, Prisma } from '@prisma/client';
+import { Device, DeviceStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateDeviceDto } from './dto/create-device.dto';
 import { DeviceFilterDto } from './dto/device-filter.dto';
 import { UpdateDeviceDto } from './dto/update-device.dto';
-import { Device } from './entities/device.entity';
 
 @Injectable()
 export class DeviceService {
@@ -54,9 +53,7 @@ export class DeviceService {
         limit,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to retrieve devices with pagination and filters',
-      );
+      throw new InternalServerErrorException('Lấy thiết bị thất bại');
     }
   }
 
@@ -64,7 +61,7 @@ export class DeviceService {
     try {
       return await this.prisma.device.findMany();
     } catch (error) {
-      throw new InternalServerErrorException('Failed to retrieve devices');
+      throw new InternalServerErrorException('Lấy thiết bị thất bại');
     }
   }
 
@@ -74,7 +71,7 @@ export class DeviceService {
         where: { id },
       });
     } catch (error) {
-      throw new NotFoundException('Device not found');
+      throw new NotFoundException('Thiết bị không tồn tại');
     }
   }
 
@@ -84,7 +81,7 @@ export class DeviceService {
         data: dto,
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to create device');
+      throw new InternalServerErrorException('Tạo thiết bị thất bại');
     }
   }
 
@@ -96,9 +93,9 @@ export class DeviceService {
       });
     } catch (error) {
       if (error.code === 'P2025') {
-        throw new NotFoundException('Device not found');
+        throw new NotFoundException('Thiết bị không tồn tại');
       }
-      throw new InternalServerErrorException('Failed to update device');
+      throw new InternalServerErrorException('Cập nhật thất bại');
     }
   }
 
@@ -107,9 +104,9 @@ export class DeviceService {
       await this.prisma.device.delete({
         where: { id },
       });
-      return { message: 'Device deleted successfully' };
+      return { message: 'Xóa thành công' };
     } catch (error) {
-      throw new NotFoundException('Device not found');
+      throw new NotFoundException('Thiết bị không tồn tại');
     }
   }
 }

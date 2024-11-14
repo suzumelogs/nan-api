@@ -6,12 +6,12 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsInt,
 } from 'class-validator';
 
 export class CreateDeviceDto {
   @ApiProperty({
     description: 'Tên thiết bị',
-    example: 'Canon EOS 90D DSLR Camera',
   })
   @IsNotEmpty()
   @IsString()
@@ -19,7 +19,6 @@ export class CreateDeviceDto {
 
   @ApiProperty({
     description: 'URL hình ảnh',
-    example: 'https://example.com/image.jpg',
   })
   @IsNotEmpty()
   @IsString()
@@ -27,8 +26,6 @@ export class CreateDeviceDto {
 
   @ApiProperty({
     description: 'Mô tả thiết bị',
-    example: 'Máy ảnh DSLR chất lượng cao.',
-    required: false,
   })
   @IsOptional()
   @IsString()
@@ -36,49 +33,61 @@ export class CreateDeviceDto {
 
   @ApiProperty({
     description: 'Giá thuê hàng ngày',
-    example: 50.0,
+    required: false,
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  priceDay: number;
+  priceDay?: number;
 
   @ApiProperty({
     description: 'Giá thuê hàng tuần',
-    example: 300.0,
+    required: false,
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  priceWeek: number;
+  priceWeek?: number;
 
   @ApiProperty({
     description: 'Giá thuê hàng tháng',
-    example: 1000.0,
+    required: false,
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsNumber()
-  priceMonth: number;
+  priceMonth?: number;
 
   @ApiProperty({
     description: 'Trạng thái thiết bị',
     enum: DeviceStatus,
-    example: DeviceStatus.available,
+    default: DeviceStatus.available,
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsEnum(DeviceStatus)
-  status: DeviceStatus;
+  status?: DeviceStatus;
 
   @ApiProperty({
     description: 'ID danh mục',
-    example: '60b9c3f3b236d17a10b76e6f',
   })
   @IsNotEmpty()
   @IsString()
   categoryId: string;
 
   @ApiProperty({
+    description: 'Số lượng thiết bị',
+    default: 1,
+  })
+  @IsOptional()
+  @IsInt()
+  quantity?: number;
+
+  @ApiProperty({
+    description: 'ID gói dịch vụ (nếu có)',
+  })
+  @IsOptional()
+  @IsString()
+  packageId?: string;
+
+  @ApiProperty({
     description: 'ID giỏ hàng (nếu có)',
-    example: '60b9c3f3b236d17a10b76e6f',
-    required: false,
   })
   @IsOptional()
   @IsString()
