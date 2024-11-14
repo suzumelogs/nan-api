@@ -14,7 +14,7 @@ import { CategoryService } from './category.service';
 import { CategoryFilterDto } from './dto/category-filter.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category } from './entities/category.entity';
+import { Category } from '@prisma/client';
 
 @ApiBearerAuth()
 @ApiTags('Categories')
