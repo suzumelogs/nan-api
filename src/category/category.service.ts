@@ -3,13 +3,12 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Category, Prisma } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CategoryFilterDto } from './dto/category-filter.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category } from './entities/category.entity';
 
 @Injectable()
 export class CategoryService {
@@ -31,9 +30,6 @@ export class CategoryService {
             mode: Prisma.QueryMode.insensitive,
           },
         }),
-        ...(filters.priceDay && { priceDay: filters.priceDay }),
-        ...(filters.priceWeek && { priceWeek: filters.priceWeek }),
-        ...(filters.priceMonth && { priceMonth: filters.priceMonth }),
       };
 
       const [data, total] = await Promise.all([
@@ -42,29 +38,20 @@ export class CategoryService {
           skip: (page - 1) * limit,
           take: limit,
         }),
-        this.prisma.category.count({
-          where: whereClause,
-        }),
+        this.prisma.category.count({ where: whereClause }),
       ]);
 
-      return {
-        data,
-        total,
-        page,
-        limit,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to retrieve categories with pagination and filters',
-      );
+      return { data, total, page, limit };
+    } catch {
+      throw new InternalServerErrorException('Lấy danh mục thất bại');
     }
   }
 
   async findAll(): Promise<Category[]> {
     try {
       return await this.prisma.category.findMany();
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to retrieve categories');
+    } catch {
+      throw new InternalServerErrorException('Lấy danh mục thất bại');
     }
   }
 
@@ -72,50 +59,39 @@ export class CategoryService {
     try {
       const category = await this.prisma.category.findUniqueOrThrow({
         where: { id },
-        include: {
-          devices: true,
-        },
+        include: { devices: true },
       });
       return { data: category };
-    } catch (error) {
-      throw new NotFoundException('Category not found');
+    } catch {
+      throw new NotFoundException('Danh mục không tồn tại');
     }
   }
 
   async create(dto: CreateCategoryDto): Promise<Category> {
     try {
-      const newCategory = await this.prisma.category.create({
-        data: dto,
-      });
-      return newCategory;
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to create category');
+      return await this.prisma.category.create({ data: dto });
+    } catch {
+      throw new InternalServerErrorException('Tạo danh mục thất bại');
     }
   }
 
   async update(id: string, dto: UpdateCategoryDto): Promise<Category> {
     try {
-      const updatedCategory = await this.prisma.category.update({
-        where: { id },
-        data: dto,
-      });
-      return updatedCategory;
+      return await this.prisma.category.update({ where: { id }, data: dto });
     } catch (error) {
       if (error.code === 'P2025') {
-        throw new NotFoundException('Category not found');
+        throw new NotFoundException('Danh mục không tồn tại');
       }
-      throw new InternalServerErrorException('Failed to update category');
+      throw new InternalServerErrorException('Cập nhật danh mục thất bại');
     }
   }
 
   async remove(id: string): Promise<{ message: string }> {
     try {
-      await this.prisma.category.delete({
-        where: { id },
-      });
-      return { message: 'Category deleted successfully' };
-    } catch (error) {
-      throw new NotFoundException('Category not found');
+      await this.prisma.category.delete({ where: { id } });
+      return { message: 'Xóa danh mục thành công' };
+    } catch {
+      throw new NotFoundException('Danh mục không tồn tại');
     }
   }
 
@@ -126,10 +102,8 @@ export class CategoryService {
         label: category.name,
         value: category.id,
       }));
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to retrieve label-value pairs',
-      );
+    } catch {
+      throw new InternalServerErrorException('Lấy dữ liệu thất bại');
     }
   }
 }

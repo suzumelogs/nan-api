@@ -105,15 +105,11 @@ model Device {
   @@map("devices")
 }
 
-// Danh mục (Gói)
+// Danh mục
 model Category {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
   name        String  @unique
   description String?
-
-  priceDay   Float?
-  priceWeek  Float?
-  priceMonth Float?
 
   devices Device[]
 

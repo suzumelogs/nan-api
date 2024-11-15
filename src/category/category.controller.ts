@@ -14,7 +14,7 @@ import { CategoryService } from './category.service';
 import { CategoryFilterDto } from './dto/category-filter.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category } from './entities/category.entity';
+import { Category } from '@prisma/client';
 
 @ApiBearerAuth()
 @ApiTags('Categories')
@@ -23,9 +23,7 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Get('pagination')
-  @ApiOperation({
-    summary: 'Lất tất cả gói (Có phân trang và tìm kiếm)',
-  })
+  @ApiOperation({ summary: 'Lấy danh mục (phân trang, tìm kiếm)' })
   async findAllPagination(
     @Query() filterDto: CategoryFilterDto,
   ): Promise<{ data: Category[]; total: number; page: number; limit: number }> {
@@ -34,33 +32,25 @@ export class CategoryController {
   }
 
   @Get()
-  @ApiOperation({
-    summary: 'Lấy tất cả gói (Không phân trang)',
-  })
+  @ApiOperation({ summary: 'Lấy tất cả danh mục' })
   findAll(): Promise<Category[]> {
     return this.categoryService.findAll();
   }
 
   @Get(':id')
-  @ApiOperation({
-    summary: 'Lấy gói theo ID',
-  })
+  @ApiOperation({ summary: 'Lấy danh mục theo ID' })
   findOne(@Param('id') id: string): Promise<{ data: Category }> {
     return this.categoryService.findOne(id);
   }
 
   @Post()
-  @ApiOperation({
-    summary: 'Tạo gói mới',
-  })
+  @ApiOperation({ summary: 'Tạo danh mục' })
   create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
     return this.categoryService.create(createCategoryDto);
   }
 
   @Patch(':id')
-  @ApiOperation({
-    summary: 'Cập nhật gói theo ID',
-  })
+  @ApiOperation({ summary: 'Cập nhật danh mục' })
   update(
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -69,17 +59,13 @@ export class CategoryController {
   }
 
   @Delete(':id')
-  @ApiOperation({
-    summary: 'Xóa gói theo ID',
-  })
+  @ApiOperation({ summary: 'Xóa danh mục' })
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.categoryService.remove(id);
   }
 
   @Get('label-value')
-  @ApiOperation({
-    summary: 'Lấy tất cả gói (Định dạng label value)',
-  })
+  @ApiOperation({ summary: 'Lấy danh mục (dạng label-value)' })
   getLabelValue(): Promise<LabelValueResponse[]> {
     return this.categoryService.getLabelValue();
   }
