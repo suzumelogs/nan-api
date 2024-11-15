@@ -1,14 +1,15 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, RentalStatus } from '@prisma/client';
+import { Prisma, Rental, RentalStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CalculateRentalDto } from './dto/calculat-rental.dto';
 import { CreateRentalDto } from './dto/create-rental.dto';
 import { RentalFilterDto } from './dto/rental-filter.dto';
 import { UpdateRentalDto } from './dto/update-rental.dto';
-import { Rental } from './entities/rental.entity';
 
 @Injectable()
 export class RentalService {
@@ -128,5 +129,89 @@ export class RentalService {
         'Failed to retrieve rental history',
       );
     }
+  }
+
+  async calculateRental(dto: CalculateRentalDto) {
+    try {
+      const rentalStartDate = new Date(dto.rentalStartDate);
+      const rentalEndDate = new Date(dto.rentalEndDate);
+      const days = Math.ceil(
+        (rentalEndDate.getTime() - rentalStartDate.getTime()) /
+          (1000 * 3600 * 24),
+      );
+
+      if (days <= 0) {
+        throw new BadRequestException(
+          'Ngày kết thúc phải lớn hơn ngày bắt đầu.',
+        );
+      }
+
+      let totalPrice = 0;
+
+      const devices = await this.prisma.device.findMany({
+        where: {
+          id: { in: dto.deviceIds },
+        },
+      });
+
+      for (const device of devices) {
+        const devicePrice = this.calculateTotalPrice(
+          device.priceDay,
+          device.priceWeek,
+          device.priceMonth,
+          days,
+        );
+        totalPrice += devicePrice;
+      }
+
+      if (dto.packageIds && dto.packageIds.length > 0) {
+        const packages = await this.prisma.package.findMany({
+          where: {
+            id: { in: dto.packageIds },
+          },
+        });
+
+        for (const pkg of packages) {
+          const packagePrice = this.calculateTotalPrice(
+            pkg.priceDay,
+            pkg.priceWeek,
+            pkg.priceMonth,
+            days,
+          );
+          totalPrice += packagePrice;
+        }
+      }
+
+      return { totalPrice };
+    } catch (error) {
+      throw new InternalServerErrorException('Không thể tính toán giá thuê');
+    }
+  }
+
+  private calculateTotalPrice(
+    priceDay: number,
+    priceWeek: number,
+    priceMonth: number,
+    days: number,
+  ): number {
+    let totalPrice = 0;
+
+    if (days <= 7) {
+      totalPrice = days * priceDay;
+    } else if (days <= 30) {
+      const weeks = Math.floor(days / 7);
+      const remainingDays = days % 7;
+      totalPrice = weeks * priceWeek + remainingDays * priceDay;
+    } else {
+      const months = Math.floor(days / 30);
+      const remainingDaysAfterMonths = days % 30;
+      const weeks = Math.floor(remainingDaysAfterMonths / 7);
+      const remainingDays = remainingDaysAfterMonths % 7;
+
+      totalPrice =
+        months * priceMonth + weeks * priceWeek + remainingDays * priceDay;
+    }
+
+    return totalPrice;
   }
 }

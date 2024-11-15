@@ -9,12 +9,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Role, User } from '@prisma/client';
+import { Rental, Role, User } from '@prisma/client';
 import { Auth, GetUser } from 'src/auth/decorators';
 import { CreateRentalDto } from './dto/create-rental.dto';
 import { RentalFilterDto } from './dto/rental-filter.dto';
 import { UpdateRentalDto } from './dto/update-rental.dto';
-import { Rental } from './entities/rental.entity';
 import { RentalService } from './rental.service';
 
 @ApiBearerAuth()
