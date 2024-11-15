@@ -4,22 +4,17 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Cart, User } from '@prisma/client';
-
+import { Cart, Role, User } from '@prisma/client';
 import { Auth, GetUser } from 'src/auth/decorators';
 import { CartService } from './cart.service';
-import { AddDeviceToCartDto } from './dto/add-device-to-cart.dto';
 import { CartFilterDto } from './dto/cart-filter.dto';
 import { CreateCartDto } from './dto/create-cart.dto';
-import { RemoveDeviceFromCartDto } from './dto/remove-device-from-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
-import { AddPackageToCartDto } from './dto/add-package-to-cart.dto';
-import { RemovePackageFromCartDto } from './dto/remove-package-from-cart.dto';
 
 @ApiBearerAuth()
 @ApiTags('Carts')
@@ -38,109 +33,44 @@ export class CartController {
     return this.cartService.findAllPagination(page, limit, filters);
   }
 
-  @Get()
+  @Get('by-me')
   @ApiOperation({
-    summary: 'Lấy tất cả giỏ hàng (Không phân trang)',
+    summary: 'Lấy thông tin giỏ hàng của tôi',
   })
-  findAll(): Promise<Cart[]> {
-    return this.cartService.findAll();
-  }
-
-  @Get(':id')
-  @ApiOperation({
-    summary: 'Lấy giỏ hàng theo ID',
-  })
-  findOne(@Param('id') id: string): Promise<Cart> {
-    return this.cartService.findOne(id);
-  }
-
-  @Post()
-  @ApiOperation({
-    summary: 'Tạo giỏ hàng mới',
-  })
-  create(@Body() createCartDto: CreateCartDto): Promise<Cart> {
-    return this.cartService.create(createCartDto);
-  }
-
-  @Patch(':id')
-  @ApiOperation({
-    summary: 'Cập nhật giỏ hàng theo ID',
-  })
-  update(
-    @Param('id') id: string,
-    @Body() updateCartDto: UpdateCartDto,
-  ): Promise<Cart> {
-    return this.cartService.update(id, updateCartDto);
-  }
-
-  @Delete(':id')
-  @ApiOperation({
-    summary: 'Xóa giỏ hàng theo ID',
-  })
-  remove(@Param('id') id: string): Promise<{ message: string }> {
-    return this.cartService.remove(id);
-  }
-
-  @Get('me/all')
-  @ApiOperation({
-    summary: 'Lấy tất cả giỏ hàng của tôi',
-  })
-  @Auth('user')
+  @Auth(Role.user)
   async findCartByUser(@GetUser() user: User): Promise<Cart> {
     return this.cartService.findCartByUser(user.id);
   }
 
-  @Post('me/add-device')
+  @Post('by-me')
   @ApiOperation({
-    summary: 'Thêm thiết bị vào giỏ hàng của tôi',
+    summary: 'Thêm thiết bị hoặc gói vào giỏ hàng',
   })
-  @Auth('user')
-  async addDeviceToCart(
+  @Auth(Role.user)
+  async addItemToCart(
     @GetUser() user: User,
-    @Body() addDeviceToCartDto: AddDeviceToCartDto,
+    @Body() createCartDto: CreateCartDto,
   ): Promise<{ message: string }> {
-    return this.cartService.addDeviceToCart(user.id, addDeviceToCartDto);
+    return this.cartService.addItemToCart(user.id, createCartDto);
   }
 
-  @Delete('me/remove-device')
+  @Put('quantity')
   @ApiOperation({
-    summary: 'Xóa thiết bị khỏi giỏ hàng của tôi',
+    summary: 'Cập nhật số lượng thiết bị hoặc gói trong giỏ hàng',
   })
-  @Auth('user')
-  async removeDeviceFromCart(
-    @GetUser() user: User,
-    @Body() removeDeviceFromCartDto: RemoveDeviceFromCartDto,
+  async updateCartItem(
+    @Body() updateCartDto: UpdateCartDto,
   ): Promise<{ message: string }> {
-    return this.cartService.removeDeviceFromCart(
-      user.id,
-      removeDeviceFromCartDto,
-    );
+    return this.cartService.updateCartItem(updateCartDto);
   }
 
-  @Post('me/add-package')
+  @Delete('remove/:cartItemId')
   @ApiOperation({
-    summary: 'Thêm gói thiết bị vào giỏ hàng của tôi',
+    summary: 'Xóa mục khỏi giỏ hàng',
   })
-  @Auth('user')
-  async addPackageToCart(
-    @GetUser() user: User,
-    @Body() addPackageToCartDto: AddPackageToCartDto,
+  async removeItemFromCart(
+    @Param('cartItemId') cartItemId: string,
   ): Promise<{ message: string }> {
-    return this.cartService.addPackageToCart(user.id, addPackageToCartDto);
-  }
-
-  @Delete('me/remove-package')
-  @ApiOperation({
-    summary: 'Xóa gói thiết bị khỏi giỏ hàng của tôi',
-  })
-  @Auth('user')
-  async removePackageFromCart(
-    @GetUser() user: User,
-    @Body() removePackageFromCartDto: RemovePackageFromCartDto,
-  ): Promise<{ message: string }> {
-    return this.cartService.removePackageFromCart(
-      user.id,
-      removePackageFromCartDto,
-    );
+    return this.cartService.removeItemFromCart(cartItemId);
   }
 }

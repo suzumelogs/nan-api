@@ -5,13 +5,9 @@ import {
 } from '@nestjs/common';
 import { Cart, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AddDeviceToCartDto } from './dto/add-device-to-cart.dto';
 import { CartFilterDto } from './dto/cart-filter.dto';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
-import { RemoveDeviceFromCartDto } from './dto/remove-device-from-cart.dto';
-import { AddPackageToCartDto } from './dto/add-package-to-cart.dto';
-import { RemovePackageFromCartDto } from './dto/remove-package-from-cart.dto';
 
 @Injectable()
 export class CartService {
@@ -32,273 +28,127 @@ export class CartService {
           where: whereClause,
           skip: (page - 1) * limit,
           take: limit,
-          include: {
-            cartItems: true,
-          },
+          include: { cartItems: true },
         }),
-        this.prisma.cart.count({
-          where: whereClause,
-        }),
+        this.prisma.cart.count({ where: whereClause }),
       ]);
 
       return { data, total, page, limit };
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException(
         'Không thể lấy danh sách giỏ hàng',
       );
-    }
-  }
-
-  async findAll(): Promise<Cart[]> {
-    try {
-      return await this.prisma.cart.findMany({
-        include: {
-          cartItems: true,
-        },
-      });
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Không thể lấy danh sách giỏ hàng',
-      );
-    }
-  }
-
-  async findOne(id: string): Promise<Cart> {
-    try {
-      const cart = await this.prisma.cart.findUniqueOrThrow({
-        where: { id },
-        include: {
-          cartItems: true,
-        },
-      });
-      return cart;
-    } catch (error) {
-      throw new NotFoundException('Không tìm thấy giỏ hàng');
-    }
-  }
-
-  async create(dto: CreateCartDto): Promise<Cart> {
-    try {
-      const newCart = await this.prisma.cart.create({
-        data: dto,
-        include: {
-          cartItems: true,
-        },
-      });
-      return newCart;
-    } catch (error) {
-      throw new InternalServerErrorException('Không thể tạo giỏ hàng');
-    }
-  }
-
-  async update(id: string, dto: UpdateCartDto): Promise<Cart> {
-    try {
-      const updatedCart = await this.prisma.cart.update({
-        where: { id },
-        data: dto,
-        include: {
-          cartItems: true,
-        },
-      });
-      return updatedCart;
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy giỏ hàng');
-      }
-      throw new InternalServerErrorException('Không thể cập nhật giỏ hàng');
-    }
-  }
-
-  async remove(id: string): Promise<{ message: string }> {
-    try {
-      await this.prisma.cart.delete({
-        where: { id },
-      });
-      return { message: 'Xóa giỏ hàng thành công' };
-    } catch (error) {
-      throw new NotFoundException('Không tìm thấy giỏ hàng');
     }
   }
 
   async findCartByUser(userId: string): Promise<Cart> {
-    const cart = await this.prisma.cart.findUnique({
-      where: { userId },
-      include: {
-        cartItems: {
-          include: {
-            device: true,
-          },
-        },
-      },
-    });
-
-    if (!cart) {
-      throw new NotFoundException('Không tìm thấy giỏ hàng cho người dùng này');
-    }
-
-    return cart;
-  }
-
-  async addDeviceToCart(
-    userId: string,
-    addDeviceToCartDto: AddDeviceToCartDto,
-  ) {
-    const { deviceId, quantity } = addDeviceToCartDto;
-
-    const device = await this.prisma.device.findUnique({
-      where: { id: deviceId },
-    });
-    if (!device) {
-      throw new NotFoundException('Không tìm thấy thiết bị');
-    }
-
-    let cart = await this.prisma.cart.findUnique({
-      where: { userId },
-      include: { cartItems: true },
-    });
-
-    if (!cart) {
-      cart = await this.prisma.cart.create({
-        data: {
-          userId,
+    try {
+      const cart = await this.prisma.cart.findUnique({
+        where: { userId },
+        include: {
           cartItems: {
-            create: {
-              deviceId,
-              quantity,
+            include: {
+              device: true,
+              package: true,
             },
           },
         },
-        include: { cartItems: true },
       });
-    } else {
-      const existingCartItem = cart.cartItems.find(
-        (item) => item.deviceId === deviceId,
-      );
-      if (existingCartItem) {
-        await this.prisma.cartItem.update({
-          where: { id: existingCartItem.id },
-          data: { quantity: existingCartItem.quantity + quantity },
-        });
-      } else {
-        await this.prisma.cartItem.create({
-          data: {
-            cartId: cart.id,
-            deviceId,
-            quantity,
-          },
-        });
+
+      if (!cart) {
+        throw new NotFoundException(
+          'Giỏ hàng không tồn tại cho người dùng này',
+        );
       }
-    }
 
-    return { message: 'Thêm thiết bị vào giỏ hàng thành công' };
+      return cart;
+    } catch {
+      throw new InternalServerErrorException(
+        'Không thể tìm giỏ hàng của người dùng',
+      );
+    }
   }
 
-  async removeDeviceFromCart(
-    userId: string,
-    removeDeviceFromCartDto: RemoveDeviceFromCartDto,
-  ) {
-    const { deviceId } = removeDeviceFromCartDto;
+  async addItemToCart(userId: string, dto: CreateCartDto) {
+    try {
+      const { deviceId, packageId, quantity } = dto;
 
-    const cart = await this.prisma.cart.findUnique({
-      where: { userId },
-      include: { cartItems: true },
-    });
-    if (!cart) {
-      throw new NotFoundException('Không tìm thấy giỏ hàng');
-    }
+      if (deviceId && packageId) {
+        throw new InternalServerErrorException(
+          'Không thể thêm cả thiết bị và gói cùng một lúc',
+        );
+      }
 
-    const cartItem = cart.cartItems.find((item) => item.deviceId === deviceId);
-    if (!cartItem) {
-      throw new NotFoundException('Không tìm thấy thiết bị trong giỏ hàng');
-    }
+      let cart = await this.prisma.cart.findUnique({ where: { userId } });
+      if (!cart) {
+        cart = await this.prisma.cart.create({ data: { userId } });
+      }
 
-    await this.prisma.cartItem.delete({
-      where: { id: cartItem.id },
-    });
-
-    return { message: 'Xóa thiết bị khỏi giỏ hàng thành công' };
-  }
-
-  async addPackageToCart(
-    userId: string,
-    addPackageToCartDto: AddPackageToCartDto,
-  ) {
-    const { packageId, quantity } = addPackageToCartDto;
-
-    const packageService = await this.prisma.package.findUnique({
-      where: { id: packageId },
-    });
-    if (!packageService) {
-      throw new NotFoundException('Không tìm thấy gói thiết bị');
-    }
-
-    let cart = await this.prisma.cart.findUnique({
-      where: { userId },
-      include: { cartItems: true },
-    });
-
-    if (!cart) {
-      cart = await this.prisma.cart.create({
-        data: {
-          userId,
-          cartItems: {
-            create: {
-              packageId,
-              quantity,
-            },
-          },
+      const existingItem = await this.prisma.cartItem.findFirst({
+        where: {
+          cartId: cart.id,
+          OR: [{ deviceId }, { packageId }],
         },
-        include: { cartItems: true },
       });
-    } else {
-      const existingCartItem = cart.cartItems.find(
-        (item) => item.packageId === packageId,
-      );
 
-      if (existingCartItem) {
+      if (existingItem) {
         await this.prisma.cartItem.update({
-          where: { id: existingCartItem.id },
-          data: { quantity: existingCartItem.quantity + quantity },
+          where: { id: existingItem.id },
+          data: { quantity: existingItem.quantity + quantity },
         });
-      } else {
-        await this.prisma.cartItem.create({
-          data: {
-            cartId: cart.id,
-            packageId,
-            quantity,
-          },
-        });
+        return { message: 'Cập nhật số lượng mục trong giỏ hàng thành công' };
       }
-    }
 
-    return { message: 'Thêm gói thiết bị vào giỏ hàng thành công' };
+      await this.prisma.cartItem.create({
+        data: {
+          cartId: cart.id,
+          deviceId,
+          packageId,
+          quantity,
+        },
+      });
+
+      return { message: 'Thêm mục vào giỏ hàng thành công' };
+    } catch {
+      throw new InternalServerErrorException('Không thể thêm mục vào giỏ hàng');
+    }
   }
 
-  async removePackageFromCart(
-    userId: string,
-    removePackageFromCartDto: RemovePackageFromCartDto,
-  ) {
-    const { packageId } = removePackageFromCartDto;
+  async updateCartItem(dto: UpdateCartDto) {
+    try {
+      const { cartItemId, newQuantity } = dto;
 
-    const cart = await this.prisma.cart.findUnique({
-      where: { userId },
-      include: { cartItems: true },
-    });
-    if (!cart) {
-      throw new NotFoundException('Không tìm thấy giỏ hàng');
+      const cartItem = await this.prisma.cartItem.findUnique({
+        where: { id: cartItemId },
+      });
+      if (!cartItem) {
+        throw new NotFoundException('Mục giỏ hàng không tồn tại');
+      }
+
+      await this.prisma.cartItem.update({
+        where: { id: cartItemId },
+        data: { quantity: newQuantity },
+      });
+
+      return { message: 'Cập nhật mục giỏ hàng thành công' };
+    } catch {
+      throw new InternalServerErrorException('Không thể cập nhật mục giỏ hàng');
     }
+  }
 
-    const cartItem = cart.cartItems.find(
-      (item) => item.packageId === packageId,
-    );
-    if (!cartItem) {
-      throw new NotFoundException('Không tìm thấy gói thiết bị trong giỏ hàng');
+  async removeItemFromCart(cartItemId: string) {
+    try {
+      const cartItem = await this.prisma.cartItem.findUnique({
+        where: { id: cartItemId },
+      });
+      if (!cartItem) {
+        throw new NotFoundException('Mục giỏ hàng không tồn tại');
+      }
+
+      await this.prisma.cartItem.delete({ where: { id: cartItemId } });
+      return { message: 'Xóa mục khỏi giỏ hàng thành công' };
+    } catch {
+      throw new InternalServerErrorException('Không thể xóa mục khỏi giỏ hàng');
     }
-
-    await this.prisma.cartItem.delete({
-      where: { id: cartItem.id },
-    });
-
-    return { message: 'Xóa gói thiết bị khỏi giỏ hàng thành công' };
   }
 }
