@@ -31,9 +31,6 @@ export class CategoryService {
             mode: Prisma.QueryMode.insensitive,
           },
         }),
-        ...(filters.priceDay && { priceDay: filters.priceDay }),
-        ...(filters.priceWeek && { priceWeek: filters.priceWeek }),
-        ...(filters.priceMonth && { priceMonth: filters.priceMonth }),
       };
 
       const [data, total] = await Promise.all([
@@ -55,7 +52,7 @@ export class CategoryService {
       };
     } catch (error) {
       throw new InternalServerErrorException(
-        'Failed to retrieve categories with pagination and filters',
+        'Lỗi khi lấy danh sách phân trang',
       );
     }
   }
@@ -64,7 +61,7 @@ export class CategoryService {
     try {
       return await this.prisma.category.findMany();
     } catch (error) {
-      throw new InternalServerErrorException('Failed to retrieve categories');
+      throw new InternalServerErrorException('Lỗi khi lấy danh sách danh mục');
     }
   }
 
@@ -78,44 +75,35 @@ export class CategoryService {
       });
       return { data: category };
     } catch (error) {
-      throw new NotFoundException('Category not found');
+      throw new NotFoundException('Không tìm thấy danh mục');
     }
   }
 
   async create(dto: CreateCategoryDto): Promise<Category> {
     try {
-      const newCategory = await this.prisma.category.create({
-        data: dto,
-      });
-      return newCategory;
+      return await this.prisma.category.create({ data: dto });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to create category');
+      throw new InternalServerErrorException('Lỗi khi tạo danh mục mới');
     }
   }
 
   async update(id: string, dto: UpdateCategoryDto): Promise<Category> {
     try {
-      const updatedCategory = await this.prisma.category.update({
-        where: { id },
-        data: dto,
-      });
-      return updatedCategory;
+      return await this.prisma.category.update({ where: { id }, data: dto });
     } catch (error) {
       if (error.code === 'P2025') {
-        throw new NotFoundException('Category not found');
+        throw new NotFoundException('Không tìm thấy danh mục');
       }
-      throw new InternalServerErrorException('Failed to update category');
+      throw new InternalServerErrorException('Lỗi khi cập nhật danh mục');
     }
   }
 
   async remove(id: string): Promise<{ message: string }> {
     try {
-      await this.prisma.category.delete({
-        where: { id },
-      });
-      return { message: 'Category deleted successfully' };
+      await this.prisma.category.delete({ where: { id } });
+      return { message: 'Xóa danh mục thành công' };
     } catch (error) {
-      throw new NotFoundException('Category not found');
+      throw new NotFoundException('Không tìm thấy danh mục');
     }
   }
 
@@ -127,9 +115,7 @@ export class CategoryService {
         value: category.id,
       }));
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to retrieve label-value pairs',
-      );
+      throw new InternalServerErrorException('Lỗi khi lấy label-value');
     }
   }
 }

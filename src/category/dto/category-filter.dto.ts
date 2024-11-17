@@ -8,31 +8,10 @@ export class CategoryFilterDto {
   @IsString()
   name?: string;
 
-  @ApiProperty({ description: 'Mô tả danh mục', required: false })
+  @ApiProperty({ description: 'Mô tả', required: false })
   @IsOptional()
   @IsString()
   description?: string;
-
-  @ApiProperty({ description: 'Giá theo ngày', required: false, minimum: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  @Min(0)
-  priceDay?: number;
-
-  @ApiProperty({ description: 'Giá theo tuần', required: false, minimum: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  @Min(0)
-  priceWeek?: number;
-
-  @ApiProperty({ description: 'Giá theo tháng', required: false, minimum: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  @Min(0)
-  priceMonth?: number;
 
   @ApiProperty({
     description: 'Số trang',

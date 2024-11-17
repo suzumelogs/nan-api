@@ -80,6 +80,20 @@ model User {
   @@map("users")
 }
 
+// Danh mục thiết bị
+model Category {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String  @unique
+  description String?
+
+  devices Device[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
 // Thiết bị
 model Device {
   id          String       @id @default(auto()) @map("_id") @db.ObjectId
@@ -103,24 +117,6 @@ model Device {
   cartId    String?  @db.ObjectId
 
   @@map("devices")
-}
-
-// Danh mục (Gói)
-model Category {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
-  name        String  @unique
-  description String?
-
-  priceDay   Float?
-  priceWeek  Float?
-  priceMonth Float?
-
-  devices Device[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("categories")
 }
 
 // Thuê

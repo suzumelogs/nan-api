@@ -4,70 +4,60 @@ const prisma = new PrismaClient();
 
 const categories = [
   {
-    name: 'Gói sự kiện',
+    id: '5fbb1a2c3c9d440000a12345',
+    name: 'Thiết bị gia đình',
     description:
-      'Gói thiết bị cho các sự kiện lớn như hội nghị, tiệc cưới, và lễ hội.',
-    priceDay: 1500000,
-    priceWeek: 9000000,
-    priceMonth: 36000000,
+      'Các thiết bị phục vụ cho nhu cầu sinh hoạt hàng ngày trong gia đình.',
   },
   {
-    name: 'Gói nhóm ngoại khóa',
+    id: '5fbb1a2c3c9d440000a12346',
+    name: 'Thiết bị điện tử',
     description:
-      'Gói dành cho các hoạt động ngoại khóa, bao gồm các thiết bị như loa, máy chiếu.',
-    priceDay: 800000,
-    priceWeek: 4800000,
-    priceMonth: 19200000,
+      'Các thiết bị điện tử hiện đại phục vụ cho giải trí và công việc.',
   },
   {
-    name: 'Gói thiết bị văn phòng',
-    description:
-      'Gói thiết bị cho văn phòng bao gồm máy chiếu, thiết bị âm thanh và các công cụ hỗ trợ.',
-    priceDay: 1200000,
-    priceWeek: 7200000,
-    priceMonth: 28800000,
+    id: '5fbb1a2c3c9d440000a12347',
+    name: 'Thiết bị nhà bếp',
+    description: 'Các dụng cụ, thiết bị hỗ trợ nấu ăn và chuẩn bị thực phẩm.',
   },
   {
-    name: 'Gói giải trí',
+    id: '5fbb1a2c3c9d440000a12348',
+    name: 'Thiết bị làm mát',
     description:
-      'Gói thiết bị giải trí cho các buổi tiệc hoặc hoạt động giải trí, bao gồm âm thanh và ánh sáng.',
-    priceDay: 1000000,
-    priceWeek: 6000000,
-    priceMonth: 24000000,
+      'Các sản phẩm giúp làm mát không gian sống như quạt, điều hòa.',
   },
   {
-    name: 'Gói tổ chức sự kiện',
+    id: '5fbb1a2c3c9d440000a12349',
+    name: 'Thiết bị bảo vệ',
     description:
-      'Gói hoàn chỉnh để tổ chức sự kiện, bao gồm tất cả các thiết bị cần thiết cho sự kiện thành công.',
-    priceDay: 2000000,
-    priceWeek: 12000000,
-    priceMonth: 48000000,
+      'Các thiết bị giúp bảo vệ an ninh, sức khỏe cho gia đình như camera, máy lọc không khí.',
   },
 ];
 
 const seedCategory = async (category: (typeof categories)[number]) => {
   await prisma.category.upsert({
-    where: { name: category.name },
+    where: { id: category.id },
     update: {},
     create: {
+      id: category.id,
       name: category.name,
       description: category.description,
-      priceDay: category.priceDay,
-      priceWeek: category.priceWeek,
-      priceMonth: category.priceMonth,
     },
   });
 
-  console.log(`Category ${category.name} seeded successfully.`);
+  console.log(`Danh mục ${category.name} đã được thêm thành công.`);
 };
 
 const categorySeed = async () => {
   try {
+    await prisma.category.deleteMany({});
+    console.log('Đã xóa tất cả các danh mục cũ.');
+
     for (const category of categories) {
       await seedCategory(category);
     }
   } catch (error) {
-    console.error('Error seeding categories: ', error);
+    console.error('Lỗi khi thêm danh mục: ', error);
   } finally {
     await prisma.$disconnect();
   }
