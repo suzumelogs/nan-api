@@ -1,240 +1,245 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AddDeviceToCartDto } from './dto/add-device-to-cart.dto';
-import { CartFilterDto } from './dto/cart-filter.dto';
-import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
-import { UpdateDeviceToCartDto } from './dto/update-device-to-cart.dto';
-import { Cart } from './entities/cart.entity';
+import { CreateItemToCartDto } from './dto/create-item-to-cart.dto';
+import { UpdateItemToCartDto } from './dto/update-item-to-cart.dto';
 
 @Injectable()
 export class CartService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAllPagination(
-    page: number,
-    limit: number,
-    filters: Partial<CartFilterDto>,
-  ): Promise<{ data: Cart[]; total: number; page: number; limit: number }> {
-    try {
-      const whereClause: Prisma.CartWhereInput = {
-        ...(filters.userId && { userId: filters.userId }),
-        ...(filters.rentalDuration && {
-          rentalDuration: filters.rentalDuration,
-        }),
-        ...(filters.totalPrice && { totalPrice: filters.totalPrice }),
-      };
-
-      const [data, total] = await Promise.all([
-        this.prisma.cart.findMany({
-          where: whereClause,
-          skip: (page - 1) * limit,
-          take: limit,
-          include: {
-            user: true,
-            devices: true,
-          },
-        }),
-        this.prisma.cart.count({
-          where: whereClause,
-        }),
-      ]);
-
-      return {
-        data,
-        total,
-        page,
-        limit,
-      };
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to retrieve carts with pagination and filters',
-      );
-    }
-  }
-
-  async findAll(): Promise<Cart[]> {
-    try {
-      return await this.prisma.cart.findMany({
-        include: {
-          devices: true,
-        },
-      });
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to retrieve carts');
-    }
-  }
-
-  async findOne(id: string): Promise<Cart> {
-    try {
-      const cart = await this.prisma.cart.findUniqueOrThrow({
-        where: { id },
-        include: {
-          devices: true,
-        },
-      });
-      return cart;
-    } catch (error) {
-      throw new NotFoundException('Cart not found');
-    }
-  }
-
-  async create(dto: CreateCartDto): Promise<Cart> {
-    try {
-      const newCart = await this.prisma.cart.create({
-        data: dto,
-        include: {
-          devices: true,
-        },
-      });
-      return newCart;
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to create cart');
-    }
-  }
-
-  async update(id: string, dto: UpdateCartDto): Promise<Cart> {
-    try {
-      const updatedCart = await this.prisma.cart.update({
-        where: { id },
-        data: dto,
-        include: {
-          devices: true,
-        },
-      });
-      return updatedCart;
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Cart not found');
-      }
-      throw new InternalServerErrorException('Failed to update cart');
-    }
-  }
-
-  async remove(id: string): Promise<{ message: string }> {
-    try {
-      await this.prisma.cart.delete({
-        where: { id },
-      });
-      return { message: 'Cart deleted successfully' };
-    } catch (error) {
-      throw new NotFoundException('Cart not found');
-    }
-  }
-
-  async findByUserId(userId: string): Promise<Cart> {
-    try {
-      const cart = await this.prisma.cart.findUnique({
-        where: { userId },
-        include: { devices: true },
-      });
-
-      if (!cart) {
-        throw new NotFoundException('Cart not found for this user');
-      }
-
-      return cart;
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to retrieve user cart');
-    }
-  }
-
-  async addDeviceToCart(
+  async createItemToCart(
     userId: string,
-    dto: AddDeviceToCartDto,
-  ): Promise<Cart> {
-    try {
-      const cart = await this.prisma.cart.findUnique({
-        where: { userId },
-        include: { devices: true },
-      });
+    createItemToCartDto: CreateItemToCartDto,
+  ) {
+    let cart = await this.prisma.cart.findUnique({
+      where: { userId: userId },
+      include: { items: true },
+    });
 
-      if (!cart) {
-        throw new NotFoundException('Cart not found for this user');
-      }
-
-      const updatedCart = await this.prisma.cart.update({
-        where: { id: cart.id },
+    if (!cart) {
+      cart = await this.prisma.cart.create({
         data: {
-          devices: {
-            connect: { id: dto.deviceId },
+          userId: userId,
+          totalAmount: 0,
+          items: {
+            create: [],
           },
         },
-        include: { devices: true },
+        include: { items: true },
       });
-
-      return updatedCart;
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to add device to cart');
     }
+
+    let price = createItemToCartDto.price;
+
+    if (createItemToCartDto.equipmentId) {
+      const equipment = await this.prisma.equipment.findUnique({
+        where: { id: createItemToCartDto.equipmentId },
+      });
+      if (!equipment) {
+        throw new NotFoundException('Không tìm thấy thiết bị');
+      }
+
+      switch (createItemToCartDto.durationType) {
+        case 'day':
+          price = equipment.pricePerDay * createItemToCartDto.durationValue;
+          break;
+        case 'week':
+          price = equipment.pricePerWeek * createItemToCartDto.durationValue;
+          break;
+        case 'month':
+          price = equipment.pricePerMonth * createItemToCartDto.durationValue;
+          break;
+        default:
+          throw new Error('Loại thời lượng không hợp lệ');
+      }
+    }
+
+    if (createItemToCartDto.packageId) {
+      const packageItem = await this.prisma.equipmentPackage.findUnique({
+        where: { id: createItemToCartDto.packageId },
+      });
+      if (!packageItem) {
+        throw new NotFoundException('Không tìm thấy gói');
+      }
+
+      switch (createItemToCartDto.durationType) {
+        case 'day':
+          price = packageItem.pricePerDay * createItemToCartDto.durationValue;
+          break;
+        case 'week':
+          price = packageItem.pricePerWeek * createItemToCartDto.durationValue;
+          break;
+        case 'month':
+          price = packageItem.pricePerMonth * createItemToCartDto.durationValue;
+          break;
+        default:
+          throw new Error('Loại thời lượng không hợp lệ');
+      }
+    }
+
+    const cartItem = await this.prisma.cartItem.create({
+      data: {
+        cartId: cart.id,
+        equipmentId: createItemToCartDto.equipmentId,
+        packageId: createItemToCartDto.packageId,
+        quantity: createItemToCartDto.quantity,
+        durationType: createItemToCartDto.durationType,
+        durationValue: createItemToCartDto.durationValue,
+        price: price,
+      },
+    });
+
+    const totalAmount =
+      cart.items.reduce((total, item) => total + item.price, 0) + price;
+    await this.prisma.cart.update({
+      where: { id: cart.id },
+      data: { totalAmount },
+    });
+
+    return cartItem;
   }
 
-  async updateDeviceToCart(
+  async updateItemToCart(
     userId: string,
-    dto: UpdateDeviceToCartDto,
-  ): Promise<Cart> {
-    try {
-      const cart = await this.prisma.cart.findUnique({
-        where: { userId },
-        include: { devices: true },
-      });
+    cartItemId: string,
+    updateItemToCartDto: UpdateItemToCartDto,
+  ) {
+    const cart = await this.prisma.cart.findUnique({
+      where: { userId: userId },
+      include: { items: true },
+    });
 
-      if (!cart) {
-        throw new NotFoundException('Cart not found for this user');
+    if (!cart) {
+      throw new NotFoundException('Không tìm thấy giỏ hàng');
+    }
+
+    const cartItem = await this.prisma.cartItem.findUnique({
+      where: { id: cartItemId },
+    });
+
+    if (!cartItem) {
+      throw new NotFoundException('Không tìm thấy mục giỏ hàng');
+    }
+
+    if (cartItem.cartId !== cart.id) {
+      throw new Error('Mặt hàng trong giỏ hàng không thuộc về giỏ hàng này');
+    }
+
+    let price = updateItemToCartDto.price;
+
+    if (updateItemToCartDto.equipmentId) {
+      const equipment = await this.prisma.equipment.findUnique({
+        where: { id: updateItemToCartDto.equipmentId },
+      });
+      if (!equipment) {
+        throw new NotFoundException('Không tìm thấy thiết bị');
       }
 
-      const updatedCart = await this.prisma.cart.update({
-        where: { id: cart.id },
-        data: {
-          ...dto,
-        },
-        include: { devices: true },
-      });
-
-      return updatedCart;
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to update cart');
+      switch (updateItemToCartDto.durationType) {
+        case 'day':
+          price = equipment.pricePerDay * updateItemToCartDto.durationValue;
+          break;
+        case 'week':
+          price = equipment.pricePerWeek * updateItemToCartDto.durationValue;
+          break;
+        case 'month':
+          price = equipment.pricePerMonth * updateItemToCartDto.durationValue;
+          break;
+        default:
+          throw new Error('Loại thời lượng không hợp lệ');
+      }
     }
+
+    if (updateItemToCartDto.packageId) {
+      const packageItem = await this.prisma.equipmentPackage.findUnique({
+        where: { id: updateItemToCartDto.packageId },
+      });
+      if (!packageItem) {
+        throw new NotFoundException('Không tìm thấy gói');
+      }
+
+      switch (updateItemToCartDto.durationType) {
+        case 'day':
+          price = packageItem.pricePerDay * updateItemToCartDto.durationValue;
+          break;
+        case 'week':
+          price = packageItem.pricePerWeek * updateItemToCartDto.durationValue;
+          break;
+        case 'month':
+          price = packageItem.pricePerMonth * updateItemToCartDto.durationValue;
+          break;
+        default:
+          throw new Error('Loại thời lượng không hợp lệ');
+      }
+    }
+
+    const updatedCartItem = await this.prisma.cartItem.update({
+      where: { id: cartItemId },
+      data: {
+        quantity: updateItemToCartDto.quantity,
+        durationType: updateItemToCartDto.durationType,
+        durationValue: updateItemToCartDto.durationValue,
+        price: price,
+      },
+    });
+
+    const updatedItems = await this.prisma.cartItem.findMany({
+      where: { cartId: cart.id },
+    });
+
+    const totalAmount = updatedItems.reduce(
+      (total, item) => total + item.price,
+      0,
+    );
+
+    await this.prisma.cart.update({
+      where: { id: cart.id },
+      data: { totalAmount },
+    });
+
+    return updatedCartItem;
   }
 
-  async removeDeviceFromCart(userId: string, deviceId: string): Promise<Cart> {
-    try {
-      const cart = await this.prisma.cart.findUnique({
-        where: { userId },
-        include: { devices: true },
-      });
+  async removeItem(userId: string, cartItemId: string) {
+    const cart = await this.prisma.cart.findUnique({
+      where: { userId: userId },
+      include: { items: true },
+    });
 
-      if (!cart) {
-        throw new NotFoundException('Cart not found for this user');
-      }
-
-      const deviceExists = cart.devices.some(
-        (device) => device.id === deviceId,
-      );
-      if (!deviceExists) {
-        throw new NotFoundException('Device not found in cart');
-      }
-
-      const updatedCart = await this.prisma.cart.update({
-        where: { id: cart.id },
-        data: {
-          devices: {
-            disconnect: { id: deviceId },
-          },
-        },
-        include: { devices: true },
-      });
-
-      return updatedCart;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to remove device from cart',
-      );
+    if (!cart) {
+      throw new NotFoundException('Không tìm thấy giỏ hàng');
     }
+
+    const cartItem = await this.prisma.cartItem.findUnique({
+      where: { id: cartItemId },
+    });
+
+    if (!cartItem) {
+      throw new NotFoundException('Không tìm thấy mục giỏ hàng');
+    }
+
+    if (cartItem.cartId !== cart.id) {
+      throw new Error('Mặt hàng trong giỏ hàng không thuộc về giỏ hàng này');
+    }
+
+    await this.prisma.cartItem.delete({
+      where: { id: cartItemId },
+    });
+
+    const updatedItems = await this.prisma.cartItem.findMany({
+      where: { cartId: cart.id },
+    });
+
+    const totalAmount = updatedItems.reduce(
+      (total, item) => total + item.price,
+      0,
+    );
+
+    await this.prisma.cart.update({
+      where: { id: cart.id },
+      data: { totalAmount },
+    });
+
+    return { message: 'Đã xóa thành công!' };
   }
 }

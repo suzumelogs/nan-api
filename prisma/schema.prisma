@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -28,6 +25,12 @@ enum RentalStatus {
   confirmed
   completed
   canceled
+}
+
+enum Duration {
+  day
+  week
+  month
 }
 
 enum PaymentType {
@@ -86,7 +89,7 @@ model Category {
   name        String  @unique
   description String?
 
-  devices Device[]
+  equipments Equipment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -95,45 +98,112 @@ model Category {
 }
 
 // Thiết bị
-model Device {
-  id          String       @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  description String?
-  image       String
-  priceDay    Float
-  priceWeek   Float
-  priceMonth  Float
-  status      DeviceStatus @default(available)
+model Equipment {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  image         String
+  description   String
+  pricePerDay   Float?
+  pricePerWeek  Float?
+  pricePerMonth Float?
+  stock         Int?
 
-  categoryId String @db.ObjectId
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String   @db.ObjectId
 
-  category           Category      @relation(fields: [categoryId], references: [id])
-  rentals            Rental[]
-  maintenanceRecords Maintenance[]
+  cartItems   CartItem[]
+  rentalItems RentalItem[]
+  packages    EquipmentPackageOnEquipment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Cart      Cart?    @relation(fields: [cartId], references: [id])
-  cartId    String?  @db.ObjectId
 
-  @@map("devices")
+  @@map("equipments")
 }
 
-// Thuê
-model Rental {
-  id              String       @id @default(auto()) @map("_id") @db.ObjectId
-  rentalStartDate DateTime
-  rentalEndDate   DateTime
-  totalPrice      Float
-  depositAmount   Float
-  damageFee       Float? // phí hỏng hóc nếu có
-  status          RentalStatus @default(pending)
+// Gói thiết bị
+model EquipmentPackage {
+  id            String @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  description   String
+  pricePerDay   Float?
+  pricePerWeek  Float?
+  pricePerMonth Float?
 
-  userId   String @db.ObjectId
-  deviceId String @db.ObjectId
+  equipments  EquipmentPackageOnEquipment[]
+  cartItems   CartItem[]
+  rentalItems RentalItem[]
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("equipment_packages")
+}
+
+// Bảng trung gian giữa Equipment và EquipmentPackage
+model EquipmentPackageOnEquipment {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  equipmentId String    @db.ObjectId
+  equipment   Equipment @relation(fields: [equipmentId], references: [id])
+
+  packageId String           @db.ObjectId
+  package   EquipmentPackage @relation(fields: [packageId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("equipment_package_on_equipment")
+}
+
+// Giỏ hàng
+model Cart {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @unique @db.ObjectId
   user   User   @relation(fields: [userId], references: [id])
-  device Device @relation(fields: [deviceId], references: [id])
+
+  items       CartItem[]
+  totalAmount Float      @default(0.0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("carts")
+}
+
+// Mục trong giỏ hàng
+model CartItem {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  cartId String @db.ObjectId
+  cart   Cart   @relation(fields: [cartId], references: [id])
+
+  equipmentId String?    @db.ObjectId
+  equipment   Equipment? @relation(fields: [equipmentId], references: [id])
+
+  packageId String?           @db.ObjectId
+  package   EquipmentPackage? @relation(fields: [packageId], references: [id])
+
+  quantity      Int      @default(1)
+  durationType  Duration
+  durationValue Int
+  price         Float
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("cart_items")
+}
+
+// Thuê thiết bị
+model Rental {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  items       RentalItem[]
+  totalAmount Float
+  startDate   DateTime
+  endDate     DateTime
+  status      RentalStatus @default(pending)
 
   feedbacks Feedback[]
 
@@ -143,22 +213,27 @@ model Rental {
   @@map("rentals")
 }
 
-// Giỏ hàng
-model Cart {
-  id             String @id @default(auto()) @map("_id") @db.ObjectId
-  rentalDuration Int // thời gian thuê
-  totalPrice     Float // tổng giá đã tính toán
+// Mục thuê thiết bị
+model RentalItem {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  rentalId String @db.ObjectId
+  rental   Rental @relation(fields: [rentalId], references: [id])
 
-  userId String @unique @db.ObjectId
+  equipmentId String?    @db.ObjectId
+  equipment   Equipment? @relation(fields: [equipmentId], references: [id])
 
-  user             User     @relation(fields: [userId], references: [id])
-  devices          Device[] // danh sách thiết bị trong giỏ hàng
-  deviceQuantities Int[] // danh sách số lượng thiết bị trong giỏ hàng
+  packageId String?           @db.ObjectId
+  package   EquipmentPackage? @relation(fields: [packageId], references: [id])
+
+  quantity      Int
+  durationType  Duration
+  durationValue Int
+  price         Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("carts")
+  @@map("rental_items")
 }
 
 // Chính sách
@@ -204,8 +279,6 @@ model Maintenance {
   maintenanceCost          Float? // chi phí bảo trì
 
   deviceId String @db.ObjectId
-
-  device Device @relation(fields: [deviceId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

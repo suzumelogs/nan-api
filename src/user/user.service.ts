@@ -227,19 +227,6 @@ export class UserService {
         where: {
           userId: user.id,
         },
-        include: {
-          device: {
-            select: {
-              id: true,
-              name: true,
-              description: true,
-              image: true,
-              priceDay: true,
-              priceWeek: true,
-              priceMonth: true,
-            },
-          },
-        },
       });
       return { data: rentals };
     } catch (error) {

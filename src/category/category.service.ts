@@ -70,7 +70,7 @@ export class CategoryService {
       const category = await this.prisma.category.findUniqueOrThrow({
         where: { id },
         include: {
-          devices: true,
+          equipments: true,
         },
       });
       return { data: category };
