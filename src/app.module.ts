@@ -14,6 +14,7 @@ import { PolicyModule } from './policy/policy.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
 import { CartModule } from './cart/cart.module';
+import { EquipmentModule } from './equipment/equipment.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { CartModule } from './cart/cart.module';
     MaintenanceModule,
     NotificationModule,
     CartModule,
+    EquipmentModule,
   ],
   controllers: [AppController],
   providers: [AppService, FirebaseService],

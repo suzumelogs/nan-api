@@ -22,7 +22,7 @@ import { Category } from './entities/category.entity';
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @Get('pagination')
+  @Get('all/pagination')
   @ApiOperation({
     summary: 'Lất tất cả gói (Có phân trang và tìm kiếm)',
   })
@@ -33,15 +33,15 @@ export class CategoryController {
     return this.categoryService.findAllPagination(page, limit, filters);
   }
 
-  @Get()
+  @Get('all')
   @ApiOperation({
     summary: 'Lấy tất cả gói (Không phân trang)',
   })
-  findAll(): Promise<Category[]> {
+  findAll(): Promise<{ data: Category[] }> {
     return this.categoryService.findAll();
   }
 
-  @Get(':id')
+  @Get('get-by/:id')
   @ApiOperation({
     summary: 'Lấy gói theo ID',
   })
@@ -49,7 +49,7 @@ export class CategoryController {
     return this.categoryService.findOne(id);
   }
 
-  @Post()
+  @Post('create')
   @ApiOperation({
     summary: 'Tạo gói mới',
   })
@@ -57,7 +57,7 @@ export class CategoryController {
     return this.categoryService.create(createCategoryDto);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   @ApiOperation({
     summary: 'Cập nhật gói theo ID',
   })
@@ -68,7 +68,7 @@ export class CategoryController {
     return this.categoryService.update(id, updateCategoryDto);
   }
 
-  @Delete(':id')
+  @Delete('remove/:id')
   @ApiOperation({
     summary: 'Xóa gói theo ID',
   })
@@ -76,11 +76,11 @@ export class CategoryController {
     return this.categoryService.remove(id);
   }
 
-  @Get('label-value')
+  @Get('all/label-value')
   @ApiOperation({
     summary: 'Lấy tất cả gói (Định dạng label value)',
   })
-  getLabelValue(): Promise<LabelValueResponse[]> {
+  getLabelValue(): Promise<{ data: LabelValueResponse[] }> {
     return this.categoryService.getLabelValue();
   }
 }

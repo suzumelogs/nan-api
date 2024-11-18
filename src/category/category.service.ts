@@ -57,9 +57,10 @@ export class CategoryService {
     }
   }
 
-  async findAll(): Promise<Category[]> {
+  async findAll(): Promise<{ data: Category[] }> {
     try {
-      return await this.prisma.category.findMany();
+      const categories = await this.prisma.category.findMany();
+      return { data: categories };
     } catch (error) {
       throw new InternalServerErrorException('Lỗi khi lấy danh sách danh mục');
     }
@@ -107,13 +108,14 @@ export class CategoryService {
     }
   }
 
-  async getLabelValue(): Promise<LabelValueResponse[]> {
+  async getLabelValue(): Promise<{ data: LabelValueResponse[] }> {
     try {
       const categories = await this.prisma.category.findMany();
-      return categories.map((category) => ({
+      const categoriesLabelValue = categories.map((category) => ({
         label: category.name,
         value: category.id,
       }));
+      return { data: categoriesLabelValue };
     } catch (error) {
       throw new InternalServerErrorException('Lỗi khi lấy label-value');
     }
