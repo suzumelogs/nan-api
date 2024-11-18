@@ -9,11 +9,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Equipment } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { EquipmentFilterDto } from './dto/equipment-filter.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
-import { Equipment } from './entities/equipment.entity';
 import { EquipmentService } from './equipment.service';
 
 @ApiBearerAuth()

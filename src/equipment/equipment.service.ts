@@ -3,13 +3,12 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Equipment, Prisma } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { EquipmentFilterDto } from './dto/equipment-filter.dto';
 import { UpdateEquipmentDto } from './dto/update-equipment.dto';
-import { Equipment } from './entities/equipment.entity';
 
 @Injectable()
 export class EquipmentService {
