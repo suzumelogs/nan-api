@@ -8,22 +8,22 @@ export class EquipmentPackageFilterDto {
   @IsString()
   name?: string;
 
-  @ApiProperty({ description: 'Mô tả gói thiết bị', required: false })
+  @ApiProperty({ description: 'Mô tả', required: false })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiProperty({ description: 'Giá mỗi ngày', required: false })
+  @ApiProperty({ description: 'Giá theo ngày', required: false })
   @IsOptional()
   @IsNumber()
   pricePerDay?: number;
 
-  @ApiProperty({ description: 'Giá mỗi tuần', required: false })
+  @ApiProperty({ description: 'Giá theo tuần', required: false })
   @IsOptional()
   @IsNumber()
   pricePerWeek?: number;
 
-  @ApiProperty({ description: 'Giá mỗi tháng', required: false })
+  @ApiProperty({ description: 'Giá theo tháng', required: false })
   @IsOptional()
   @IsNumber()
   pricePerMonth?: number;

@@ -53,39 +53,62 @@ const equipments = [
   },
 ];
 
-const seedEquipment = async (equipment: (typeof equipments)[number]) => {
-  await prisma.equipment.upsert({
-    where: { id: equipment.id },
-    update: {},
-    create: {
-      id: equipment.id,
-      name: equipment.name,
-      image: equipment.image,
-      description: equipment.description,
-      pricePerDay: equipment.pricePerDay,
-      pricePerWeek: equipment.pricePerWeek,
-      pricePerMonth: equipment.pricePerMonth,
-      stock: equipment.stock,
-      categoryId: equipment.categoryId,
-    },
-  });
+const seedEquipment = async (equipment: (typeof equipments)[0]) => {
+  try {
+    await prisma.equipment.upsert({
+      where: { id: equipment.id },
+      update: {
+        name: equipment.name,
+        image: equipment.image,
+        description: equipment.description,
+        pricePerDay: equipment.pricePerDay,
+        pricePerWeek: equipment.pricePerWeek,
+        pricePerMonth: equipment.pricePerMonth,
+        stock: equipment.stock,
+        categoryId: equipment.categoryId,
+      },
+      create: {
+        id: equipment.id,
+        name: equipment.name,
+        image: equipment.image,
+        description: equipment.description,
+        pricePerDay: equipment.pricePerDay,
+        pricePerWeek: equipment.pricePerWeek,
+        pricePerMonth: equipment.pricePerMonth,
+        stock: equipment.stock,
+        categoryId: equipment.categoryId,
+      },
+    });
 
-  console.log(`Thiết bị ${equipment.name} đã được thêm thành công.`);
+    console.log(
+      `Thiết bị "${equipment.name}" đã được thêm hoặc cập nhật thành công.`,
+    );
+  } catch (error) {
+    console.error(
+      `Lỗi khi thêm hoặc cập nhật thiết bị "${equipment.name}":`,
+      error,
+    );
+  }
 };
 
-const equipmentSeed = async () => {
+const seedEquipments = async () => {
   try {
-    await prisma.equipment.deleteMany({});
-    console.log('Đã xóa tất cả các thiết bị cũ.');
+    console.log('--- Bắt đầu seed thiết bị ---');
 
     for (const equipment of equipments) {
       await seedEquipment(equipment);
     }
+
+    console.log('--- Seed thiết bị hoàn tất ---');
   } catch (error) {
-    console.error('Lỗi khi thêm thiết bị: ', error);
+    console.error('Lỗi trong quá trình seed thiết bị:', error);
   } finally {
     await prisma.$disconnect();
   }
 };
 
-export default equipmentSeed;
+if (require.main === module) {
+  seedEquipments();
+}
+
+export default seedEquipments;

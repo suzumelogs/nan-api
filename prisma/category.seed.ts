@@ -35,32 +35,48 @@ const categories = [
 ];
 
 const seedCategory = async (category: (typeof categories)[number]) => {
-  await prisma.category.upsert({
-    where: { id: category.id },
-    update: {},
-    create: {
-      id: category.id,
-      name: category.name,
-      description: category.description,
-    },
-  });
-
-  console.log(`Danh mục ${category.name} đã được thêm thành công.`);
+  try {
+    await prisma.category.upsert({
+      where: { id: category.id },
+      update: {
+        name: category.name,
+        description: category.description,
+      },
+      create: {
+        id: category.id,
+        name: category.name,
+        description: category.description,
+      },
+    });
+    console.log(
+      `Danh mục "${category.name}" đã được thêm hoặc cập nhật thành công.`,
+    );
+  } catch (error) {
+    console.error(
+      `Lỗi khi thêm hoặc cập nhật danh mục "${category.name}":`,
+      error,
+    );
+  }
 };
 
-const categorySeed = async () => {
+const seedCategories = async () => {
   try {
-    await prisma.category.deleteMany({});
-    console.log('Đã xóa tất cả các danh mục cũ.');
+    console.log('--- Bắt đầu seed danh mục ---');
 
     for (const category of categories) {
       await seedCategory(category);
     }
+
+    console.log('--- Seed danh mục hoàn tất ---');
   } catch (error) {
-    console.error('Lỗi khi thêm danh mục: ', error);
+    console.error('Lỗi trong quá trình seed danh mục:', error);
   } finally {
     await prisma.$disconnect();
   }
 };
 
-export default categorySeed;
+if (require.main === module) {
+  seedCategories();
+}
+
+export default seedCategories;

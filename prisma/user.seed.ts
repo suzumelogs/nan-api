@@ -21,34 +21,59 @@ const users = [
 ];
 
 const hashPassword = async (password: string): Promise<string> => {
-  return bcrypt.hash(password, 10);
+  try {
+    return await bcrypt.hash(password, 10);
+  } catch (error) {
+    console.error('Lỗi khi băm mật khẩu:', error);
+    throw new Error('Không thể băm mật khẩu');
+  }
 };
 
 const upsertUser = async (user: (typeof users)[number]): Promise<void> => {
-  const hashedPassword = await hashPassword(user.password);
-  await prisma.user.upsert({
-    where: { email: user.email },
-    update: {},
-    create: {
-      name: user.name,
-      email: user.email,
-      password: hashedPassword,
-      role: user.role,
-      emailVerified: user.emailVerified,
-    },
-  });
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: { email: user.email },
+    });
 
-  console.log(`User ${user.email} seeded successfully.`);
+    if (existingUser) {
+      console.log(`Người dùng ${user.email} đã tồn tại, không cần thêm mới.`);
+    } else {
+      const hashedPassword = await hashPassword(user.password);
+
+      await prisma.user.create({
+        data: {
+          name: user.name,
+          email: user.email,
+          password: hashedPassword,
+          role: user.role,
+          emailVerified: user.emailVerified,
+        },
+      });
+
+      console.log(`Người dùng ${user.email} đã được thêm thành công.`);
+    }
+  } catch (error) {
+    console.error(
+      `Lỗi khi thêm hoặc cập nhật người dùng ${user.email}:`,
+      error,
+    );
+  }
 };
 
 const userSeed = async (): Promise<void> => {
   try {
+    console.log('--- Đang thêm người dùng ---');
     await Promise.all(users.map((user) => upsertUser(user)));
+    console.log('--- Thêm người dùng hoàn tất ---');
   } catch (error) {
-    console.error('Error seeding users: ', error);
+    console.error('Lỗi trong quá trình thêm người dùng:', error);
   } finally {
     await prisma.$disconnect();
   }
 };
+
+if (require.main === module) {
+  userSeed();
+}
 
 export default userSeed;
