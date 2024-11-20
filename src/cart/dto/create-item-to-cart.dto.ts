@@ -44,13 +44,4 @@ export class CreateItemToCartDto {
   })
   @IsNumber()
   durationValue: number;
-
-  @ApiProperty({
-    description: 'Giá của mục trong giỏ hàng (tùy chọn)',
-    type: Number,
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber()
-  price?: number;
 }

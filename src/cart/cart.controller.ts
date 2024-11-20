@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { Auth, GetUser } from 'src/auth/decorators';
@@ -12,6 +20,13 @@ import { UpdateItemToCartDto } from './dto/update-item-to-cart.dto';
 @Controller('carts')
 export class CartController {
   constructor(private readonly cartService: CartService) {}
+
+  @Get('me')
+  @ApiOperation({ summary: 'Lấy giỏ hàng của tôi' })
+  @Auth(Role.user)
+  async findCartByMe(@GetUser() user: User) {
+    return this.cartService.findCartByMe(user.id);
+  }
 
   @Post('create-item')
   @ApiOperation({ summary: 'Thêm item vào giỏ hàng' })
