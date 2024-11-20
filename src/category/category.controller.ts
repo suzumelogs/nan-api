@@ -80,7 +80,7 @@ export class CategoryController {
 
   @Get('all/label-value')
   @ApiOperation({
-    summary: 'Lấy tất cả danh mục (Định dạng label value)',
+    summary: 'Tất cả danh mục (Định dạng label value)',
   })
   getLabelValue(): Promise<{ data: LabelValueResponse[] }> {
     return this.categoryService.getLabelValue();

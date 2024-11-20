@@ -24,7 +24,7 @@ export class EquipmentController {
 
   @Get('all/pagination')
   @ApiOperation({
-    summary: 'Lấy tất cả thiết bị (Có phân trang và tìm kiếm)',
+    summary: 'Tất cả thiết bị (Có phân trang và tìm kiếm)',
   })
   async findAllPagination(@Query() filterDto: EquipmentFilterDto): Promise<{
     data: Equipment[];
@@ -38,7 +38,7 @@ export class EquipmentController {
 
   @Get('all')
   @ApiOperation({
-    summary: 'Lấy tất cả thiết bị (Không phân trang)',
+    summary: 'Tất cả thiết bị (Không phân trang)',
   })
   findAll(): Promise<{ data: Equipment[] }> {
     return this.equipmentService.findAll();
@@ -46,7 +46,7 @@ export class EquipmentController {
 
   @Get('get-by/:id')
   @ApiOperation({
-    summary: 'Lấy thiết bị theo ID',
+    summary: 'Thiết bị theo ID',
   })
   findOne(@Param('id') id: string): Promise<{ data: Equipment }> {
     return this.equipmentService.findOne(id);
@@ -56,7 +56,9 @@ export class EquipmentController {
   @ApiOperation({
     summary: 'Tạo thiết bị mới',
   })
-  create(@Body() createEquipmentDto: CreateEquipmentDto): Promise<Equipment> {
+  create(
+    @Body() createEquipmentDto: CreateEquipmentDto,
+  ): Promise<{ message: string }> {
     return this.equipmentService.create(createEquipmentDto);
   }
 
@@ -67,7 +69,7 @@ export class EquipmentController {
   update(
     @Param('id') id: string,
     @Body() updateEquipmentDto: UpdateEquipmentDto,
-  ): Promise<Equipment> {
+  ): Promise<{ message: string }> {
     return this.equipmentService.update(id, updateEquipmentDto);
   }
 
@@ -81,7 +83,7 @@ export class EquipmentController {
 
   @Get('all/label-value')
   @ApiOperation({
-    summary: 'Lấy tất cả thiết bị (Định dạng label-value)',
+    summary: 'Tất cả thiết bị (Định dạng label-value)',
   })
   getLabelValue(): Promise<{ data: LabelValueResponse[] }> {
     return this.equipmentService.getLabelValue();

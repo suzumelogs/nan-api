@@ -70,16 +70,18 @@ export class EquipmentService {
         limit,
       };
     } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi lấy danh sách thiết bị');
+      throw new InternalServerErrorException(error);
     }
   }
 
   async findAll(): Promise<{ data: Equipment[] }> {
     try {
-      const equipments = await this.prisma.equipment.findMany();
+      const equipments = await this.prisma.equipment.findMany({
+        include: { category: true },
+      });
       return { data: equipments };
     } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi lấy danh sách thiết bị');
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -93,51 +95,53 @@ export class EquipmentService {
       });
       return { data: equipment };
     } catch (error) {
-      throw new NotFoundException('Không tìm thấy thiết bị');
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Không tìm thấy');
+      }
+      throw new InternalServerErrorException(error);
     }
   }
 
-  async create(dto: CreateEquipmentDto): Promise<Equipment> {
+  async create(dto: CreateEquipmentDto): Promise<{ message: string }> {
     try {
-      return await this.prisma.equipment.create({
-        data: {
-          name: dto.name,
-          image: dto.image,
-          description: dto.description,
-          pricePerDay: dto.pricePerDay,
-          pricePerWeek: dto.pricePerWeek,
-          pricePerMonth: dto.pricePerMonth,
-          stock: dto.stock,
-          category: {
-            connect: { id: dto.categoryId },
-          },
-        },
+      await this.prisma.equipment.create({
+        data: dto,
       });
+
+      return { message: 'Tạo thành công' };
     } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi tạo thiết bị mới');
+      throw new InternalServerErrorException(error);
     }
   }
 
-  async update(id: string, dto: UpdateEquipmentDto): Promise<Equipment> {
+  async update(
+    id: string,
+    dto: UpdateEquipmentDto,
+  ): Promise<{ message: string }> {
     try {
-      return await this.prisma.equipment.update({
+      await this.prisma.equipment.update({
         where: { id },
         data: dto,
       });
+
+      return { message: 'Cập nhật thành công' };
     } catch (error) {
       if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy thiết bị');
+        throw new NotFoundException('Không tìm thấy');
       }
-      throw new InternalServerErrorException('Lỗi khi cập nhật thiết bị');
+      throw new InternalServerErrorException(error);
     }
   }
 
   async remove(id: string): Promise<{ message: string }> {
     try {
       await this.prisma.equipment.delete({ where: { id } });
-      return { message: 'Xóa thiết bị thành công' };
+      return { message: 'Xóa thành công' };
     } catch (error) {
-      throw new NotFoundException('Không tìm thấy thiết bị');
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Không tìm thấy');
+      }
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -150,7 +154,7 @@ export class EquipmentService {
       }));
       return { data: equipmentsLabelValue };
     } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi lấy label-value');
+      throw new InternalServerErrorException(error);
     }
   }
 }
