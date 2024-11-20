@@ -3,13 +3,12 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Category, Prisma } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CategoryFilterDto } from './dto/category-filter.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category } from './entities/category.entity';
 
 @Injectable()
 export class CategoryService {
@@ -51,9 +50,7 @@ export class CategoryService {
         limit,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Lỗi khi lấy danh sách phân trang',
-      );
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -62,7 +59,7 @@ export class CategoryService {
       const categories = await this.prisma.category.findMany();
       return { data: categories };
     } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi lấy danh sách danh mục');
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -76,35 +73,46 @@ export class CategoryService {
       });
       return { data: category };
     } catch (error) {
-      throw new NotFoundException('Không tìm thấy danh mục');
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Không tìm thấy');
+      }
+      throw new InternalServerErrorException(error);
     }
   }
 
-  async create(dto: CreateCategoryDto): Promise<Category> {
+  async create(dto: CreateCategoryDto): Promise<{ message: string }> {
     try {
-      return await this.prisma.category.create({ data: dto });
+      await this.prisma.category.create({ data: dto });
+      return { message: 'Tạo mới thành công' };
     } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi tạo danh mục mới');
+      throw new InternalServerErrorException(error);
     }
   }
 
-  async update(id: string, dto: UpdateCategoryDto): Promise<Category> {
+  async update(
+    id: string,
+    dto: UpdateCategoryDto,
+  ): Promise<{ message: string }> {
     try {
-      return await this.prisma.category.update({ where: { id }, data: dto });
+      await this.prisma.category.update({ where: { id }, data: dto });
+      return { message: 'Cập nhật thành công' };
     } catch (error) {
       if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy danh mục');
+        throw new NotFoundException('Không tìm thấy');
       }
-      throw new InternalServerErrorException('Lỗi khi cập nhật danh mục');
+      throw new InternalServerErrorException(error);
     }
   }
 
   async remove(id: string): Promise<{ message: string }> {
     try {
       await this.prisma.category.delete({ where: { id } });
-      return { message: 'Xóa danh mục thành công' };
+      return { message: 'Xóa thành công' };
     } catch (error) {
-      throw new NotFoundException('Không tìm thấy danh mục');
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Không tìm thấy');
+      }
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -117,7 +125,7 @@ export class CategoryService {
       }));
       return { data: categoriesLabelValue };
     } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi lấy label-value');
+      throw new InternalServerErrorException(error);
     }
   }
 }
