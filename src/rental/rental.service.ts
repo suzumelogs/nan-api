@@ -5,10 +5,10 @@ import {
 } from '@nestjs/common';
 import { Prisma, Rental, RentalStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AddTtemToRentalDto } from './dto/add-item-to-rental.dto';
 import { CreateRentalDto } from './dto/create-rental.dto';
 import { RentalFilterDto } from './dto/rental-filter.dto';
 import { UpdateRentalStatusDto } from './dto/update-rental-status.dto';
+import { AddItemToRentalDto } from './dto/add-item-to-rental.dto';
 
 @Injectable()
 export class RentalService {
@@ -61,9 +61,7 @@ export class RentalService {
         limit,
       };
     } catch (error) {
-      console.log(error);
-
-      throw new InternalServerErrorException('Lỗi khi lấy danh sách đơn thuê');
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -79,18 +77,21 @@ export class RentalService {
       });
       return { data: rental };
     } catch (error) {
-      throw new NotFoundException('Không tìm thấy đơn thuê');
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Không tìm thấy');
+      }
+      throw new InternalServerErrorException(error);
     }
   }
 
   async createRental(
     userId: string,
     createRentalDto: CreateRentalDto,
-  ): Promise<Rental> {
+  ): Promise<{ message: string }> {
     try {
       const { startDate, endDate, items, totalAmount } = createRentalDto;
 
-      const rental = await this.prisma.rental.create({
+      await this.prisma.rental.create({
         data: {
           userId,
           startDate: new Date(startDate),
@@ -110,16 +111,18 @@ export class RentalService {
         },
       });
 
-      return rental;
+      return {
+        message: 'Thuê thành công. Vui lòng đợi quản trị viên phê duyệt!',
+      };
     } catch (error) {
-      throw new Error('Lỗi khi tạo đơn thuê');
+      throw new Error(error);
     }
   }
 
   async updateRentalStatus(
     rentalId: string,
     updateRentalStatusDto: UpdateRentalStatusDto,
-  ) {
+  ): Promise<{ message: string }> {
     try {
       const { status } = updateRentalStatusDto;
 
@@ -128,15 +131,15 @@ export class RentalService {
         data: { status },
       });
 
-      return rental;
+      return {
+        message: 'Cập nhật thành công. Vui lòng đợi quản trị viên phê duyệt!',
+      };
     } catch (error) {
-      throw new NotFoundException(
-        'Không tìm thấy đơn thuê để cập nhật trạng thái',
-      );
+      throw new NotFoundException(error);
     }
   }
 
-  async getRentalsByUser(userId: string): Promise<{ data: Rental[] }> {
+  async findRentalByMe(userId: string): Promise<{ data: Rental[] }> {
     try {
       const rentals = await this.prisma.rental.findMany({
         where: { userId },
@@ -145,16 +148,14 @@ export class RentalService {
 
       return { data: rentals };
     } catch (error) {
-      console.log(error);
-
-      throw new Error('Lỗi khi lấy thông tin đơn thuê của người dùng');
+      throw new Error(error);
     }
   }
 
   async addItemToRental(
     rentalId: string,
-    addTtemToRentalDto: AddTtemToRentalDto,
-  ) {
+    addItemToRentalDto: AddItemToRentalDto,
+  ): Promise<{ message: string }> {
     const {
       equipmentId,
       packageId,
@@ -162,10 +163,10 @@ export class RentalService {
       durationType,
       durationValue,
       price,
-    } = addTtemToRentalDto;
+    } = addItemToRentalDto;
 
     try {
-      const rentalItem = await this.prisma.rentalItem.create({
+      await this.prisma.rentalItem.create({
         data: {
           rentalId,
           equipmentId,
@@ -177,7 +178,9 @@ export class RentalService {
         },
       });
 
-      return rentalItem;
+      return {
+        message: 'Thêm thành công. Vui lòng đợi quản trị viên phê duyệt!',
+      };
     } catch (error) {
       throw new Error('Lỗi khi thêm item vào đơn thuê');
     }
@@ -186,9 +189,9 @@ export class RentalService {
   async remove(id: string): Promise<{ message: string }> {
     try {
       await this.prisma.rental.delete({ where: { id } });
-      return { message: 'Xóa đơn thuê thành công' };
+      return { message: 'Xóa thành công' };
     } catch (error) {
-      throw new NotFoundException('Không tìm thấy đơn thuê');
+      throw new NotFoundException(error);
     }
   }
 }

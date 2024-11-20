@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Duration } from '@prisma/client';
 import { IsEnum, IsInt, IsNumber, IsString } from 'class-validator';
 
-export class AddTtemToRentalDto {
+export class AddItemToRentalDto {
   @ApiProperty({
     description: 'ID của thiết bị được thuê',
     required: false,
