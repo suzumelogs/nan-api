@@ -16,6 +16,7 @@ import { UserModule } from './user/user.module';
 import { CartModule } from './cart/cart.module';
 import { EquipmentModule } from './equipment/equipment.module';
 import { EquipmentPackageModule } from './equipment-package/equipment-package.module';
+import { RentalModule } from './rental/rental.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { EquipmentPackageModule } from './equipment-package/equipment-package.mo
     CartModule,
     EquipmentModule,
     EquipmentPackageModule,
+    RentalModule,
   ],
   controllers: [AppController],
   providers: [AppService, FirebaseService],

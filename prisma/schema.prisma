@@ -200,9 +200,9 @@ model Rental {
   user   User   @relation(fields: [userId], references: [id])
 
   items       RentalItem[]
-  totalAmount Float
-  startDate   DateTime
-  endDate     DateTime
+  totalAmount Float?
+  startDate   DateTime?
+  endDate     DateTime?
   status      RentalStatus @default(pending)
 
   feedbacks Feedback[]
