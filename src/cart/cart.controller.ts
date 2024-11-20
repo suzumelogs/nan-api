@@ -21,15 +21,15 @@ import { UpdateItemToCartDto } from './dto/update-item-to-cart.dto';
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
-  @Get('me')
-  @ApiOperation({ summary: 'Lấy giỏ hàng của tôi' })
+  @Get('by-me')
+  @ApiOperation({ summary: 'Giỏ hàng của tôi' })
   @Auth(Role.user)
   async findCartByMe(@GetUser() user: User) {
     return this.cartService.findCartByMe(user.id);
   }
 
-  @Post('create-item')
-  @ApiOperation({ summary: 'Thêm item vào giỏ hàng' })
+  @Post('create/by-me')
+  @ApiOperation({ summary: 'Thêm item vào giỏ hàng của tôi' })
   @Auth(Role.user)
   async createItemToCart(
     @GetUser() user: User,
@@ -38,8 +38,8 @@ export class CartController {
     return this.cartService.createItemToCart(user.id, createItemToCartDto);
   }
 
-  @Patch('update-item')
-  @ApiOperation({ summary: 'Cập nhật item trong giỏ hàng' })
+  @Patch('update/by-me')
+  @ApiOperation({ summary: 'Cập nhật item trong giỏ hàng của tôi' })
   @Auth(Role.user)
   async updateItemToCart(
     @GetUser() user: User,
@@ -53,7 +53,7 @@ export class CartController {
   }
 
   @Delete('remove-item/:cartItemId')
-  @ApiOperation({ summary: 'Xóa item khỏi giỏ hàng' })
+  @ApiOperation({ summary: 'Xóa item khỏi giỏ hàng của tôi' })
   @Auth(Role.user)
   async removeItemFromCart(
     @GetUser() user: User,
