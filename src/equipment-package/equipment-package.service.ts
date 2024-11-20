@@ -67,9 +67,7 @@ export class EquipmentPackageService {
         limit,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Lỗi khi lấy danh sách gói thiết bị',
-      );
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -78,9 +76,7 @@ export class EquipmentPackageService {
       const equipmentPackages = await this.prisma.equipmentPackage.findMany();
       return { data: equipmentPackages };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Lỗi khi lấy danh sách gói thiết bị',
-      );
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -92,43 +88,53 @@ export class EquipmentPackageService {
         });
       return { data: equipmentPackage };
     } catch (error) {
-      throw new NotFoundException('Không tìm thấy gói thiết bị');
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Không tìm thấy');
+      }
+      throw new InternalServerErrorException(error);
     }
   }
 
-  async create(dto: CreateEquipmentPackageDto): Promise<EquipmentPackage> {
+  async create(dto: CreateEquipmentPackageDto): Promise<{ message: string }> {
     try {
-      return await this.prisma.equipmentPackage.create({
+      await this.prisma.equipmentPackage.create({
         data: dto,
       });
+
+      return { message: 'Tạo mới thành công' };
     } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi tạo gói thiết bị mới');
+      throw new InternalServerErrorException(error);
     }
   }
 
   async update(
     id: string,
     dto: UpdateEquipmentPackageDto,
-  ): Promise<EquipmentPackage> {
+  ): Promise<{ message: string }> {
     try {
-      return await this.prisma.equipmentPackage.update({
+      await this.prisma.equipmentPackage.update({
         where: { id },
         data: dto,
       });
+
+      return { message: 'Cập nhật thành công' };
     } catch (error) {
       if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy gói thiết bị');
+        throw new NotFoundException('Không tìm thấy');
       }
-      throw new InternalServerErrorException('Lỗi khi cập nhật gói thiết bị');
+      throw new InternalServerErrorException(error);
     }
   }
 
   async remove(id: string): Promise<{ message: string }> {
     try {
       await this.prisma.equipmentPackage.delete({ where: { id } });
-      return { message: 'Xóa gói thiết bị thành công' };
+      return { message: 'Xóa thành công' };
     } catch (error) {
-      throw new NotFoundException('Không tìm thấy gói thiết bị');
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Không tìm thấy');
+      }
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -143,7 +149,7 @@ export class EquipmentPackageService {
       );
       return { data: equipmentPackagesLabelValue };
     } catch (error) {
-      throw new InternalServerErrorException('Lỗi khi lấy label-value');
+      throw new InternalServerErrorException(error);
     }
   }
 }

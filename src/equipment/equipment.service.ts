@@ -108,7 +108,7 @@ export class EquipmentService {
         data: dto,
       });
 
-      return { message: 'Tạo thành công' };
+      return { message: 'Tạo mới thành công' };
     } catch (error) {
       throw new InternalServerErrorException(error);
     }

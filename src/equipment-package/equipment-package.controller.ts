@@ -9,16 +9,16 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { EquipmentPackage } from '@prisma/client'; // Thay đổi theo mô hình của bạn
+import { EquipmentPackage } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
-import { CreateEquipmentPackageDto } from './dto/create-equipment-package.dto'; // Thêm DTO tương ứng
-import { EquipmentPackageFilterDto } from './dto/equipment-package-filter.dto'; // Thêm DTO lọc tương ứng
-import { UpdateEquipmentPackageDto } from './dto/update-equipment-package.dto'; // Thêm DTO cập nhật
+import { CreateEquipmentPackageDto } from './dto/create-equipment-package.dto';
+import { EquipmentPackageFilterDto } from './dto/equipment-package-filter.dto';
+import { UpdateEquipmentPackageDto } from './dto/update-equipment-package.dto';
 import { EquipmentPackageService } from './equipment-package.service';
 
 @ApiBearerAuth()
 @ApiTags('Equipment Packages')
-@Controller('equipment-package')
+@Controller('equipment-packages')
 export class EquipmentPackageController {
   constructor(
     private readonly equipmentPackageService: EquipmentPackageService,
@@ -26,7 +26,7 @@ export class EquipmentPackageController {
 
   @Get('all/pagination')
   @ApiOperation({
-    summary: 'Lấy tất cả gói thiết bị (Có phân trang và tìm kiếm)',
+    summary: 'Tất cả gói thiết bị (Có phân trang và tìm kiếm)',
   })
   async findAllPagination(
     @Query() filterDto: EquipmentPackageFilterDto,
@@ -42,7 +42,7 @@ export class EquipmentPackageController {
 
   @Get('all')
   @ApiOperation({
-    summary: 'Lấy tất cả gói thiết bị (Không phân trang)',
+    summary: 'Tất cả gói thiết bị (Không phân trang)',
   })
   findAll(): Promise<{ data: EquipmentPackage[] }> {
     return this.equipmentPackageService.findAll();
@@ -50,7 +50,7 @@ export class EquipmentPackageController {
 
   @Get('get-by/:id')
   @ApiOperation({
-    summary: 'Lấy gói thiết bị theo ID',
+    summary: 'Thiết bị theo ID',
   })
   findOne(@Param('id') id: string): Promise<{ data: EquipmentPackage }> {
     return this.equipmentPackageService.findOne(id);
@@ -62,7 +62,7 @@ export class EquipmentPackageController {
   })
   create(
     @Body() createEquipmentPackageDto: CreateEquipmentPackageDto,
-  ): Promise<EquipmentPackage> {
+  ): Promise<{ message: string }> {
     return this.equipmentPackageService.create(createEquipmentPackageDto);
   }
 
@@ -73,7 +73,7 @@ export class EquipmentPackageController {
   update(
     @Param('id') id: string,
     @Body() updateEquipmentPackageDto: UpdateEquipmentPackageDto,
-  ): Promise<EquipmentPackage> {
+  ): Promise<{ message: string }> {
     return this.equipmentPackageService.update(id, updateEquipmentPackageDto);
   }
 
@@ -87,7 +87,7 @@ export class EquipmentPackageController {
 
   @Get('all/label-value')
   @ApiOperation({
-    summary: 'Lấy tất cả gói thiết bị (Định dạng label-value)',
+    summary: 'Tất cả gói thiết bị (Định dạng label-value)',
   })
   getLabelValue(): Promise<{ data: LabelValueResponse[] }> {
     return this.equipmentPackageService.getLabelValue();
