@@ -9,21 +9,22 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Maintenance } from '@prisma/client';
 import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 import { MaintenanceFilterDto } from './dto/maintenance-filter.dto';
 import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
-import { Maintenance } from './entities/maintenance.entity';
+import { UpdateStatusDto } from './dto/update-status.dto';
 import { MaintenanceService } from './maintenance.service';
 
 @ApiBearerAuth()
-@ApiTags('Maintenance')
-@Controller('maintenance')
+@ApiTags('Maintenances')
+@Controller('maintenances')
 export class MaintenanceController {
   constructor(private readonly maintenanceService: MaintenanceService) {}
 
   @Get('pagination')
   @ApiOperation({
-    summary: 'Lấy tất cả lịch bảo trì (Có phân trang và tìm kiếm)',
+    summary: 'Tất cả lịch bảo trì (Có phân trang và tìm kiếm)',
   })
   async findAllPagination(@Query() filterDto: MaintenanceFilterDto): Promise<{
     data: Maintenance[];
@@ -37,17 +38,17 @@ export class MaintenanceController {
 
   @Get()
   @ApiOperation({
-    summary: 'Lấy tất cả lịch bảo trì (Không phân trang)',
+    summary: 'Tất cả lịch bảo trì (Không phân trang)',
   })
-  findAll(): Promise<Maintenance[]> {
+  findAll(): Promise<{ data: Maintenance[] }> {
     return this.maintenanceService.findAll();
   }
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Lấy lịch bảo trì theo ID',
+    summary: 'Lịch bảo trì theo ID',
   })
-  findOne(@Param('id') id: string): Promise<Maintenance> {
+  findOne(@Param('id') id: string): Promise<{ data: Maintenance }> {
     return this.maintenanceService.findOne(id);
   }
 
@@ -57,7 +58,7 @@ export class MaintenanceController {
   })
   create(
     @Body() createMaintenanceDto: CreateMaintenanceDto,
-  ): Promise<Maintenance> {
+  ): Promise<{ message: string }> {
     return this.maintenanceService.create(createMaintenanceDto);
   }
 
@@ -68,7 +69,7 @@ export class MaintenanceController {
   update(
     @Param('id') id: string,
     @Body() updateMaintenanceDto: UpdateMaintenanceDto,
-  ): Promise<Maintenance> {
+  ): Promise<{ message: string }> {
     return this.maintenanceService.update(id, updateMaintenanceDto);
   }
 
@@ -80,11 +81,95 @@ export class MaintenanceController {
     return this.maintenanceService.remove(id);
   }
 
-  @Get('device/:deviceId')
+  @Patch('status')
   @ApiOperation({
-    summary: 'Lấy lịch bảo trì theo Device ID',
+    summary: 'Cập nhật trạng thái bảo trì',
   })
-  findByDeviceId(@Param('deviceId') deviceId: string): Promise<Maintenance[]> {
-    return this.maintenanceService.findByDeviceId(deviceId);
+  updateStatus(
+    @Body() updateStatusDto: UpdateStatusDto,
+  ): Promise<{ message: string }> {
+    return this.maintenanceService.updateStatus(updateStatusDto);
+  }
+
+  @Get('status/:status')
+  @ApiOperation({
+    summary: 'Lấy tất cả lịch bảo trì theo trạng thái',
+  })
+  findByStatus(
+    @Param('status') status: string,
+  ): Promise<{ data: Maintenance[] }> {
+    return this.maintenanceService.findByStatus(status as any);
+  }
+
+  @Get('next-maintenance')
+  @ApiOperation({
+    summary: 'Lấy lịch bảo trì tiếp theo',
+  })
+  findNextMaintenance(): Promise<{ data: Maintenance }> {
+    return this.maintenanceService.findNextMaintenance();
+  }
+
+  @Get('total-cost')
+  @ApiOperation({
+    summary: 'Tính tổng chi phí bảo trì theo bộ lọc',
+  })
+  calculateTotalCost(
+    @Query() filterDto: MaintenanceFilterDto,
+  ): Promise<{ totalCost: number }> {
+    return this.maintenanceService.calculateTotalCost(filterDto);
+  }
+
+  @Get('history/:equipmentId')
+  @ApiOperation({
+    summary: 'Lịch sử bảo trì theo thiết bị',
+  })
+  getMaintenanceHistory(
+    @Param('equipmentId') equipmentId: string,
+  ): Promise<{ data: Maintenance[] }> {
+    return this.maintenanceService.getMaintenanceHistory(equipmentId);
+  }
+
+  @Get('summary/:equipmentId')
+  @ApiOperation({
+    summary: 'Tổng hợp bảo trì theo thiết bị',
+  })
+  getMaintenanceSummaryByEquipment(
+    @Param('equipmentId') equipmentId: string,
+  ): Promise<{
+    data: {
+      totalCost: number;
+      maintenanceCount: number;
+      lastMaintenanceDate: Date | null;
+    };
+  }> {
+    return this.maintenanceService.getMaintenanceSummaryByEquipment(
+      equipmentId,
+    );
+  }
+
+  @Post('bulk-create')
+  @ApiOperation({
+    summary: 'Tạo nhiều lịch bảo trì cùng lúc',
+  })
+  bulkCreate(
+    @Body() createMaintenanceDto: CreateMaintenanceDto[],
+  ): Promise<{ message: string }> {
+    return this.maintenanceService.bulkCreate(createMaintenanceDto);
+  }
+
+  @Get('history/:equipmentId/date-range')
+  @ApiOperation({
+    summary: 'Lịch sử bảo trì theo thiết bị và khoảng thời gian',
+  })
+  getMaintenanceByEquipmentAndDateRange(
+    @Param('equipmentId') equipmentId: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ): Promise<{ data: Maintenance[] }> {
+    return this.maintenanceService.getMaintenanceByEquipmentAndDateRange(
+      equipmentId,
+      startDate,
+      endDate,
+    );
   }
 }

@@ -3,16 +3,23 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Maintenance, MaintenanceStatus, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 import { MaintenanceFilterDto } from './dto/maintenance-filter.dto';
 import { UpdateMaintenanceDto } from './dto/update-maintenance.dto';
-import { Maintenance } from './entities/maintenance.entity';
+import { UpdateStatusDto } from './dto/update-status.dto';
 
 @Injectable()
 export class MaintenanceService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private handlePrismaError(error: any): never {
+    if (error.code === 'P2025') {
+      throw new NotFoundException('Không tìm thấy');
+    }
+    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
+  }
 
   async findAllPagination(
     page: number,
@@ -59,54 +66,54 @@ export class MaintenanceService {
         limit,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to retrieve maintenance records with pagination and filters',
-      );
+      this.handlePrismaError(error);
     }
   }
 
-  async findAll(): Promise<Maintenance[]> {
+  async findAll(): Promise<{ data: Maintenance[] }> {
     try {
-      return await this.prisma.maintenance.findMany();
+      const maintenances = await this.prisma.maintenance.findMany();
+      return { data: maintenances };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to retrieve maintenances');
+      this.handlePrismaError(error);
     }
   }
 
-  async findOne(id: string): Promise<Maintenance> {
+  async findOne(id: string): Promise<{ data: Maintenance }> {
     try {
       const maintenance = await this.prisma.maintenance.findUniqueOrThrow({
         where: { id },
       });
-      return maintenance;
+      return { data: maintenance };
     } catch (error) {
-      throw new NotFoundException('Maintenance not found');
+      this.handlePrismaError(error);
     }
   }
 
-  async create(dto: CreateMaintenanceDto): Promise<Maintenance> {
+  async create(dto: CreateMaintenanceDto): Promise<{ message: string }> {
     try {
-      const newMaintenance = await this.prisma.maintenance.create({
+      await this.prisma.maintenance.create({
         data: dto,
       });
-      return newMaintenance;
+
+      return { message: 'Tạo mới thành công' };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to create maintenance');
+      this.handlePrismaError(error);
     }
   }
 
-  async update(id: string, dto: UpdateMaintenanceDto): Promise<Maintenance> {
+  async update(
+    id: string,
+    dto: UpdateMaintenanceDto,
+  ): Promise<{ message: string }> {
     try {
-      const updatedMaintenance = await this.prisma.maintenance.update({
+      await this.prisma.maintenance.update({
         where: { id },
         data: dto,
       });
-      return updatedMaintenance;
+      return { message: 'Cập nhật thành công' };
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Maintenance not found');
-      }
-      throw new InternalServerErrorException('Failed to update maintenance');
+      this.handlePrismaError(error);
     }
   }
 
@@ -115,27 +122,184 @@ export class MaintenanceService {
       await this.prisma.maintenance.delete({
         where: { id },
       });
-      return { message: 'Maintenance deleted successfully' };
+
+      return { message: 'Xóa thành công' };
     } catch (error) {
-      throw new NotFoundException('Maintenance not found');
+      this.handlePrismaError(error);
     }
   }
 
-  async findByDeviceId(deviceId: string): Promise<Maintenance[]> {
+  async updateStatus(updateDto: UpdateStatusDto): Promise<{ message: string }> {
+    try {
+      const { id, status, maintenanceCost } = updateDto;
+
+      await this.prisma.maintenance.update({
+        where: { id },
+        data: {
+          status,
+          ...(maintenanceCost && { maintenanceCost }),
+        },
+      });
+
+      return { message: 'Trạng thái bảo trì đã được cập nhật thành công' };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async findByStatus(
+    status: MaintenanceStatus,
+  ): Promise<{ data: Maintenance[] }> {
     try {
       const maintenances = await this.prisma.maintenance.findMany({
-        where: { deviceId },
+        where: { status },
       });
-      if (maintenances.length === 0) {
-        throw new NotFoundException(
-          'No maintenance records found for this device',
-        );
-      }
-      return maintenances;
+      return { data: maintenances };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to retrieve maintenances for the device',
-      );
+      this.handlePrismaError(error);
+    }
+  }
+
+  async findNextMaintenance(): Promise<{ data: Maintenance }> {
+    try {
+      const nextMaintenance = await this.prisma.maintenance.findFirst({
+        where: {
+          suggestedNextMaintenance: {
+            gte: new Date(),
+          },
+        },
+        orderBy: {
+          suggestedNextMaintenance: 'asc',
+        },
+      });
+      return { data: nextMaintenance };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async calculateTotalCost(
+    filters: Partial<MaintenanceFilterDto>,
+  ): Promise<{ totalCost: number }> {
+    try {
+      const whereClause: Prisma.MaintenanceWhereInput = {
+        ...(filters.maintenanceDate && {
+          maintenanceDate: { gte: new Date(filters.maintenanceDate) },
+        }),
+        ...(filters.suggestedNextMaintenance && {
+          suggestedNextMaintenance: {
+            lte: new Date(filters.suggestedNextMaintenance),
+          },
+        }),
+        ...(filters.status && { status: filters.status }),
+      };
+
+      const totalCost = await this.prisma.maintenance.aggregate({
+        _sum: {
+          maintenanceCost: true,
+        },
+        where: whereClause,
+      });
+
+      return { totalCost: totalCost._sum.maintenanceCost || 0 };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async getMaintenanceHistory(
+    equipmentId: string,
+  ): Promise<{ data: Maintenance[] }> {
+    try {
+      const maintenances = await this.prisma.maintenance.findMany({
+        where: {
+          equipmentId: equipmentId,
+        },
+        orderBy: {
+          maintenanceDate: 'desc',
+        },
+      });
+      return { data: maintenances };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async getMaintenanceSummaryByEquipment(equipmentId: string): Promise<{
+    data: {
+      totalCost: number;
+      maintenanceCount: number;
+      lastMaintenanceDate: Date | null;
+    };
+  }> {
+    try {
+      const summary = await this.prisma.maintenance.aggregate({
+        _sum: {
+          maintenanceCost: true,
+        },
+        _count: {
+          id: true,
+        },
+        where: {
+          equipmentId: equipmentId,
+        },
+      });
+
+      return {
+        data: {
+          totalCost: summary._sum.maintenanceCost || 0,
+          maintenanceCount: summary._count.id || 0,
+          lastMaintenanceDate:
+            summary._count.id > 0
+              ? await this.prisma.maintenance
+                  .findFirst({
+                    where: { equipmentId },
+                    orderBy: { maintenanceDate: 'desc' },
+                    select: { maintenanceDate: true },
+                  })
+                  .then((res) => res?.maintenanceDate)
+              : null,
+        },
+      };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async bulkCreate(dto: CreateMaintenanceDto[]): Promise<{ message: string }> {
+    try {
+      await this.prisma.maintenance.createMany({
+        data: dto,
+      });
+
+      return { message: 'Tạo mới bảo trì thành công' };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async getMaintenanceByEquipmentAndDateRange(
+    equipmentId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<{ data: Maintenance[] }> {
+    try {
+      const maintenances = await this.prisma.maintenance.findMany({
+        where: {
+          equipmentId: equipmentId,
+          maintenanceDate: {
+            gte: new Date(startDate),
+            lte: new Date(endDate),
+          },
+        },
+        orderBy: {
+          maintenanceDate: 'asc',
+        },
+      });
+
+      return { data: maintenances };
+    } catch (error) {
+      this.handlePrismaError(error);
     }
   }
 }

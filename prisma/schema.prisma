@@ -111,9 +111,10 @@ model Equipment {
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String   @db.ObjectId
 
-  cartItems   CartItem[]
-  rentalItems RentalItem[]
-  packages    EquipmentPackageOnEquipment[]
+  cartItems    CartItem[]
+  rentalItems  RentalItem[]
+  packages     EquipmentPackageOnEquipment[]
+  maintenances Maintenance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -278,7 +279,8 @@ model Maintenance {
   status                   MaintenanceStatus @default(pending)
   maintenanceCost          Float? // chi phí bảo trì
 
-  deviceId String @db.ObjectId
+  equipmentId String    @db.ObjectId
+  equipment   Equipment @relation(fields: [equipmentId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
