@@ -5,14 +5,21 @@ import {
 } from '@nestjs/common';
 import { Prisma, Rental, RentalStatus } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AddItemToRentalDto } from './dto/add-item-to-rental.dto';
 import { CreateRentalDto } from './dto/create-rental.dto';
 import { RentalFilterDto } from './dto/rental-filter.dto';
 import { UpdateRentalStatusDto } from './dto/update-rental-status.dto';
-import { AddItemToRentalDto } from './dto/add-item-to-rental.dto';
 
 @Injectable()
 export class RentalService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private handlePrismaError(error: any): never {
+    if (error.code === 'P2025') {
+      throw new NotFoundException('Không tìm thấy');
+    }
+    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
+  }
 
   async findAllPagination(
     page: number,
@@ -24,44 +31,27 @@ export class RentalService {
     page: number;
     limit: number;
   }> {
-    try {
-      const whereClause: Prisma.RentalWhereInput = {
-        ...(filters.userId && {
-          userId: filters.userId,
-        }),
-        ...(filters.status && {
-          status: filters.status,
-        }),
-        ...(filters.startDate && {
-          startDate: { gte: filters.startDate },
-        }),
-        ...(filters.endDate && {
-          endDate: { lte: filters.endDate },
-        }),
-        ...(filters.totalAmount && {
-          totalAmount: { gte: filters.totalAmount },
-        }),
-      };
+    const whereClause: Prisma.RentalWhereInput = {
+      ...(filters.userId && { userId: filters.userId }),
+      ...(filters.status && { status: filters.status }),
+      ...(filters.startDate && { startDate: { gte: filters.startDate } }),
+      ...(filters.endDate && { endDate: { lte: filters.endDate } }),
+      ...(filters.totalAmount && { totalAmount: { gte: filters.totalAmount } }),
+    };
 
+    try {
       const [data, total] = await Promise.all([
         this.prisma.rental.findMany({
           where: whereClause,
           skip: (page - 1) * limit,
           take: limit,
         }),
-        this.prisma.rental.count({
-          where: whereClause,
-        }),
+        this.prisma.rental.count({ where: whereClause }),
       ]);
 
-      return {
-        data,
-        total,
-        page,
-        limit,
-      };
+      return { data, total, page, limit };
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -69,28 +59,21 @@ export class RentalService {
     try {
       const rental = await this.prisma.rental.findUniqueOrThrow({
         where: { id },
-        include: {
-          user: true,
-          items: true,
-          feedbacks: true,
-        },
+        include: { user: true, items: true, feedbacks: true },
       });
       return { data: rental };
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy');
-      }
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
-  async createRental(
+  async createByMe(
     userId: string,
     createRentalDto: CreateRentalDto,
   ): Promise<{ message: string }> {
-    try {
-      const { startDate, endDate, items, totalAmount } = createRentalDto;
+    const { startDate, endDate, items, totalAmount } = createRentalDto;
 
+    try {
       await this.prisma.rental.create({
         data: {
           userId,
@@ -115,7 +98,7 @@ export class RentalService {
         message: 'Thuê thành công. Vui lòng đợi quản trị viên phê duyệt!',
       };
     } catch (error) {
-      throw new Error(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -123,32 +106,78 @@ export class RentalService {
     rentalId: string,
     updateRentalStatusDto: UpdateRentalStatusDto,
   ): Promise<{ message: string }> {
-    try {
-      const { status } = updateRentalStatusDto;
+    const { status } = updateRentalStatusDto;
 
-      const rental = await this.prisma.rental.update({
+    try {
+      const rental = await this.prisma.rental.findUniqueOrThrow({
+        where: { id: rentalId },
+        include: { items: true },
+      });
+
+      if (status === RentalStatus.confirmed) {
+        await this.decreaseStock(rental.items);
+      } else if (status === RentalStatus.canceled) {
+        await this.increaseStock(rental.items);
+      }
+
+      await this.prisma.rental.update({
         where: { id: rentalId },
         data: { status },
       });
 
-      return {
-        message: 'Cập nhật thành công. Vui lòng đợi quản trị viên phê duyệt!',
-      };
+      return { message: 'Cập nhật trạng thái thành công!' };
     } catch (error) {
-      throw new NotFoundException(error);
+      this.handlePrismaError(error);
     }
   }
 
-  async findRentalByMe(userId: string): Promise<{ data: Rental[] }> {
+  private async decreaseStock(
+    items: Array<{ equipmentId: string; quantity: number }>,
+  ) {
+    for (const item of items) {
+      const equipment = await this.prisma.equipment.findUnique({
+        where: { id: item.equipmentId },
+      });
+
+      if (!equipment) {
+        throw new NotFoundException(
+          `Không tìm thấy thiết bị với ID: ${item.equipmentId}`,
+        );
+      }
+
+      if (equipment.stock < item.quantity) {
+        throw new Error(
+          `Không đủ số lượng hàng trong kho cho thiết bị ID: ${item.equipmentId}`,
+        );
+      }
+
+      await this.prisma.equipment.update({
+        where: { id: item.equipmentId },
+        data: { stock: equipment.stock - item.quantity },
+      });
+    }
+  }
+
+  private async increaseStock(
+    items: Array<{ equipmentId: string; quantity: number }>,
+  ) {
+    for (const item of items) {
+      await this.prisma.equipment.update({
+        where: { id: item.equipmentId },
+        data: { stock: { increment: item.quantity } },
+      });
+    }
+  }
+
+  async findByMe(userId: string): Promise<{ data: Rental[] }> {
     try {
       const rentals = await this.prisma.rental.findMany({
         where: { userId },
         include: { items: true, feedbacks: true },
       });
-
       return { data: rentals };
     } catch (error) {
-      throw new Error(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -178,20 +207,18 @@ export class RentalService {
         },
       });
 
-      return {
-        message: 'Thêm thành công. Vui lòng đợi quản trị viên phê duyệt!',
-      };
+      return { message: 'Thêm item vào đơn thuê thành công!' };
     } catch (error) {
-      throw new Error('Lỗi khi thêm item vào đơn thuê');
+      this.handlePrismaError(error);
     }
   }
 
   async remove(id: string): Promise<{ message: string }> {
     try {
       await this.prisma.rental.delete({ where: { id } });
-      return { message: 'Xóa thành công' };
+      return { message: 'Xóa đơn thuê thành công!' };
     } catch (error) {
-      throw new NotFoundException(error);
+      this.handlePrismaError(error);
     }
   }
 }

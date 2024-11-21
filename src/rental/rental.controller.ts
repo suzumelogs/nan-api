@@ -37,7 +37,7 @@ export class RentalController {
     return this.rentalService.findAllPagination(page, limit, filters);
   }
 
-  @Get('get-by/:id')
+  @Get(':id')
   @ApiOperation({
     summary: 'Đơn thuê theo ID',
   })
@@ -48,16 +48,16 @@ export class RentalController {
   @Post('create/by-me')
   @ApiOperation({ summary: 'Thuê thiết bị (gói thiết bị) của tôi' })
   @Auth(Role.user)
-  async createRental(
+  async createByMe(
     @GetUser() user: User,
     @Body() createRentalDto: CreateRentalDto,
   ): Promise<{ message: string }> {
-    return this.rentalService.createRental(user.id, createRentalDto);
+    return this.rentalService.createByMe(user.id, createRentalDto);
   }
 
   @Patch('update-status/:id')
   @ApiOperation({
-    summary: 'Cập nhật trạng thái đơn thuê',
+    summary: 'Cập nhật trạng thái đơn thuê (Admin)',
   })
   async updateRentalStatus(
     @Param('id') id: string,
@@ -66,13 +66,13 @@ export class RentalController {
     return this.rentalService.updateRentalStatus(id, updateRentalStatusDto);
   }
 
-  @Get('by-me')
+  @Get('get-by/me')
   @ApiOperation({
-    summary: 'Lấy tất cả đơn thuê của tôi theo ID',
+    summary: 'Đơn thuê của tôi theo ID',
   })
   @Auth(Role.user)
-  async findRentalByMe(@GetUser() user: User): Promise<{ data: Rental[] }> {
-    return this.rentalService.findRentalByMe(user.id);
+  async findByMe(@GetUser() user: User): Promise<{ data: Rental[] }> {
+    return this.rentalService.findByMe(user.id);
   }
 
   @Post('add-item/:id')
