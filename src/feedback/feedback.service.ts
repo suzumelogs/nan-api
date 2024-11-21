@@ -3,16 +3,22 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Feedback, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { FeedbackFilterDto } from './dto/feedback-filter.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
-import { Feedback } from './entities/feedback.entity';
 
 @Injectable()
 export class FeedbackService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private handlePrismaError(error: any): never {
+    if (error.code === 'P2025') {
+      throw new NotFoundException('Không tìm thấy');
+    }
+    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
+  }
 
   async findAllPagination(
     page: number,
@@ -51,54 +57,57 @@ export class FeedbackService {
         limit,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to retrieve feedback with pagination and filters',
-      );
+      this.handlePrismaError(error);
     }
   }
 
-  async findAll(): Promise<Feedback[]> {
+  async findAll(): Promise<{ data: Feedback[] }> {
     try {
-      return await this.prisma.feedback.findMany();
+      const feedbacks = await this.prisma.feedback.findMany();
+
+      return { data: feedbacks };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to retrieve feedbacks');
+      this.handlePrismaError(error);
     }
   }
 
-  async findOne(id: string): Promise<Feedback> {
+  async findOne(id: string): Promise<{ data: Feedback }> {
     try {
       const feedback = await this.prisma.feedback.findUniqueOrThrow({
         where: { id },
       });
-      return feedback;
+
+      return { data: feedback };
     } catch (error) {
-      throw new NotFoundException('Feedback not found');
+      this.handlePrismaError(error);
     }
   }
 
-  async create(dto: CreateFeedbackDto): Promise<Feedback> {
+  async create(dto: CreateFeedbackDto): Promise<{ message: string }> {
     try {
-      const newFeedback = await this.prisma.feedback.create({
+      await this.prisma.feedback.create({
         data: dto,
       });
-      return newFeedback;
+
+      return { message: 'Thêm mới thành công' };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to create feedback');
+      this.handlePrismaError(error);
     }
   }
 
-  async update(id: string, dto: UpdateFeedbackDto): Promise<Feedback> {
+  async update(
+    id: string,
+    dto: UpdateFeedbackDto,
+  ): Promise<{ message: string }> {
     try {
-      const updatedFeedback = await this.prisma.feedback.update({
+      await this.prisma.feedback.update({
         where: { id },
         data: dto,
       });
-      return updatedFeedback;
+
+      return { message: 'Cập nhật thành công' };
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Feedback not found');
-      }
-      throw new InternalServerErrorException('Failed to update feedback');
+      this.handlePrismaError(error);
     }
   }
 
@@ -107,9 +116,104 @@ export class FeedbackService {
       await this.prisma.feedback.delete({
         where: { id },
       });
-      return { message: 'Feedback deleted successfully' };
+
+      return { message: 'Xóa thành công' };
     } catch (error) {
-      throw new NotFoundException('Feedback not found');
+      this.handlePrismaError(error);
+    }
+  }
+
+  async reply(
+    id: string,
+    dto: { adminResponse: string; replyDate: Date },
+  ): Promise<{ message: string }> {
+    try {
+      await this.prisma.feedback.update({
+        where: { id },
+        data: {
+          adminResponse: dto.adminResponse,
+          replyDate: dto.replyDate,
+        },
+      });
+
+      return { message: 'Phản hồi thành công' };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async findByUser(userId: string): Promise<{ data: Feedback[] }> {
+    try {
+      const feedbacks = await this.prisma.feedback.findMany({
+        where: { userId },
+      });
+
+      return { data: feedbacks };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async averageRating(): Promise<{ average: number }> {
+    try {
+      const feedbacks = await this.prisma.feedback.findMany();
+      const totalRating = feedbacks.reduce(
+        (sum, feedback) => sum + feedback.rating,
+        0,
+      );
+      const average = feedbacks.length > 0 ? totalRating / feedbacks.length : 0;
+
+      return { average };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async findByRental(rentalId: string): Promise<{ data: Feedback[] }> {
+    try {
+      const feedbacks = await this.prisma.feedback.findMany({
+        where: { rentalId },
+      });
+
+      return { data: feedbacks };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async findRepliedFeedbacks(): Promise<{ data: Feedback[] }> {
+    try {
+      const feedbacks = await this.prisma.feedback.findMany({
+        where: {
+          NOT: {
+            replyDate: null, // Lọc những phản hồi có replyDate (đã có phản hồi)
+          },
+        },
+      });
+
+      return { data: feedbacks };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async feedbackStatistics(): Promise<{
+    total: number;
+    ratingCounts: Record<number, number>;
+  }> {
+    try {
+      const feedbacks = await this.prisma.feedback.findMany();
+      const ratingCounts = feedbacks.reduce(
+        (acc, feedback) => {
+          acc[feedback.rating] = (acc[feedback.rating] || 0) + 1;
+          return acc;
+        },
+        {} as Record<number, number>,
+      );
+
+      return { total: feedbacks.length, ratingCounts };
+    } catch (error) {
+      this.handlePrismaError(error);
     }
   }
 }
