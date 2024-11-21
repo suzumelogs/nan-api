@@ -61,4 +61,11 @@ export class CartController {
   ) {
     return this.cartService.removeItem(user.id, cartItemId);
   }
+
+  @Delete('clear')
+  @ApiOperation({ summary: 'Làm sạch giỏ hàng của tôi' })
+  @Auth(Role.user)
+  async clearCart(@GetUser() user: User) {
+    return this.cartService.clearCart(user.id);
+  }
 }

@@ -202,4 +202,26 @@ export class CartService {
 
     return { message: 'Đã xóa thành công!' };
   }
+
+  async clearCart(userId: string) {
+    const cart = await this.prisma.cart.findUnique({
+      where: { userId },
+      include: { items: true },
+    });
+
+    if (!cart) {
+      throw new NotFoundException('Không tìm thấy giỏ hàng');
+    }
+
+    await this.prisma.cartItem.deleteMany({
+      where: { cartId: cart.id },
+    });
+
+    await this.prisma.cart.update({
+      where: { id: cart.id },
+      data: { totalAmount: 0 },
+    });
+
+    return { message: 'Giỏ hàng đã được làm sạch' };
+  }
 }
