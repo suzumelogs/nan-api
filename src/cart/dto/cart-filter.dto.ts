@@ -8,20 +8,6 @@ export class CartFilterDto {
   @IsString()
   userId?: string;
 
-  @ApiProperty({ description: 'Thời gian thuê', required: false, minimum: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  @Min(0)
-  rentalDuration?: number;
-
-  @ApiProperty({ description: 'Tổng giá', required: false, minimum: 0 })
-  @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  @Min(0)
-  totalPrice?: number;
-
   @ApiProperty({
     description: 'Số trang',
     required: false,

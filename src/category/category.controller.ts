@@ -14,7 +14,7 @@ import { CategoryService } from './category.service';
 import { CategoryFilterDto } from './dto/category-filter.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category } from './entities/category.entity';
+import { Category } from '@prisma/client';
 
 @ApiBearerAuth()
 @ApiTags('Categories')
@@ -24,7 +24,7 @@ export class CategoryController {
 
   @Get('pagination')
   @ApiOperation({
-    summary: 'Lất tất cả gói (Có phân trang và tìm kiếm)',
+    summary: 'Lất tất cả danh mục (Có phân trang và tìm kiếm)',
   })
   async findAllPagination(
     @Query() filterDto: CategoryFilterDto,
@@ -35,7 +35,7 @@ export class CategoryController {
 
   @Get()
   @ApiOperation({
-    summary: 'Lấy tất cả gói (Không phân trang)',
+    summary: 'Lấy tất cả danh mục (Không phân trang)',
   })
   findAll(): Promise<Category[]> {
     return this.categoryService.findAll();
@@ -43,7 +43,7 @@ export class CategoryController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Lấy gói theo ID',
+    summary: 'Lấy danh mục theo ID',
   })
   findOne(@Param('id') id: string): Promise<{ data: Category }> {
     return this.categoryService.findOne(id);
@@ -51,7 +51,7 @@ export class CategoryController {
 
   @Post()
   @ApiOperation({
-    summary: 'Tạo gói mới',
+    summary: 'Tạo danh mục mới',
   })
   create(@Body() createCategoryDto: CreateCategoryDto): Promise<Category> {
     return this.categoryService.create(createCategoryDto);
@@ -59,7 +59,7 @@ export class CategoryController {
 
   @Patch(':id')
   @ApiOperation({
-    summary: 'Cập nhật gói theo ID',
+    summary: 'Cập nhật danh mục theo ID',
   })
   update(
     @Param('id') id: string,
@@ -70,17 +70,17 @@ export class CategoryController {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'Xóa gói theo ID',
+    summary: 'Xóa danh mục theo ID',
   })
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.categoryService.remove(id);
   }
 
-  @Get('label-value')
+  @Get('all/label-value')
   @ApiOperation({
-    summary: 'Lấy tất cả gói (Định dạng label value)',
+    summary: 'Lấy tất cả danh mục (Định dạng label value)',
   })
-  getLabelValue(): Promise<LabelValueResponse[]> {
+  getLabelValue(): Promise<{ data: LabelValueResponse[] }> {
     return this.categoryService.getLabelValue();
   }
 }

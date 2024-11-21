@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { DeviceStatus } from '@prisma/client';
 
 export class DeviceFilterDto {
   @ApiProperty({ description: 'Tên thiết bị', required: false })
@@ -37,10 +38,11 @@ export class DeviceFilterDto {
   @ApiProperty({
     description: 'Trạng thái thiết bị',
     required: false,
+    enum: DeviceStatus,
   })
   @IsOptional()
-  @IsString()
-  status?: string;
+  @IsEnum(DeviceStatus)
+  status?: DeviceStatus;
 
   @ApiProperty({
     description: 'Số trang',

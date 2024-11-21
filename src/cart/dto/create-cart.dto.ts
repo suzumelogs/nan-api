@@ -1,28 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsPositive } from 'class-validator';
 
 export class CreateCartDto {
   @ApiProperty({
-    description: 'Thời gian thuê (ngày)',
-    example: 7,
+    description: 'ID của thiết bị (nếu có)',
+    required: false,
   })
-  @IsNotEmpty()
-  @IsNumber()
-  rentalDuration: number;
+  @IsOptional()
+  deviceId?: string;
 
   @ApiProperty({
-    description: 'Tổng giá thuê',
-    example: 150.5,
+    description: 'ID của gói (nếu có)',
+    required: false,
   })
-  @IsNotEmpty()
-  @IsNumber()
-  totalPrice: number;
+  @IsOptional()
+  packageId?: string;
 
   @ApiProperty({
-    description: 'ID của người dùng',
-    example: '60b9c3f3b236d17a10b76e6f',
+    description: 'Số lượng',
   })
-  @IsNotEmpty()
-  @IsString()
-  userId: string;
+  @IsPositive()
+  quantity: number;
 }

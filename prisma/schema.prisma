@@ -23,6 +23,12 @@ enum DeviceStatus {
   under_maintenance
 }
 
+enum PackageStatus {
+  available
+  rented
+  under_maintenance
+}
+
 enum RentalStatus {
   pending
   confirmed
@@ -67,12 +73,12 @@ model User {
   role          Role      @default(user)
   identityDoc   String?
 
-  rentals        Rental[]
-  feedbacks      Feedback[]
-  cart           Cart?
-  notifications  Notification[]
-  paymentMethods PaymentMethod[]
-  supports       Support[]
+  rentals        Rental[]        @relation("UserRentals")
+  feedbacks      Feedback[]      @relation("UserFeedbacks")
+  cart           Cart?           @relation("UserCart")
+  notifications  Notification[]  @relation("UserNotifications")
+  paymentMethods PaymentMethod[] @relation("UserPaymentMethods")
+  supports       Support[]       @relation("UserSupports")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -80,47 +86,109 @@ model User {
   @@map("users")
 }
 
-// Thiết bị
-model Device {
-  id          String       @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  description String?
-  image       String
-  priceDay    Float
-  priceWeek   Float
-  priceMonth  Float
-  status      DeviceStatus @default(available)
-
-  categoryId String @db.ObjectId
-
-  category           Category      @relation(fields: [categoryId], references: [id])
-  rentals            Rental[]
-  maintenanceRecords Maintenance[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Cart      Cart?    @relation(fields: [cartId], references: [id])
-  cartId    String?  @db.ObjectId
-
-  @@map("devices")
-}
-
-// Danh mục (Gói)
+// Danh mục
 model Category {
   id          String  @id @default(auto()) @map("_id") @db.ObjectId
   name        String  @unique
   description String?
 
-  priceDay   Float?
-  priceWeek  Float?
-  priceMonth Float?
-
-  devices Device[]
+  devices Device[] @relation("CategoryDevices")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("categories")
+}
+
+// Thiết bị
+model Device {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  image       String
+
+  priceDay   Float?
+  priceWeek  Float?
+  priceMonth Float?
+
+  quantity Int @default(1)
+
+  status DeviceStatus @default(available)
+
+  categoryId String   @db.ObjectId
+  category   Category @relation("CategoryDevices", fields: [categoryId], references: [id])
+
+  rentals            Rental[]      @relation("DeviceRentals")
+  maintenanceRecords Maintenance[] @relation("DeviceMaintenanceRecords")
+
+  cartItems CartItem[] @relation("CartDeviceItems")
+  packageId String?    @db.ObjectId
+  package   Package?   @relation("DevicePackages", fields: [packageId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("devices")
+}
+
+// Gói
+model Package {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String?
+  image       String
+
+  priceDay   Float?
+  priceWeek  Float?
+  priceMonth Float?
+
+  quantity Int @default(1)
+
+  status PackageStatus @default(available)
+
+  devices Device[] @relation("DevicePackages")
+
+  rentals Rental[] @relation("PackageRentals")
+
+  cartItems CartItem[] @relation("CartPackageItems")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("packages")
+}
+
+// Giỏ hàng
+model Cart {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  userId String @unique @db.ObjectId
+  user   User   @relation("UserCart", fields: [userId], references: [id])
+
+  cartItems CartItem[] @relation("CartItems")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("carts")
+}
+
+// Mục trong giỏ hàng
+model CartItem {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  quantity  Int     @default(1)
+  cartId    String  @db.ObjectId
+  deviceId  String? @db.ObjectId
+  packageId String? @db.ObjectId
+
+  cart    Cart     @relation("CartItems", fields: [cartId], references: [id])
+  device  Device?  @relation("CartDeviceItems", fields: [deviceId], references: [id])
+  package Package? @relation("CartPackageItems", fields: [packageId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("cart_items")
 }
 
 // Thuê
@@ -133,36 +201,20 @@ model Rental {
   damageFee       Float? // phí hỏng hóc nếu có
   status          RentalStatus @default(pending)
 
-  userId   String @db.ObjectId
-  deviceId String @db.ObjectId
+  userId    String  @db.ObjectId
+  deviceId  String? @db.ObjectId // Nếu thuê từng thiết bị
+  packageId String? @db.ObjectId // Nếu thuê theo gói
 
-  user   User   @relation(fields: [userId], references: [id])
-  device Device @relation(fields: [deviceId], references: [id])
+  user    User     @relation("UserRentals", fields: [userId], references: [id])
+  device  Device?  @relation("DeviceRentals", fields: [deviceId], references: [id])
+  package Package? @relation("PackageRentals", fields: [packageId], references: [id])
 
-  feedbacks Feedback[]
+  feedbacks Feedback[] @relation("RentalFeedbacks")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("rentals")
-}
-
-// Giỏ hàng
-model Cart {
-  id             String @id @default(auto()) @map("_id") @db.ObjectId
-  rentalDuration Int // thời gian thuê
-  totalPrice     Float // tổng giá đã tính toán
-
-  userId String @unique @db.ObjectId
-
-  user             User     @relation(fields: [userId], references: [id])
-  devices          Device[] // danh sách thiết bị trong giỏ hàng
-  deviceQuantities Int[] // danh sách số lượng thiết bị trong giỏ hàng
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("carts")
 }
 
 // Chính sách
@@ -189,8 +241,8 @@ model Feedback {
   userId   String @db.ObjectId
   rentalId String @db.ObjectId
 
-  user   User   @relation(fields: [userId], references: [id])
-  rental Rental @relation(fields: [rentalId], references: [id])
+  user   User   @relation("UserFeedbacks", fields: [userId], references: [id])
+  rental Rental @relation("RentalFeedbacks", fields: [rentalId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -209,7 +261,7 @@ model Maintenance {
 
   deviceId String @db.ObjectId
 
-  device Device @relation(fields: [deviceId], references: [id])
+  device Device @relation("DeviceMaintenanceRecords", fields: [deviceId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -225,7 +277,7 @@ model Notification {
 
   userId String @db.ObjectId
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation("UserNotifications", fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -257,7 +309,7 @@ model PaymentMethod {
 
   userId String @db.ObjectId
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation("UserPaymentMethods", fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -274,7 +326,7 @@ model Support {
 
   userId String @db.ObjectId
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation("UserSupports", fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

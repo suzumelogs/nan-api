@@ -3,13 +3,12 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Category, Prisma } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CategoryFilterDto } from './dto/category-filter.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category } from './entities/category.entity';
 
 @Injectable()
 export class CategoryService {
@@ -31,9 +30,6 @@ export class CategoryService {
             mode: Prisma.QueryMode.insensitive,
           },
         }),
-        ...(filters.priceDay && { priceDay: filters.priceDay }),
-        ...(filters.priceWeek && { priceWeek: filters.priceWeek }),
-        ...(filters.priceMonth && { priceMonth: filters.priceMonth }),
       };
 
       const [data, total] = await Promise.all([
@@ -119,13 +115,18 @@ export class CategoryService {
     }
   }
 
-  async getLabelValue(): Promise<LabelValueResponse[]> {
+  async getLabelValue(): Promise<{ data: LabelValueResponse[] }> {
     try {
       const categories = await this.prisma.category.findMany();
-      return categories.map((category) => ({
-        label: category.name,
-        value: category.id,
-      }));
+      return {
+        data:
+          categories.length > 0
+            ? categories.map((category) => ({
+                label: category.name,
+                value: category.id,
+              }))
+            : [],
+      };
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to retrieve label-value pairs',
