@@ -6,7 +6,8 @@ const equipments = [
   {
     id: '5fbb1a2c3c9d440000e12345',
     name: 'Quạt điều hòa',
-    image: 'https://link-to-image.com/fan.jpg',
+    image:
+      'https://cellphones.com.vn/media/wysiwyg/May-anh/DSLR/may-anh-dslr-1.jpg',
     description:
       'Quạt điều hòa giúp làm mát không gian sống, tiết kiệm điện năng.',
     pricePerDay: 100000,
@@ -18,7 +19,8 @@ const equipments = [
   {
     id: '5fbb1a2c3c9d440000e12346',
     name: 'Máy lọc không khí',
-    image: 'https://link-to-image.com/air-purifier.jpg',
+    image:
+      'https://cellphones.com.vn/media/wysiwyg/May-anh/DSLR/may-anh-dslr-1.jpg',
     description:
       'Máy lọc không khí giúp không gian sống luôn trong lành và sạch sẽ.',
     pricePerDay: 150000,
@@ -30,7 +32,8 @@ const equipments = [
   {
     id: '5fbb1a2c3c9d440000e12347',
     name: 'Lò vi sóng',
-    image: 'https://link-to-image.com/microwave.jpg',
+    image:
+      'https://cellphones.com.vn/media/wysiwyg/May-anh/DSLR/may-anh-dslr-1.jpg',
     description:
       'Lò vi sóng giúp hâm nóng và nấu các món ăn nhanh chóng và tiện lợi.',
     pricePerDay: 200000,
@@ -42,7 +45,8 @@ const equipments = [
   {
     id: '5fbb1a2c3c9d440000e12348',
     name: 'Điều hòa không khí',
-    image: 'https://link-to-image.com/air-conditioner.jpg',
+    image:
+      'https://cellphones.com.vn/media/wysiwyg/May-anh/DSLR/may-anh-dslr-1.jpg',
     description:
       'Điều hòa không khí giúp làm mát và làm lạnh không gian sống hiệu quả.',
     pricePerDay: 300000,
