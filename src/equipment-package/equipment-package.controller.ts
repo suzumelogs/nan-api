@@ -18,7 +18,7 @@ import { EquipmentPackageService } from './equipment-package.service';
 
 @ApiBearerAuth()
 @ApiTags('Equipment Packages')
-@Controller('equipment-packages')
+@Controller('equipments-package')
 export class EquipmentPackageController {
   constructor(
     private readonly equipmentPackageService: EquipmentPackageService,

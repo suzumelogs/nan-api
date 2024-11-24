@@ -4,6 +4,7 @@ import discountSeed from './discount.seed';
 import equipmentPackageSeed from './equipment-package.seed';
 import equipmentSeed from './equipment.seed';
 import userSeed from './user.seed';
+import policySeed from './policy.seed';
 
 const prisma = new PrismaClient();
 
@@ -22,6 +23,9 @@ async function main() {
 
     await equipmentPackageSeed();
     console.log('Đã hoàn thành việc thêm gói thiết bị.');
+
+    await policySeed();
+    console.log('Đã hoàn thành việc thêm chính sách.');
 
     await discountSeed();
     console.log('Đã hoàn thành việc thêm mã giảm giá.');

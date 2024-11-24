@@ -23,7 +23,7 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get('pagination')
+  @Get('all/pagination')
   @ApiOperation({
     summary: 'Lất tất cả user (Có phân trang và tìm kiếm)',
   })

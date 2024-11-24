@@ -21,9 +21,9 @@ import { PolicyService } from './policy.service';
 export class PolicyController {
   constructor(private readonly policyService: PolicyService) {}
 
-  @Get('pagination')
+  @Get('all/pagination')
   @ApiOperation({
-    summary: 'Lấy tất cả chính sách (Có phân trang và tìm kiếm)',
+    summary: 'Tất cả chính sách (Có phân trang và tìm kiếm)',
   })
   async findAllPagination(
     @Query() filterDto: PolicyFilterDto,
@@ -32,23 +32,23 @@ export class PolicyController {
     return this.policyService.findAllPagination(page, limit, filters);
   }
 
-  @Get()
+  @Get('all')
   @ApiOperation({
-    summary: 'Lấy tất cả chính sách (Không phân trang)',
+    summary: 'Tất cả chính sách (Không phân trang)',
   })
   async findAll(): Promise<Policy[]> {
     return this.policyService.findAll();
   }
 
-  @Get(':id')
+  @Get('get-by/:id')
   @ApiOperation({
-    summary: 'Lấy chính sách theo ID',
+    summary: 'Chính sách theo ID',
   })
   async findOne(@Param('id') id: string): Promise<Policy> {
     return this.policyService.findOne(id);
   }
 
-  @Post()
+  @Post('create')
   @ApiOperation({
     summary: 'Tạo chính sách mới',
   })
@@ -56,7 +56,7 @@ export class PolicyController {
     return this.policyService.create(createPolicyDto);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   @ApiOperation({
     summary: 'Cập nhật chính sách theo ID',
   })
@@ -67,7 +67,7 @@ export class PolicyController {
     return this.policyService.update(id, updatePolicyDto);
   }
 
-  @Delete(':id')
+  @Delete('remove/:id')
   @ApiOperation({
     summary: 'Xóa chính sách theo ID',
   })
