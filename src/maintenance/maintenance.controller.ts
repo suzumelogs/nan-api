@@ -22,7 +22,7 @@ import { MaintenanceService } from './maintenance.service';
 export class MaintenanceController {
   constructor(private readonly maintenanceService: MaintenanceService) {}
 
-  @Get('pagination')
+  @Get('all/pagination')
   @ApiOperation({
     summary: 'Tất cả lịch bảo trì (Có phân trang và tìm kiếm)',
   })
@@ -44,7 +44,7 @@ export class MaintenanceController {
     return this.maintenanceService.findAll();
   }
 
-  @Get(':id')
+  @Get('get-by/:id')
   @ApiOperation({
     summary: 'Lịch bảo trì theo ID',
   })
@@ -52,7 +52,7 @@ export class MaintenanceController {
     return this.maintenanceService.findOne(id);
   }
 
-  @Post()
+  @Post('create')
   @ApiOperation({
     summary: 'Tạo lịch bảo trì mới',
   })
@@ -62,7 +62,7 @@ export class MaintenanceController {
     return this.maintenanceService.create(createMaintenanceDto);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   @ApiOperation({
     summary: 'Cập nhật lịch bảo trì theo ID',
   })
@@ -73,7 +73,7 @@ export class MaintenanceController {
     return this.maintenanceService.update(id, updateMaintenanceDto);
   }
 
-  @Delete(':id')
+  @Delete('remove/:id')
   @ApiOperation({
     summary: 'Xóa lịch bảo trì theo ID',
   })
