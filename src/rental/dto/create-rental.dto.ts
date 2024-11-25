@@ -1,4 +1,3 @@
-// src/rentals/dto/create-rental.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
 import { Duration } from '@prisma/client';
 import {
@@ -8,6 +7,7 @@ import {
   IsInt,
   IsNumber,
   IsString,
+  Min,
 } from 'class-validator';
 
 class RentalItemDto {
@@ -31,6 +31,7 @@ class RentalItemDto {
     description: 'Số lượng thiết bị thuê',
   })
   @IsInt()
+  @Min(1)
   quantity: number;
 
   @ApiProperty({
@@ -44,12 +45,14 @@ class RentalItemDto {
     description: 'Giá trị của thời gian thuê (ví dụ: số ngày, tuần, tháng)',
   })
   @IsInt()
+  @Min(1)
   durationValue: number;
 
   @ApiProperty({
     description: 'Giá thuê của thiết bị hoặc gói thiết bị',
   })
   @IsNumber()
+  @Min(0)
   price: number;
 }
 
@@ -77,5 +80,6 @@ export class CreateRentalDto {
     description: 'Tổng số tiền thuê',
   })
   @IsNumber()
+  @Min(0)
   totalAmount: number;
 }

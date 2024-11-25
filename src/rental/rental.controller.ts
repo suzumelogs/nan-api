@@ -11,10 +11,8 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Rental, Role, User } from '@prisma/client';
 import { Auth, GetUser } from 'src/auth/decorators';
-import { AddItemToRentalDto } from './dto/add-item-to-rental.dto';
 import { CreateRentalDto } from './dto/create-rental.dto';
 import { RentalFilterDto } from './dto/rental-filter.dto';
-import { UpdateRentalStatusDto } from './dto/update-rental-status.dto';
 import { RentalService } from './rental.service';
 
 @ApiBearerAuth()
@@ -45,27 +43,6 @@ export class RentalController {
     return this.rentalService.findOne(id);
   }
 
-  @Post('create/by-me')
-  @ApiOperation({ summary: 'Thuê thiết bị (gói thiết bị) của tôi' })
-  @Auth(Role.user)
-  async createByMe(
-    @GetUser() user: User,
-    @Body() createRentalDto: CreateRentalDto,
-  ): Promise<{ message: string }> {
-    return this.rentalService.createByMe(user.id, createRentalDto);
-  }
-
-  @Patch('update-status/:id')
-  @ApiOperation({
-    summary: 'Cập nhật trạng thái đơn thuê (Admin)',
-  })
-  async updateRentalStatus(
-    @Param('id') id: string,
-    @Body() updateRentalStatusDto: UpdateRentalStatusDto,
-  ) {
-    return this.rentalService.updateRentalStatus(id, updateRentalStatusDto);
-  }
-
   @Get('get-by/me')
   @ApiOperation({
     summary: 'Đơn thuê của tôi theo ID',
@@ -75,15 +52,14 @@ export class RentalController {
     return this.rentalService.findByMe(user.id);
   }
 
-  @Post('add-item/:id')
-  @ApiOperation({
-    summary: 'Thêm thiết bị (gói thiết bị) vào đơn thuê',
-  })
-  async addItemToRental(
-    @Param('id') rentalId: string,
-    @Body() addItemToRentalDto: AddItemToRentalDto,
-  ) {
-    return this.rentalService.addItemToRental(rentalId, addItemToRentalDto);
+  @Post('create/by-me')
+  @ApiOperation({ summary: 'Thuê thiết bị (gói thiết bị) của tôi' })
+  @Auth(Role.user)
+  async createRentalByMe(
+    @GetUser() user: User,
+    @Body() createRentalDto: CreateRentalDto,
+  ): Promise<Rental> {
+    return this.rentalService.createRentalByMe(user.id, createRentalDto);
   }
 
   @Delete('remove/:id')
@@ -92,5 +68,30 @@ export class RentalController {
   })
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.rentalService.remove(id);
+  }
+
+  @Patch('confirm/:id')
+  @ApiOperation({
+    summary: 'Xác nhận đơn thuê',
+  })
+  async confirmRental(@Param('id') id: string): Promise<Rental> {
+    return this.rentalService.confirmRental(id);
+  }
+
+  @Patch('cancel/:id')
+  @ApiOperation({
+    summary: 'Hủy đơn thuê',
+  })
+  async cancelRental(@Param('id') id: string): Promise<{ message: string }> {
+    return this.rentalService.cancelRental(id);
+  }
+
+  @Delete('clear-all/by-me')
+  @ApiOperation({
+    summary: 'Xóa toàn bộ đơn thuê của tôi',
+  })
+  @Auth(Role.user)
+  async clearAllByMe(@GetUser() user: User): Promise<{ message: string }> {
+    return this.rentalService.clearAllByMe(user.id);
   }
 }
