@@ -14,6 +14,13 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoryService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private handlePrismaError(error: any): never {
+    if (error.code === 'P2025') {
+      throw new NotFoundException('Không tìm thấy');
+    }
+    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
+  }
+
   async findAllPagination(
     page: number,
     limit: number,
@@ -50,7 +57,7 @@ export class CategoryService {
         limit,
       };
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -59,7 +66,7 @@ export class CategoryService {
       const categories = await this.prisma.category.findMany();
       return { data: categories };
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -73,10 +80,7 @@ export class CategoryService {
       });
       return { data: category };
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy');
-      }
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -85,7 +89,7 @@ export class CategoryService {
       await this.prisma.category.create({ data: dto });
       return { message: 'Tạo mới thành công' };
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -97,10 +101,7 @@ export class CategoryService {
       await this.prisma.category.update({ where: { id }, data: dto });
       return { message: 'Cập nhật thành công' };
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy');
-      }
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -109,10 +110,7 @@ export class CategoryService {
       await this.prisma.category.delete({ where: { id } });
       return { message: 'Xóa thành công' };
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy');
-      }
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -125,7 +123,7 @@ export class CategoryService {
       }));
       return { data: categoriesLabelValue };
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 }

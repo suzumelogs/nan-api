@@ -1,13 +1,20 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { CreateItemToCartDto } from './create-item-to-cart.dto';
-import { IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsString } from 'class-validator';
 
-export class UpdateItemToCartDto extends PartialType(CreateItemToCartDto) {
+export class UpdateItemToCartDto {
   @ApiProperty({
-    description: 'ID của mục trong giỏ hàng cần được cập nhật',
+    description: 'ID của item',
     type: String,
     required: true,
   })
   @IsString()
   cartItemId: string;
+
+  @ApiProperty({
+    description: 'Số lượng mới',
+    type: Number,
+    required: true,
+  })
+  @IsNumber()
+  newQuantity: number;
 }

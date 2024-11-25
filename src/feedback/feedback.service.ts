@@ -186,7 +186,7 @@ export class FeedbackService {
       const feedbacks = await this.prisma.feedback.findMany({
         where: {
           NOT: {
-            replyDate: null, // Lọc những phản hồi có replyDate (đã có phản hồi)
+            replyDate: null,
           },
         },
       });

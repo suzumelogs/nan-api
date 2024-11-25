@@ -9,11 +9,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Discount } from '@prisma/client';
 import { DiscountService } from './discount.service';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { DiscountFilterDto } from './dto/discount-filter.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
-import { Discount } from './entities/discount.entity';
 
 @ApiBearerAuth()
 @ApiTags('Discounts')
@@ -21,9 +21,9 @@ import { Discount } from './entities/discount.entity';
 export class DiscountController {
   constructor(private readonly discountService: DiscountService) {}
 
-  @Get('pagination')
+  @Get('all/pagination')
   @ApiOperation({
-    summary: 'Lất tất cả mã giảm giá (Có phân trang và tìm kiếm)',
+    summary: 'Tất cả mã giảm giá (Có phân trang và tìm kiếm)',
   })
   async findAllPagination(
     @Query() filterDto: DiscountFilterDto,
@@ -32,23 +32,23 @@ export class DiscountController {
     return this.discountService.findAllPagination(page, limit, filters);
   }
 
-  @Get()
+  @Get('all')
   @ApiOperation({
     summary: 'Lấy tất cả mã giảm giá (Không phân trang)',
   })
-  findAll(): Promise<Discount[]> {
+  findAll(): Promise<{ data: Discount[] }> {
     return this.discountService.findAll();
   }
 
-  @Get(':id')
+  @Get('get-by/:id')
   @ApiOperation({
-    summary: 'Lấy mã giảm giá theo ID.',
+    summary: 'Mã giảm giá theo ID.',
   })
-  findOne(@Param('id') id: string): Promise<Discount> {
+  findOne(@Param('id') id: string): Promise<{ data: Discount }> {
     return this.discountService.findOne(id);
   }
 
-  @Post()
+  @Post('create')
   @ApiOperation({
     summary: 'Tạo mã giảm giá mới',
   })
@@ -56,7 +56,7 @@ export class DiscountController {
     return this.discountService.create(createDiscountDto);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   @ApiOperation({
     summary: 'Cập nhật mã giảm giá theo ID',
   })
@@ -67,7 +67,7 @@ export class DiscountController {
     return this.discountService.update(id, updateDiscountDto);
   }
 
-  @Delete(':id')
+  @Delete('remove/:id')
   @ApiOperation({
     summary: 'Xóa mã giảm giá theo ID',
   })
