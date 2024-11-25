@@ -21,7 +21,7 @@ import { FeedbackService } from './feedback.service';
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
-  @Get('pagination')
+  @Get('all/pagination')
   @ApiOperation({
     summary: 'Tất cả phản hồi (Có phân trang và tìm kiếm)',
   })
@@ -32,7 +32,7 @@ export class FeedbackController {
     return this.feedbackService.findAllPagination(page, limit, filters);
   }
 
-  @Get()
+  @Get('all')
   @ApiOperation({
     summary: 'Tất cả phản hồi (Không phân trang)',
   })
@@ -40,7 +40,7 @@ export class FeedbackController {
     return this.feedbackService.findAll();
   }
 
-  @Get(':id')
+  @Get('get-by/:id')
   @ApiOperation({
     summary: 'Phản hồi theo ID',
   })
@@ -48,7 +48,7 @@ export class FeedbackController {
     return this.feedbackService.findOne(id);
   }
 
-  @Post()
+  @Post('create')
   @ApiOperation({
     summary: 'Tạo phản hồi mới',
   })
@@ -58,7 +58,7 @@ export class FeedbackController {
     return this.feedbackService.create(createFeedbackDto);
   }
 
-  @Patch(':id')
+  @Patch('update/:id')
   @ApiOperation({
     summary: 'Cập nhật phản hồi theo ID',
   })
@@ -69,7 +69,7 @@ export class FeedbackController {
     return this.feedbackService.update(id, updateFeedbackDto);
   }
 
-  @Delete(':id')
+  @Delete('remove/:id')
   @ApiOperation({
     summary: 'Xóa phản hồi theo ID',
   })
