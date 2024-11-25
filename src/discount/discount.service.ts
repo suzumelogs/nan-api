@@ -3,13 +3,12 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, Role } from '@prisma/client';
+import { Discount, Prisma, Role } from '@prisma/client';
 import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { DiscountFilterDto } from './dto/discount-filter.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
-import { Discount } from './entities/discount.entity';
 
 @Injectable()
 export class DiscountService {
@@ -17,6 +16,13 @@ export class DiscountService {
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService,
   ) {}
+
+  private handlePrismaError(error: any): never {
+    if (error.code === 'P2025') {
+      throw new NotFoundException('Không tìm thấy');
+    }
+    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
+  }
 
   async findAllPagination(
     page: number,
@@ -55,29 +61,29 @@ export class DiscountService {
         limit,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to retrieve discounts with pagination and filters',
-      );
+      this.handlePrismaError(error);
     }
   }
 
-  async findAll(): Promise<Discount[]> {
+  async findAll(): Promise<{ data: Discount[] }> {
     try {
-      return await this.prisma.discount.findMany();
+      const discounts = await this.prisma.discount.findMany();
+
+      return { data: discounts };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Không thể lấy danh sách mã giảm giá',
-      );
+      this.handlePrismaError(error);
     }
   }
 
-  async findOne(id: string): Promise<Discount> {
+  async findOne(id: string): Promise<{ data: Discount }> {
     try {
-      return await this.prisma.discount.findUniqueOrThrow({
+      const discount = await this.prisma.discount.findUniqueOrThrow({
         where: { id },
       });
+
+      return { data: discount };
     } catch (error) {
-      throw new NotFoundException('Mã giảm giá không được tìm thấy');
+      this.handlePrismaError(error);
     }
   }
 
@@ -87,9 +93,7 @@ export class DiscountService {
         data: dto,
       });
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Tạo mã giảm giá không thành công',
-      );
+      this.handlePrismaError(error);
     }
   }
 
@@ -100,12 +104,7 @@ export class DiscountService {
         data: dto,
       });
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Mã giảm giá không được tìm thấy');
-      }
-      throw new InternalServerErrorException(
-        'Cập nhật mã giảm giá không thành công',
-      );
+      this.handlePrismaError(error);
     }
   }
 
@@ -114,10 +113,7 @@ export class DiscountService {
       await this.prisma.discount.delete({ where: { id } });
       return { message: 'Mã giảm giá đã được xóa thành công' };
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Mã giảm giá không được tìm thấy');
-      }
-      throw new InternalServerErrorException('Xoá mã giảm giá thất bại');
+      this.handlePrismaError(error);
     }
   }
 
@@ -130,6 +126,7 @@ export class DiscountService {
       },
       data: {
         currentUsage: 0,
+        isActive: false,
       },
     });
   }
@@ -157,6 +154,37 @@ export class DiscountService {
         await this.notificationService.sendNotification({
           message: `Mã giảm giá ${discount.code} sắp hết hạn hoặc đạt mức sử dụng tối đa.`,
           userId: admin.id,
+        });
+      }
+    }
+  }
+
+  async notifyUsersAboutUpcomingDiscounts() {
+    const currentDate = new Date();
+    const upcomingDiscounts = await this.prisma.discount.findMany({
+      where: {
+        AND: [
+          {
+            validFrom: {
+              gte: currentDate,
+            },
+          },
+          {
+            validFrom: {
+              lte: new Date(currentDate.getTime() + 3 * 24 * 60 * 60 * 1000),
+            },
+          },
+        ],
+        isActive: true,
+      },
+    });
+
+    const users = await this.prisma.user.findMany();
+    for (const discount of upcomingDiscounts) {
+      for (const user of users) {
+        await this.notificationService.sendNotification({
+          message: `Mã giảm giá ${discount.code} sẽ có hiệu lực từ ${discount.validFrom}. Hãy chuẩn bị sử dụng!`,
+          userId: user.id,
         });
       }
     }

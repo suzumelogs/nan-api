@@ -8,11 +8,10 @@ import {
   Post,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { User } from '@prisma/client';
+import { Notification, User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorators';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
-import { Notification } from './entities/notification.entity';
 import { NotificationService } from './notification.service';
 
 @ApiBearerAuth()
@@ -25,7 +24,7 @@ export class NotificationController {
   @ApiOperation({
     summary: 'Lấy tất cả thông báo (Không phân trang)',
   })
-  findAll(): Promise<Notification[]> {
+  findAll(): Promise<{ data: Notification[] }> {
     return this.notificationService.findAll();
   }
 
@@ -33,7 +32,7 @@ export class NotificationController {
   @ApiOperation({
     summary: 'Lấy thông báo theo ID',
   })
-  findOne(@Param('id') id: string): Promise<Notification> {
+  findOne(@Param('id') id: string): Promise<{ data: Notification }> {
     return this.notificationService.findOne(id);
   }
 
@@ -70,8 +69,8 @@ export class NotificationController {
   @ApiOperation({
     summary: 'Lấy thông báo của tôi',
   })
-  findByUserId(@GetUser() user: User): Promise<Notification[]> {
-    return this.notificationService.findByUserId(user.id);
+  findByUserId(@GetUser() user: User): Promise<{ data: Notification[] }> {
+    return this.notificationService.findAllByUserId(user.id);
   }
 
   @Patch(':id/read')
@@ -80,5 +79,57 @@ export class NotificationController {
   })
   markAsRead(@Param('id') id: string): Promise<Notification> {
     return this.notificationService.markAsRead(id);
+  }
+
+  @Patch('by-me/read')
+  @ApiOperation({
+    summary: 'Đánh dấu tất cả thông báo của tôi là đã đọc',
+  })
+  markAllAsReadByUserId(@GetUser() user: User): Promise<{ count: number }> {
+    return this.notificationService.markAllAsReadByUserId(user.id);
+  }
+
+  @Post('send')
+  @ApiOperation({
+    summary: 'Gửi thông báo cho người dùng',
+  })
+  sendNotification(
+    @Body() { message, userId }: { message: string; userId: string },
+  ): Promise<Notification> {
+    return this.notificationService.sendNotification({ message, userId });
+  }
+
+  @Post('send-bulk')
+  @ApiOperation({
+    summary: 'Gửi thông báo cho nhiều người dùng',
+  })
+  sendBulkNotification(
+    @Body() { message, userIds }: { message: string; userIds: string[] },
+  ): Promise<Notification[]> {
+    return this.notificationService.sendBulkNotification({ message, userIds });
+  }
+
+  @Get('unread')
+  @ApiOperation({
+    summary: 'Lấy thông báo chưa đọc của tôi',
+  })
+  findUnreadByUserId(@GetUser() user: User): Promise<{ data: Notification[] }> {
+    return this.notificationService.findUnreadByUserId(user.id);
+  }
+
+  @Delete('cleanup-old')
+  @ApiOperation({
+    summary: 'Xóa thông báo cũ hơn 30 ngày',
+  })
+  cleanupOldNotifications(): Promise<{ message: string }> {
+    return this.notificationService.cleanupOldNotifications();
+  }
+
+  @Get('count')
+  @ApiOperation({
+    summary: 'Đếm số lượng thông báo của tôi',
+  })
+  countNotificationsByUserId(@GetUser() user: User): Promise<number> {
+    return this.notificationService.countNotificationsByUserId(user.id);
   }
 }

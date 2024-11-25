@@ -9,10 +9,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Policy } from '@prisma/client';
 import { CreatePolicyDto } from './dto/create-policy.dto';
 import { PolicyFilterDto } from './dto/policy-filter.dto';
 import { UpdatePolicyDto } from './dto/update-policy.dto';
-import { Policy } from './entities/policy.entity';
 import { PolicyService } from './policy.service';
 
 @ApiBearerAuth()
@@ -36,7 +36,7 @@ export class PolicyController {
   @ApiOperation({
     summary: 'Tất cả chính sách (Không phân trang)',
   })
-  async findAll(): Promise<Policy[]> {
+  async findAll(): Promise<{ data: Policy[] }> {
     return this.policyService.findAll();
   }
 
@@ -44,7 +44,7 @@ export class PolicyController {
   @ApiOperation({
     summary: 'Chính sách theo ID',
   })
-  async findOne(@Param('id') id: string): Promise<Policy> {
+  async findOne(@Param('id') id: string): Promise<{ data: Policy }> {
     return this.policyService.findOne(id);
   }
 

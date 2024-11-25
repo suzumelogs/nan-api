@@ -3,34 +3,39 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { Notification, NotificationStatus, User } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
-import { Notification } from './entities/notification.entity';
-import { NotificationStatus } from '@prisma/client';
 
 @Injectable()
 export class NotificationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<Notification[]> {
+  private handlePrismaError(error: any): never {
+    if (error.code === 'P2025') {
+      throw new NotFoundException('Không tìm thấy');
+    }
+    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
+  }
+
+  async findAll(): Promise<{ data: Notification[] }> {
     try {
-      return await this.prisma.notification.findMany();
+      const notifications = await this.prisma.notification.findMany();
+      return { data: notifications };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Lấy danh sách thông báo thất bại',
-      );
+      this.handlePrismaError(error);
     }
   }
 
-  async findOne(id: string): Promise<Notification> {
+  async findOne(id: string): Promise<{ data: Notification }> {
     try {
       const notification = await this.prisma.notification.findUniqueOrThrow({
         where: { id },
       });
-      return notification;
+      return { data: notification };
     } catch (error) {
-      throw new NotFoundException('Không tìm thấy thông báo');
+      this.handlePrismaError(error);
     }
   }
 
@@ -41,7 +46,7 @@ export class NotificationService {
       });
       return newNotification;
     } catch (error) {
-      throw new InternalServerErrorException('Tạo thông báo thất bại');
+      this.handlePrismaError(error);
     }
   }
 
@@ -53,10 +58,7 @@ export class NotificationService {
       });
       return updatedNotification;
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy thông báo');
-      }
-      throw new InternalServerErrorException('Cập nhật thông báo thất bại');
+      this.handlePrismaError(error);
     }
   }
 
@@ -67,31 +69,19 @@ export class NotificationService {
       });
       return { message: 'Xóa thông báo thành công' };
     } catch (error) {
-      throw new NotFoundException('Không tìm thấy thông báo');
+      this.handlePrismaError(error);
     }
   }
 
-  async findAllByUserId(userId: string): Promise<Notification[]> {
+  async findAllByUserId(userId: string): Promise<{ data: Notification[] }> {
     try {
-      return await this.prisma.notification.findMany({
+      const notifications = await this.prisma.notification.findMany({
         where: { userId },
       });
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Lấy danh sách thông báo cho người dùng thất bại',
-      );
-    }
-  }
 
-  async findByUserId(userId: string): Promise<Notification[]> {
-    try {
-      return await this.prisma.notification.findMany({
-        where: { userId },
-      });
+      return { data: notifications };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Lấy danh sách thông báo cho người dùng thất bại',
-      );
+      this.handlePrismaError(error);
     }
   }
 
@@ -106,9 +96,7 @@ export class NotificationService {
       };
       return await this.create(notificationData);
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Tạo thông báo cho người dùng thất bại',
-      );
+      this.handlePrismaError(error);
     }
   }
 
@@ -130,12 +118,7 @@ export class NotificationService {
 
       return await this.update(notificationId, dto);
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy thông báo');
-      }
-      throw new InternalServerErrorException(
-        'Cập nhật thông báo cho người dùng thất bại',
-      );
+      this.handlePrismaError(error);
     }
   }
 
@@ -148,12 +131,7 @@ export class NotificationService {
         },
       });
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy thông báo');
-      }
-      throw new InternalServerErrorException(
-        'Đánh dấu thông báo là đã đọc thất bại',
-      );
+      this.handlePrismaError(error);
     }
   }
 
@@ -171,5 +149,89 @@ export class NotificationService {
     };
 
     return await this.create(notificationDto);
+  }
+
+  async markAllAsReadByUserId(userId: string): Promise<{ count: number }> {
+    try {
+      const { count } = await this.prisma.notification.updateMany({
+        where: { userId, status: NotificationStatus.unread },
+        data: { status: NotificationStatus.read },
+      });
+
+      return { count };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async findUnreadByUserId(userId: string): Promise<{ data: Notification[] }> {
+    try {
+      const notifications = await this.prisma.notification.findMany({
+        where: { userId, status: NotificationStatus.unread },
+      });
+
+      return { data: notifications };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async sendBulkNotification({
+    message,
+    userIds,
+  }: {
+    message: string;
+    userIds: string[];
+  }): Promise<Notification[]> {
+    try {
+      const notifications = await Promise.all(
+        userIds.map(async (userId) => {
+          const notificationDto: CreateNotificationDto = {
+            message,
+            userId,
+            status: NotificationStatus.unread,
+          };
+          return await this.create(notificationDto);
+        }),
+      );
+      return notifications;
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async countNotificationsByUserId(userId: string): Promise<number> {
+    try {
+      const count = await this.prisma.notification.count({
+        where: { userId },
+      });
+      return count;
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async cleanupOldNotifications(): Promise<{ message: string }> {
+    try {
+      const deletedNotifications = await this.prisma.notification.deleteMany({
+        where: {
+          createdAt: { lt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        },
+      });
+      return { message: `Đã xóa ${deletedNotifications.count} thông báo cũ` };
+    } catch (error) {
+      this.handlePrismaError(error);
+    }
+  }
+
+  async sendRandomNotificationToAllUsers() {
+    const users: User[] = await this.prisma.user.findMany();
+
+    for (const user of users) {
+      await this.sendNotification({
+        message: 'Đây là một thông báo bất kỳ! Cuong Thieu',
+        userId: user.id,
+      });
+    }
   }
 }

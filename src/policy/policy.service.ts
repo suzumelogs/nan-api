@@ -3,16 +3,22 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Policy, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePolicyDto } from './dto/create-policy.dto';
 import { PolicyFilterDto } from './dto/policy-filter.dto';
 import { UpdatePolicyDto } from './dto/update-policy.dto';
-import { Policy } from './entities/policy.entity';
 
 @Injectable()
 export class PolicyService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private handlePrismaError(error: any): never {
+    if (error.code === 'P2025') {
+      throw new NotFoundException('Không tìm thấy');
+    }
+    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
+  }
 
   async findAllPagination(
     page: number,
@@ -48,28 +54,28 @@ export class PolicyService {
         limit,
       };
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to retrieve policies with pagination and filters',
-      );
+      this.handlePrismaError(error);
     }
   }
 
-  async findAll(): Promise<Policy[]> {
+  async findAll(): Promise<{ data: Policy[] }> {
     try {
-      return await this.prisma.policy.findMany();
+      const policies = await this.prisma.policy.findMany();
+
+      return { data: policies };
     } catch (error) {
-      throw new InternalServerErrorException('Failed to retrieve policies');
+      this.handlePrismaError(error);
     }
   }
 
-  async findOne(id: string): Promise<Policy> {
+  async findOne(id: string): Promise<{ data: Policy }> {
     try {
       const policy = await this.prisma.policy.findUniqueOrThrow({
         where: { id },
       });
-      return policy;
+      return { data: policy };
     } catch (error) {
-      throw new NotFoundException('Policy not found');
+      this.handlePrismaError(error);
     }
   }
 
@@ -80,7 +86,7 @@ export class PolicyService {
       });
       return newPolicy;
     } catch (error) {
-      throw new InternalServerErrorException('Failed to create policy');
+      this.handlePrismaError(error);
     }
   }
 
@@ -92,10 +98,7 @@ export class PolicyService {
       });
       return updatedPolicy;
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Policy not found');
-      }
-      throw new InternalServerErrorException('Failed to update policy');
+      this.handlePrismaError(error);
     }
   }
 
@@ -104,9 +107,10 @@ export class PolicyService {
       await this.prisma.policy.delete({
         where: { id },
       });
+
       return { message: 'Policy deleted successfully' };
     } catch (error) {
-      throw new NotFoundException('Policy not found');
+      this.handlePrismaError(error);
     }
   }
 }

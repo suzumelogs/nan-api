@@ -316,6 +316,7 @@ model Discount {
   validTo      DateTime
   maxUsage     Int // số lần mã có thể sử dụng
   currentUsage Int      @default(0)
+  isActive     Boolean  @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

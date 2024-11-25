@@ -14,6 +14,13 @@ import { UpdateEquipmentPackageDto } from './dto/update-equipment-package.dto';
 export class EquipmentPackageService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private handlePrismaError(error: any): never {
+    if (error.code === 'P2025') {
+      throw new NotFoundException('Không tìm thấy');
+    }
+    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
+  }
+
   async findAllPagination(
     page: number,
     limit: number,
@@ -67,7 +74,7 @@ export class EquipmentPackageService {
         limit,
       };
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -76,7 +83,7 @@ export class EquipmentPackageService {
       const equipmentPackages = await this.prisma.equipmentPackage.findMany();
       return { data: equipmentPackages };
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -88,10 +95,7 @@ export class EquipmentPackageService {
         });
       return { data: equipmentPackage };
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy');
-      }
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -103,7 +107,7 @@ export class EquipmentPackageService {
 
       return { message: 'Tạo mới thành công' };
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -119,10 +123,7 @@ export class EquipmentPackageService {
 
       return { message: 'Cập nhật thành công' };
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy');
-      }
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -131,10 +132,7 @@ export class EquipmentPackageService {
       await this.prisma.equipmentPackage.delete({ where: { id } });
       return { message: 'Xóa thành công' };
     } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException('Không tìm thấy');
-      }
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 
@@ -149,7 +147,7 @@ export class EquipmentPackageService {
       );
       return { data: equipmentPackagesLabelValue };
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      this.handlePrismaError(error);
     }
   }
 }
