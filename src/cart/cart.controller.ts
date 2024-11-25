@@ -1,18 +1,11 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { Auth, GetUser } from 'src/auth/decorators';
 import { User } from 'src/user/entities/user.entity';
 import { CartService } from './cart.service';
 import { CreateItemToCartDto } from './dto/create-item-to-cart.dto';
+import { RemoveItemToCartDto } from './dto/remove-item-to-cart.dto';
 import { UpdateItemToCartDto } from './dto/update-item-to-cart.dto';
 
 @ApiBearerAuth()
@@ -31,41 +24,37 @@ export class CartController {
   @Post('create/by-me')
   @ApiOperation({ summary: 'Thêm item vào giỏ hàng của tôi' })
   @Auth(Role.user)
-  async createItemToCart(
+  async createItemToCartByMe(
     @GetUser() user: User,
-    @Body() createItemToCartDto: CreateItemToCartDto,
+    @Body() dto: CreateItemToCartDto,
   ) {
-    return this.cartService.createItemToCart(user.id, createItemToCartDto);
+    return this.cartService.createItemToCartByMe(user.id, dto);
   }
 
-  @Patch('update/by-me')
-  @ApiOperation({ summary: 'Cập nhật item trong giỏ hàng của tôi' })
+  @Patch('update/quantity/by-me')
+  @ApiOperation({ summary: 'Cập nhật số lương item' })
   @Auth(Role.user)
-  async updateItemToCart(
+  async updateQuantityByMe(
     @GetUser() user: User,
-    @Body() updateItemToCartDto: UpdateItemToCartDto,
+    @Body() dto: UpdateItemToCartDto,
   ) {
-    return this.cartService.updateItemToCart(
-      user.id,
-      updateItemToCartDto.cartItemId,
-      updateItemToCartDto,
-    );
+    return this.cartService.updateQuantityByMe(user.id, dto);
   }
 
-  @Delete('remove-item/:cartItemId')
-  @ApiOperation({ summary: 'Xóa item khỏi giỏ hàng của tôi' })
+  @Delete('remove/by-me')
+  @ApiOperation({ summary: 'Xóa item' })
   @Auth(Role.user)
-  async removeItemFromCart(
+  async removeItemToCartByMe(
     @GetUser() user: User,
-    @Param('cartItemId') cartItemId: string,
+    @Body() dto: RemoveItemToCartDto,
   ) {
-    return this.cartService.removeItem(user.id, cartItemId);
+    return this.cartService.removeItemToCartByMe(user.id, dto);
   }
 
-  @Delete('clear')
-  @ApiOperation({ summary: 'Làm sạch giỏ hàng của tôi' })
+  @Delete('clear/by-me')
+  @ApiOperation({ summary: 'Xóa hết item' })
   @Auth(Role.user)
-  async clearCart(@GetUser() user: User) {
-    return this.cartService.clearCart(user.id);
+  async clearCartByMe(@GetUser() user: User) {
+    return this.cartService.clearCartByMe(user.id);
   }
 }

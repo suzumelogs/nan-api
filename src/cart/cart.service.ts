@@ -1,77 +1,26 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { Cart, Duration } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Cart, CartItem, Equipment, EquipmentPackage } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateItemToCartDto } from './dto/create-item-to-cart.dto';
+import { RemoveItemToCartDto } from './dto/remove-item-to-cart.dto';
 import { UpdateItemToCartDto } from './dto/update-item-to-cart.dto';
 
 @Injectable()
 export class CartService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private async findItemById(id: string, type: 'equipment' | 'package') {
-    const item =
-      type === 'equipment'
-        ? await this.prisma.equipment.findUnique({ where: { id } })
-        : await this.prisma.equipmentPackage.findUnique({ where: { id } });
-
-    if (!item) {
-      throw new NotFoundException(
-        type === 'equipment' ? 'Không tìm thấy thiết bị' : 'Không tìm thấy gói',
-      );
-    }
-    return item;
+  private async findEquipmentById(id: string): Promise<Equipment> {
+    const equipment = await this.prisma.equipment.findUnique({ where: { id } });
+    if (!equipment) throw new NotFoundException('Không tìm thấy thiết bị');
+    return equipment;
   }
 
-  private calculateItemPrice(
-    durationType: Duration,
-    durationValue: number,
-    item: { pricePerDay: number; pricePerWeek: number; pricePerMonth: number },
-  ): number {
-    switch (durationType) {
-      case Duration.day:
-        return item.pricePerDay * durationValue;
-      case Duration.week:
-        return item.pricePerWeek * durationValue;
-      case Duration.month:
-        return item.pricePerMonth * durationValue;
-      default:
-        throw new Error('Loại thời lượng không hợp lệ');
-    }
-  }
-
-  private async calculatePrice(
-    durationType: Duration,
-    durationValue: number,
-    equipmentId?: string,
-    packageId?: string,
-  ): Promise<number> {
-    if (equipmentId) {
-      const equipment = await this.findItemById(equipmentId, 'equipment');
-      return this.calculateItemPrice(durationType, durationValue, equipment);
-    }
-
-    if (packageId) {
-      const packageItem = await this.findItemById(packageId, 'package');
-      return this.calculateItemPrice(durationType, durationValue, packageItem);
-    }
-
-    throw new Error(
-      'Cần cung cấp ít nhất một trong equipmentId hoặc packageId',
-    );
-  }
-
-  private async updateCartTotal(cartId: string) {
-    const items = await this.prisma.cartItem.findMany({ where: { cartId } });
-    const totalAmount = items.reduce((total, item) => total + item.price, 0);
-
-    await this.prisma.cart.update({
-      where: { id: cartId },
-      data: { totalAmount },
+  private async findPackageById(id: string): Promise<EquipmentPackage> {
+    const equipmentPackage = await this.prisma.equipmentPackage.findUnique({
+      where: { id },
     });
+    if (!equipmentPackage) throw new NotFoundException('Không tìm thấy gói');
+    return equipmentPackage;
   }
 
   async findCartByMe(userId: string): Promise<{ data: Cart }> {
@@ -93,100 +42,115 @@ export class CartService {
     }
   }
 
-  async createItemToCart(userId: string, dto: CreateItemToCartDto) {
-    const { durationType, durationValue, equipmentId, packageId, quantity } =
-      dto;
-
-    let cart = await this.prisma.cart.findUnique({
+  async createItemToCartByMe(
+    userId: string,
+    dto: CreateItemToCartDto,
+  ): Promise<CartItem> {
+    const cart = await this.prisma.cart.upsert({
       where: { userId },
-      include: { items: true },
+      update: {},
+      create: { userId },
     });
 
-    if (!cart) {
-      cart = await this.prisma.cart.create({
+    let item: Equipment | EquipmentPackage;
+    let itemPriceDay = 0;
+    let itemPriceWeek = 0;
+    let itemPriceMonth = 0;
+
+    if (dto.equipmentId) {
+      const equipment = await this.findEquipmentById(dto.equipmentId);
+
+      if (equipment.stock < dto.quantity) {
+        throw new Error(
+          `Số lượng thiết bị không đủ, chỉ còn ${equipment.stock} thiết bị.`,
+        );
+      }
+
+      item = equipment;
+      itemPriceDay = equipment.pricePerDay || 0;
+      itemPriceWeek = equipment.pricePerWeek || 0;
+      itemPriceMonth = equipment.pricePerMonth || 0;
+    } else if (dto.packageId) {
+      const equipmentPackage = await this.findPackageById(dto.packageId);
+
+      item = equipmentPackage;
+      itemPriceDay = equipmentPackage.pricePerDay || 0;
+      itemPriceWeek = equipmentPackage.pricePerWeek || 0;
+      itemPriceMonth = equipmentPackage.pricePerMonth || 0;
+    } else {
+      throw new NotFoundException('Không tìm thấy thiết bị hoặc gói.');
+    }
+
+    const totalPriceDay = itemPriceDay * dto.quantity;
+    const totalPriceWeek = itemPriceWeek * dto.quantity;
+    const totalPriceMonth = itemPriceMonth * dto.quantity;
+
+    const existingCartItem = await this.prisma.cartItem.findFirst({
+      where: {
+        cartId: cart.id,
+        equipmentId: dto.equipmentId || undefined,
+        packageId: dto.packageId || undefined,
+      },
+    });
+
+    let cartItem: CartItem;
+    if (existingCartItem) {
+      const newQuantity = existingCartItem.quantity + dto.quantity;
+
+      if (dto.equipmentId && (item as Equipment).stock < newQuantity) {
+        throw new Error(
+          `Số lượng thiết bị không đủ. Chỉ còn ${(item as Equipment).stock} thiết bị.`,
+        );
+      }
+
+      cartItem = await this.prisma.cartItem.update({
+        where: { id: existingCartItem.id },
         data: {
-          userId,
-          totalAmount: 0,
-          items: { create: [] },
+          quantity: newQuantity,
+          priceDay: itemPriceDay * newQuantity,
+          priceWeek: itemPriceWeek * newQuantity,
+          priceMonth: itemPriceMonth * newQuantity,
         },
-        include: { items: true },
+      });
+
+      await this.prisma.cart.update({
+        where: { id: cart.id },
+        data: {
+          totalAmountDay: { increment: totalPriceDay },
+          totalAmountWeek: { increment: totalPriceWeek },
+          totalAmountMonth: { increment: totalPriceMonth },
+        },
+      });
+    } else {
+      cartItem = await this.prisma.cartItem.create({
+        data: {
+          cartId: cart.id,
+          equipmentId: dto.equipmentId || undefined,
+          packageId: dto.packageId || undefined,
+          quantity: dto.quantity,
+          priceDay: totalPriceDay,
+          priceWeek: totalPriceWeek,
+          priceMonth: totalPriceMonth,
+        },
+      });
+
+      await this.prisma.cart.update({
+        where: { id: cart.id },
+        data: {
+          totalAmountDay: cart.totalAmountDay + totalPriceDay,
+          totalAmountWeek: cart.totalAmountWeek + totalPriceWeek,
+          totalAmountMonth: cart.totalAmountMonth + totalPriceMonth,
+        },
       });
     }
 
-    const price = await this.calculatePrice(
-      durationType,
-      durationValue,
-      equipmentId,
-      packageId,
-    );
-
-    const cartItem = await this.prisma.cartItem.create({
-      data: {
-        cartId: cart.id,
-        equipmentId,
-        packageId,
-        quantity,
-        durationType,
-        durationValue,
-        price: price * quantity,
-      },
-    });
-
-    await this.updateCartTotal(cart.id);
     return cartItem;
   }
 
-  async updateItemToCart(
+  async updateQuantityByMe(
     userId: string,
-    cartItemId: string,
     dto: UpdateItemToCartDto,
-  ) {
-    const cart = await this.prisma.cart.findUnique({
-      where: { userId },
-      include: { items: true },
-    });
-
-    if (!cart) {
-      throw new NotFoundException('Không tìm thấy giỏ hàng của người dùng');
-    }
-
-    const cartItem = await this.prisma.cartItem.findUnique({
-      where: { id: cartItemId },
-    });
-
-    if (!cartItem || cartItem.cartId !== cart.id) {
-      throw new ForbiddenException(
-        'Mục này không thuộc giỏ hàng của người dùng',
-      );
-    }
-
-    const { durationType, durationValue, equipmentId, packageId, quantity } =
-      dto;
-
-    const price = await this.calculatePrice(
-      durationType,
-      durationValue,
-      equipmentId,
-      packageId,
-    );
-
-    const updatedCartItem = await this.prisma.cartItem.update({
-      where: { id: cartItemId },
-      data: {
-        equipmentId,
-        packageId,
-        quantity,
-        durationType,
-        durationValue,
-        price: price * quantity,
-      },
-    });
-
-    await this.updateCartTotal(cart.id);
-    return updatedCartItem;
-  }
-
-  async removeItem(userId: string, cartItemId: string) {
+  ): Promise<CartItem> {
     const cart = await this.prisma.cart.findUnique({
       where: { userId },
       include: { items: true },
@@ -197,20 +161,138 @@ export class CartService {
     }
 
     const cartItem = await this.prisma.cartItem.findUnique({
-      where: { id: cartItemId },
+      where: { id: dto.cartItemId },
+      include: {
+        equipment: true,
+        package: true,
+      },
     });
 
-    if (!cartItem || cartItem.cartId !== cart.id) {
-      throw new ForbiddenException('Mặt hàng không thuộc giỏ hàng này');
+    if (!cartItem) {
+      throw new NotFoundException('Không tìm thấy mục trong giỏ hàng');
     }
 
-    await this.prisma.cartItem.delete({ where: { id: cartItemId } });
-    await this.updateCartTotal(cart.id);
+    let item: Equipment | EquipmentPackage;
+    let itemPriceDay = 0;
+    let itemPriceWeek = 0;
+    let itemPriceMonth = 0;
 
-    return { message: 'Đã xóa thành công!' };
+    if (cartItem.equipmentId) {
+      item = cartItem.equipment;
+      itemPriceDay = item.pricePerDay || 0;
+      itemPriceWeek = item.pricePerWeek || 0;
+      itemPriceMonth = item.pricePerMonth || 0;
+    } else if (cartItem.packageId) {
+      item = cartItem.package;
+      itemPriceDay = item.pricePerDay || 0;
+      itemPriceWeek = item.pricePerWeek || 0;
+      itemPriceMonth = item.pricePerMonth || 0;
+    } else {
+      throw new NotFoundException('Không tìm thấy thiết bị hoặc gói.');
+    }
+
+    if (cartItem.equipmentId && (item as Equipment).stock < dto.newQuantity) {
+      throw new Error(
+        `Số lượng thiết bị không đủ. Chỉ còn ${(item as Equipment).stock} thiết bị.`,
+      );
+    }
+
+    const oldQuantity = cartItem.quantity;
+    const totalPriceDay = itemPriceDay * dto.newQuantity;
+    const totalPriceWeek = itemPriceWeek * dto.newQuantity;
+    const totalPriceMonth = itemPriceMonth * dto.newQuantity;
+
+    const differenceQuantity = dto.newQuantity - oldQuantity;
+    const differenceDay = itemPriceDay * differenceQuantity;
+    const differenceWeek = itemPriceWeek * differenceQuantity;
+    const differenceMonth = itemPriceMonth * differenceQuantity;
+
+    const updatedCartItem = await this.prisma.cartItem.update({
+      where: { id: cartItem.id },
+      data: {
+        quantity: dto.newQuantity,
+        priceDay: totalPriceDay,
+        priceWeek: totalPriceWeek,
+        priceMonth: totalPriceMonth,
+      },
+    });
+
+    await this.prisma.cart.update({
+      where: { id: cart.id },
+      data: {
+        totalAmountDay: cart.totalAmountDay + differenceDay,
+        totalAmountWeek: cart.totalAmountWeek + differenceWeek,
+        totalAmountMonth: cart.totalAmountMonth + differenceMonth,
+      },
+    });
+
+    return updatedCartItem;
   }
 
-  async clearCart(userId: string) {
+  async removeItemToCartByMe(
+    userId: string,
+    dto: RemoveItemToCartDto,
+  ): Promise<{ message: string }> {
+    const cart = await this.prisma.cart.findUnique({
+      where: { userId },
+      include: { items: true },
+    });
+
+    if (!cart) {
+      throw new NotFoundException('Không tìm thấy giỏ hàng');
+    }
+
+    const cartItem = await this.prisma.cartItem.findUnique({
+      where: { id: dto.cartItemId },
+      include: {
+        equipment: true,
+        package: true,
+      },
+    });
+
+    if (!cartItem) {
+      throw new NotFoundException('Không tìm thấy mục trong giỏ hàng');
+    }
+
+    let itemPriceDay = 0;
+    let itemPriceWeek = 0;
+    let itemPriceMonth = 0;
+
+    if (cartItem.equipmentId) {
+      const equipment = cartItem.equipment;
+      itemPriceDay = equipment.pricePerDay || 0;
+      itemPriceWeek = equipment.pricePerWeek || 0;
+      itemPriceMonth = equipment.pricePerMonth || 0;
+    } else if (cartItem.packageId) {
+      const equipmentPackage = cartItem.package;
+      itemPriceDay = equipmentPackage.pricePerDay || 0;
+      itemPriceWeek = equipmentPackage.pricePerWeek || 0;
+      itemPriceMonth = equipmentPackage.pricePerMonth || 0;
+    } else {
+      throw new NotFoundException('Không tìm thấy thiết bị hoặc gói.');
+    }
+
+    const totalPriceDay = itemPriceDay * cartItem.quantity;
+    const totalPriceWeek = itemPriceWeek * cartItem.quantity;
+    const totalPriceMonth = itemPriceMonth * cartItem.quantity;
+
+    await this.prisma.cartItem.delete({
+      where: { id: cartItem.id },
+    });
+
+    await this.prisma.cart.update({
+      where: { id: cart.id },
+      data: {
+        totalAmountDay: cart.totalAmountDay - totalPriceDay,
+        totalAmountWeek: cart.totalAmountWeek - totalPriceWeek,
+        totalAmountMonth: cart.totalAmountMonth - totalPriceMonth,
+      },
+    });
+
+    return { message: 'Mục đã được xóa khỏi giỏ hàng' };
+  }
+
+  async clearCartByMe(userId: string) {
     const cart = await this.prisma.cart.findUnique({
       where: { userId },
       include: { items: true },
@@ -226,7 +308,11 @@ export class CartService {
 
     await this.prisma.cart.update({
       where: { id: cart.id },
-      data: { totalAmount: 0 },
+      data: {
+        totalAmountDay: 0,
+        totalAmountWeek: 0,
+        totalAmountMonth: 0,
+      },
     });
 
     return { message: 'Giỏ hàng đã được làm sạch' };
