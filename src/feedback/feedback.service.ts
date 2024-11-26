@@ -1,9 +1,6 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Feedback, Prisma } from '@prisma/client';
+import { prismaErrorHandler } from 'src/common/messages';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { FeedbackFilterDto } from './dto/feedback-filter.dto';
@@ -12,13 +9,6 @@ import { UpdateFeedbackDto } from './dto/update-feedback.dto';
 @Injectable()
 export class FeedbackService {
   constructor(private readonly prisma: PrismaService) {}
-
-  private handlePrismaError(error: any): never {
-    if (error.code === 'P2025') {
-      throw new NotFoundException('Không tìm thấy');
-    }
-    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
-  }
 
   async findAllPagination(
     page: number,
@@ -57,7 +47,7 @@ export class FeedbackService {
         limit,
       };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -67,7 +57,7 @@ export class FeedbackService {
 
       return { data: feedbacks };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -79,7 +69,7 @@ export class FeedbackService {
 
       return { data: feedback };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -91,7 +81,7 @@ export class FeedbackService {
 
       return { message: 'Thêm mới thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -107,7 +97,7 @@ export class FeedbackService {
 
       return { message: 'Cập nhật thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -119,7 +109,7 @@ export class FeedbackService {
 
       return { message: 'Xóa thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -138,7 +128,7 @@ export class FeedbackService {
 
       return { message: 'Phản hồi thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -150,7 +140,7 @@ export class FeedbackService {
 
       return { data: feedbacks };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -165,7 +155,7 @@ export class FeedbackService {
 
       return { average };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -177,7 +167,7 @@ export class FeedbackService {
 
       return { data: feedbacks };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -193,7 +183,7 @@ export class FeedbackService {
 
       return { data: feedbacks };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -213,7 +203,64 @@ export class FeedbackService {
 
       return { total: feedbacks.length, ratingCounts };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
+    }
+  }
+
+  async getRatingBreakdown(): Promise<{
+    ratingCounts: Record<number, number>;
+  }> {
+    try {
+      const feedbacks = await this.prisma.feedback.findMany();
+      const ratingCounts = feedbacks.reduce(
+        (acc, feedback) => {
+          acc[feedback.rating] = (acc[feedback.rating] || 0) + 1;
+          return acc;
+        },
+        {} as Record<number, number>,
+      );
+
+      return { ratingCounts };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async findFeedbacksByDateRange(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<{ data: Feedback[] }> {
+    try {
+      const feedbacks = await this.prisma.feedback.findMany({
+        where: {
+          createdAt: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+      });
+
+      return { data: feedbacks };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async updateAdminResponse(
+    id: string,
+    dto: { adminResponse: string; replyDate: Date },
+  ): Promise<{ message: string }> {
+    try {
+      await this.prisma.feedback.update({
+        where: { id },
+        data: {
+          adminResponse: dto.adminResponse,
+          replyDate: dto.replyDate,
+        },
+      });
+      return { message: 'Cập nhật phản hồi admin thành công' };
+    } catch (error) {
+      prismaErrorHandler(error);
     }
   }
 }

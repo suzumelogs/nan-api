@@ -9,7 +9,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Feedback } from '@prisma/client';
+import { Feedback, Role, User } from '@prisma/client';
+import { Auth, GetUser } from 'src/auth/decorators';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { FeedbackFilterDto } from './dto/feedback-filter.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
@@ -17,7 +18,7 @@ import { FeedbackService } from './feedback.service';
 
 @ApiBearerAuth()
 @ApiTags('Feedbacks')
-@Controller('feedback')
+@Controller('feedbacks')
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
 
@@ -52,6 +53,7 @@ export class FeedbackController {
   @ApiOperation({
     summary: 'Tạo phản hồi mới',
   })
+  @Auth(Role.user)
   create(
     @Body() createFeedbackDto: CreateFeedbackDto,
   ): Promise<{ message: string }> {
@@ -81,6 +83,7 @@ export class FeedbackController {
   @ApiOperation({
     summary: 'Phản hồi từ admin',
   })
+  @Auth(Role.admin)
   async reply(
     @Param('id') id: string,
     @Body() replyDto: { adminResponse: string; replyDate: Date },
@@ -88,20 +91,20 @@ export class FeedbackController {
     return this.feedbackService.reply(id, replyDto);
   }
 
-  @Get('user/:userId')
+  @Get('user')
   @ApiOperation({
     summary: 'Tìm phản hồi của người dùng theo userId',
   })
-  async findByUser(
-    @Param('userId') userId: string,
-  ): Promise<{ data: Feedback[] }> {
-    return this.feedbackService.findByUser(userId);
+  @Auth(Role.user)
+  async findByUser(@GetUser() user: User): Promise<{ data: Feedback[] }> {
+    return this.feedbackService.findByUser(user.id);
   }
 
   @Get('statistics')
   @ApiOperation({
     summary: 'Thống kê tổng quan về feedback',
   })
+  @Auth(Role.admin)
   async feedbackStatistics(): Promise<{
     total: number;
     ratingCounts: Record<number, number>;
@@ -123,6 +126,7 @@ export class FeedbackController {
   @ApiOperation({
     summary: 'Lấy các phản hồi đã được trả lời',
   })
+  @Auth(Role.admin)
   async findRepliedFeedbacks(): Promise<{ data: Feedback[] }> {
     return this.feedbackService.findRepliedFeedbacks();
   }
@@ -131,7 +135,46 @@ export class FeedbackController {
   @ApiOperation({
     summary: 'Tính điểm đánh giá trung bình của tất cả phản hồi',
   })
+  @Auth(Role.admin)
   async averageRating(): Promise<{ average: number }> {
     return this.feedbackService.averageRating();
+  }
+
+  @Get('rating-breakdown')
+  @ApiOperation({
+    summary: 'Phân tích số lượng phản hồi theo điểm đánh giá',
+  })
+  @Auth(Role.admin)
+  async getRatingBreakdown(): Promise<{
+    ratingCounts: Record<number, number>;
+  }> {
+    return this.feedbackService.getRatingBreakdown();
+  }
+
+  @Get('date-range')
+  @ApiOperation({
+    summary: 'Lấy phản hồi trong một khoảng ngày cụ thể',
+  })
+  @Auth(Role.admin)
+  async findFeedbacksByDateRange(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ): Promise<{ data: Feedback[] }> {
+    return this.feedbackService.findFeedbacksByDateRange(
+      new Date(startDate),
+      new Date(endDate),
+    );
+  }
+
+  @Patch(':id/admin-response')
+  @ApiOperation({
+    summary: 'Cập nhật phản hồi admin',
+  })
+  @Auth(Role.admin)
+  async updateAdminResponse(
+    @Param('id') id: string,
+    @Body() replyDto: { adminResponse: string; replyDate: Date },
+  ): Promise<{ message: string }> {
+    return this.feedbackService.updateAdminResponse(id, replyDto);
   }
 }
