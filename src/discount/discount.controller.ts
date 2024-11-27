@@ -17,7 +17,7 @@ import { UpdateDiscountDto } from './dto/update-discount.dto';
 
 @ApiBearerAuth()
 @ApiTags('Discounts')
-@Controller('discount')
+@Controller('discounts')
 export class DiscountController {
   constructor(private readonly discountService: DiscountService) {}
 
