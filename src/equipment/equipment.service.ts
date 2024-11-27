@@ -77,7 +77,7 @@ export class EquipmentService {
         limit,
       };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -88,7 +88,7 @@ export class EquipmentService {
       });
       return { data: equipments };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -102,7 +102,7 @@ export class EquipmentService {
       });
       return { data: equipment };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -113,7 +113,7 @@ export class EquipmentService {
       });
       return { message: 'Tạo mới thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -128,7 +128,7 @@ export class EquipmentService {
       });
       return { message: 'Cập nhật thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -137,7 +137,7 @@ export class EquipmentService {
       await this.prisma.equipment.delete({ where: { id } });
       return { message: 'Xóa thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -150,7 +150,7 @@ export class EquipmentService {
       }));
       return { data: equipmentsLabelValue };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 }

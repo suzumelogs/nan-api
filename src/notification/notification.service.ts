@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Notification, NotificationStatus, User } from '@prisma/client';
+import { prismaErrorHandler } from 'src/common/messages';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
@@ -24,7 +25,7 @@ export class NotificationService {
       const notifications = await this.prisma.notification.findMany();
       return { data: notifications };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -35,7 +36,7 @@ export class NotificationService {
       });
       return { data: notification };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -46,7 +47,7 @@ export class NotificationService {
       });
       return newNotification;
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -58,7 +59,7 @@ export class NotificationService {
       });
       return updatedNotification;
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -69,7 +70,7 @@ export class NotificationService {
       });
       return { message: 'Xóa thông báo thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -81,7 +82,7 @@ export class NotificationService {
 
       return { data: notifications };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -96,7 +97,7 @@ export class NotificationService {
       };
       return await this.create(notificationData);
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -118,7 +119,7 @@ export class NotificationService {
 
       return await this.update(notificationId, dto);
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -131,7 +132,7 @@ export class NotificationService {
         },
       });
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -160,7 +161,7 @@ export class NotificationService {
 
       return { count };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -172,7 +173,7 @@ export class NotificationService {
 
       return { data: notifications };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -196,7 +197,7 @@ export class NotificationService {
       );
       return notifications;
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -207,7 +208,7 @@ export class NotificationService {
       });
       return count;
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -220,7 +221,7 @@ export class NotificationService {
       });
       return { message: `Đã xóa ${deletedNotifications.count} thông báo cũ` };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 

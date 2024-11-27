@@ -61,7 +61,7 @@ export class DiscountService {
         limit,
       };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -71,7 +71,7 @@ export class DiscountService {
 
       return { data: discounts };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -83,7 +83,7 @@ export class DiscountService {
 
       return { data: discount };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -93,7 +93,7 @@ export class DiscountService {
         data: dto,
       });
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -104,7 +104,7 @@ export class DiscountService {
         data: dto,
       });
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -113,7 +113,7 @@ export class DiscountService {
       await this.prisma.discount.delete({ where: { id } });
       return { message: 'Mã giảm giá đã được xóa thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 

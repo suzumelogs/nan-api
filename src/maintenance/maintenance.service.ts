@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Maintenance, MaintenanceStatus, Prisma } from '@prisma/client';
+import { prismaErrorHandler } from 'src/common/messages';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMaintenanceDto } from './dto/create-maintenance.dto';
 import { MaintenanceFilterDto } from './dto/maintenance-filter.dto';
@@ -66,7 +67,7 @@ export class MaintenanceService {
         limit,
       };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -75,7 +76,7 @@ export class MaintenanceService {
       const maintenances = await this.prisma.maintenance.findMany();
       return { data: maintenances };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -86,7 +87,7 @@ export class MaintenanceService {
       });
       return { data: maintenance };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -98,7 +99,7 @@ export class MaintenanceService {
 
       return { message: 'Tạo mới thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -113,7 +114,7 @@ export class MaintenanceService {
       });
       return { message: 'Cập nhật thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -125,7 +126,7 @@ export class MaintenanceService {
 
       return { message: 'Xóa thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -143,7 +144,7 @@ export class MaintenanceService {
 
       return { message: 'Trạng thái bảo trì đã được cập nhật thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -156,7 +157,7 @@ export class MaintenanceService {
       });
       return { data: maintenances };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -174,7 +175,7 @@ export class MaintenanceService {
       });
       return { data: nextMaintenance };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -203,7 +204,7 @@ export class MaintenanceService {
 
       return { totalCost: totalCost._sum.maintenanceCost || 0 };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -221,7 +222,7 @@ export class MaintenanceService {
       });
       return { data: maintenances };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -262,7 +263,7 @@ export class MaintenanceService {
         },
       };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -274,7 +275,7 @@ export class MaintenanceService {
 
       return { message: 'Tạo mới bảo trì thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -299,7 +300,7 @@ export class MaintenanceService {
 
       return { data: maintenances };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 }

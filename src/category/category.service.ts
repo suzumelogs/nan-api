@@ -57,7 +57,7 @@ export class CategoryService {
         limit,
       };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -66,7 +66,7 @@ export class CategoryService {
       const categories = await this.prisma.category.findMany();
       return { data: categories };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -80,7 +80,7 @@ export class CategoryService {
       });
       return { data: category };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -89,7 +89,7 @@ export class CategoryService {
       await this.prisma.category.create({ data: dto });
       return { message: 'Tạo mới thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -101,7 +101,7 @@ export class CategoryService {
       await this.prisma.category.update({ where: { id }, data: dto });
       return { message: 'Cập nhật thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -110,7 +110,7 @@ export class CategoryService {
       await this.prisma.category.delete({ where: { id } });
       return { message: 'Xóa thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -123,7 +123,7 @@ export class CategoryService {
       }));
       return { data: categoriesLabelValue };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 }

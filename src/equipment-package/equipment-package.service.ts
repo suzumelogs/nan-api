@@ -1,11 +1,8 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EquipmentPackage, Prisma } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { prismaErrorHandler } from '../common/messages/prisma-error-hanler.message';
 import { CreateEquipmentPackageDto } from './dto/create-equipment-package.dto';
 import { EquipmentPackageFilterDto } from './dto/equipment-package-filter.dto';
 import { UpdateEquipmentPackageDto } from './dto/update-equipment-package.dto';
@@ -13,13 +10,6 @@ import { UpdateEquipmentPackageDto } from './dto/update-equipment-package.dto';
 @Injectable()
 export class EquipmentPackageService {
   constructor(private readonly prisma: PrismaService) {}
-
-  private handlePrismaError(error: any): never {
-    if (error.code === 'P2025') {
-      throw new NotFoundException('Không tìm thấy');
-    }
-    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
-  }
 
   async findAllPagination(
     page: number,
@@ -74,7 +64,7 @@ export class EquipmentPackageService {
         limit,
       };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -83,7 +73,7 @@ export class EquipmentPackageService {
       const equipmentPackages = await this.prisma.equipmentPackage.findMany();
       return { data: equipmentPackages };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -95,7 +85,7 @@ export class EquipmentPackageService {
         });
       return { data: equipmentPackage };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -107,7 +97,7 @@ export class EquipmentPackageService {
 
       return { message: 'Tạo mới thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -123,7 +113,7 @@ export class EquipmentPackageService {
 
       return { message: 'Cập nhật thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -132,7 +122,7 @@ export class EquipmentPackageService {
       await this.prisma.equipmentPackage.delete({ where: { id } });
       return { message: 'Xóa thành công' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -147,7 +137,7 @@ export class EquipmentPackageService {
       );
       return { data: equipmentPackagesLabelValue };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 }

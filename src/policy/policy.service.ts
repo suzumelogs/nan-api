@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Policy, Prisma } from '@prisma/client';
+import { prismaErrorHandler } from 'src/common/messages';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreatePolicyDto } from './dto/create-policy.dto';
 import { PolicyFilterDto } from './dto/policy-filter.dto';
@@ -54,7 +55,7 @@ export class PolicyService {
         limit,
       };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -64,7 +65,7 @@ export class PolicyService {
 
       return { data: policies };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -75,7 +76,7 @@ export class PolicyService {
       });
       return { data: policy };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -86,7 +87,7 @@ export class PolicyService {
       });
       return newPolicy;
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -98,7 +99,7 @@ export class PolicyService {
       });
       return updatedPolicy;
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -110,7 +111,7 @@ export class PolicyService {
 
       return { message: 'Policy deleted successfully' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 }

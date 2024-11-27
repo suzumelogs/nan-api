@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma, Rental, RentalStatus } from '@prisma/client';
+import { prismaErrorHandler } from 'src/common/messages';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRentalDto } from './dto/create-rental.dto';
 import { RentalFilterDto } from './dto/rental-filter.dto';
@@ -49,7 +50,7 @@ export class RentalService {
 
       return { data, total, page, limit };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -61,7 +62,7 @@ export class RentalService {
       });
       return { data: rental };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -73,7 +74,7 @@ export class RentalService {
       });
       return { data: rentals };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -82,7 +83,7 @@ export class RentalService {
       await this.prisma.rental.delete({ where: { id } });
       return { message: 'Xóa đơn thuê thành công!' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -118,7 +119,7 @@ export class RentalService {
 
       return rental;
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -177,7 +178,7 @@ export class RentalService {
 
       return updatedRental;
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -202,7 +203,7 @@ export class RentalService {
 
       return { message: 'Đơn thuê đã được hủy thành công.' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 
@@ -234,7 +235,7 @@ export class RentalService {
 
       return { message: 'Đã xóa toàn bộ đơn thuê của bạn thành công.' };
     } catch (error) {
-      this.handlePrismaError(error);
+      prismaErrorHandler(error);
     }
   }
 }
