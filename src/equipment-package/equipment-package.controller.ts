@@ -9,10 +9,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { EquipmentPackage } from '@prisma/client';
+import { Equipment, EquipmentPackage } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
 import { CreateEquipmentPackageDto } from './dto/create-equipment-package.dto';
 import { EquipmentPackageFilterDto } from './dto/equipment-package-filter.dto';
+import { PaginationDto } from './dto/pagination.dto';
 import { UpdateEquipmentPackageDto } from './dto/update-equipment-package.dto';
 import { EquipmentPackageService } from './equipment-package.service';
 
@@ -91,5 +92,16 @@ export class EquipmentPackageController {
   })
   getLabelValue(): Promise<{ data: LabelValueResponse[] }> {
     return this.equipmentPackageService.getLabelValue();
+  }
+
+  @Get(':id/equipments/all/pagination')
+  @ApiOperation({
+    summary: 'Lấy danh sách thiết bị của gói thiết bị (Có phân trang)',
+  })
+  async getEquipments(
+    @Param('id') id: string,
+    @Query() dto: PaginationDto,
+  ): Promise<{ data: Equipment[]; total: number }> {
+    return this.equipmentPackageService.getEquipmentsWithPagination(id, dto);
   }
 }

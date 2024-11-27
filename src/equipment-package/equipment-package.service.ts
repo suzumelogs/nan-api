@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { EquipmentPackage, Prisma } from '@prisma/client';
+import { Equipment, EquipmentPackage, Prisma } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { prismaErrorHandler } from '../common/messages/prisma-error-hanler.message';
 import { CreateEquipmentPackageDto } from './dto/create-equipment-package.dto';
 import { EquipmentPackageFilterDto } from './dto/equipment-package-filter.dto';
+import { PaginationDto } from './dto/pagination.dto';
 import { UpdateEquipmentPackageDto } from './dto/update-equipment-package.dto';
 
 @Injectable()
@@ -136,6 +137,47 @@ export class EquipmentPackageService {
         }),
       );
       return { data: equipmentPackagesLabelValue };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async getEquipmentsWithPagination(
+    id: string,
+    dto: PaginationDto,
+  ): Promise<{
+    data: Equipment[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    try {
+      const skip = (dto.page - 1) * dto.limit;
+
+      const equipmentPackageOnEquipments =
+        await this.prisma.equipmentPackageOnEquipment.findMany({
+          where: {
+            packageId: id,
+          },
+          take: dto.limit,
+          skip: skip,
+          include: {
+            equipment: true,
+          },
+        });
+
+      const total = await this.prisma.equipmentPackageOnEquipment.count({
+        where: {
+          packageId: id,
+        },
+      });
+
+      return {
+        data: equipmentPackageOnEquipments.map((e) => e.equipment),
+        total,
+        page: dto.page,
+        limit: dto.limit,
+      };
     } catch (error) {
       prismaErrorHandler(error);
     }
