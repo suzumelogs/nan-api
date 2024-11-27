@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsDateString,
   IsNotEmpty,
   IsNumber,
@@ -10,7 +11,6 @@ import {
 export class CreateDiscountDto {
   @ApiProperty({
     description: 'Mã giảm giá',
-    example: 'SUMMER2024',
   })
   @IsNotEmpty()
   @IsString()
@@ -18,7 +18,6 @@ export class CreateDiscountDto {
 
   @ApiProperty({
     description: 'Tỷ lệ giảm giá (%)',
-    example: 20.0,
   })
   @IsNotEmpty()
   @IsNumber()
@@ -26,7 +25,6 @@ export class CreateDiscountDto {
 
   @ApiProperty({
     description: 'Thời gian bắt đầu',
-    example: '2024-06-01T00:00:00.000Z',
   })
   @IsNotEmpty()
   @IsDateString()
@@ -34,7 +32,6 @@ export class CreateDiscountDto {
 
   @ApiProperty({
     description: 'Thời gian kết thúc',
-    example: '2024-08-31T00:00:00.000Z',
   })
   @IsNotEmpty()
   @IsDateString()
@@ -42,10 +39,25 @@ export class CreateDiscountDto {
 
   @ApiProperty({
     description: 'Giới hạn số lần sử dụng',
-    example: 100,
     required: false,
   })
   @IsOptional()
   @IsNumber()
   maxUsage: number;
+
+  @ApiProperty({
+    description: 'Số lần đã sử dụng',
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  currentUsage?: number;
+
+  @ApiProperty({
+    description: 'Trạng thái hoạt động của mã giảm giá',
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }
