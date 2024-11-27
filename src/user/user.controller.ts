@@ -16,6 +16,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
+import { UpdateIdentityDocDto } from './dto/update-identity-doc.dto';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -121,5 +122,17 @@ export class UserController {
   @Auth(Role.user)
   getRentals(@GetUser() user: User) {
     return this.userService.getRentals(user);
+  }
+
+  @Patch(':id/identity-doc')
+  @ApiOperation({
+    summary: 'Cập nhật tài liệu nhận dạng của người dùng',
+  })
+  @Auth(Role.admin, Role.user)
+  async updateIdentityDoc(
+    @GetUser() user: User,
+    @Body() dto: UpdateIdentityDocDto,
+  ) {
+    return this.userService.updateIdentityDoc(user.id, dto);
   }
 }

@@ -13,6 +13,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
 import { User } from './entities/user.entity';
+import { UpdateIdentityDocDto } from './dto/update-identity-doc.dto';
 
 @Injectable()
 export class UserService {
@@ -231,6 +232,29 @@ export class UserService {
       return { data: rentals };
     } catch (error) {
       throw new InternalServerErrorException('Server error');
+    }
+  }
+
+  async updateIdentityDoc(
+    userId: string,
+    dto: UpdateIdentityDocDto,
+  ): Promise<{ message: string }> {
+    try {
+      const updatedUser = await this.prisma.user.update({
+        where: { id: userId },
+        data: { identityDoc: dto.identityDoc },
+      });
+
+      if (!updatedUser) {
+        throw new BadRequestException(`User with id ${userId} not found.`);
+      }
+
+      return { message: 'Identity document updated successfully' };
+    } catch (error) {
+      this.prismaErrorHanler(error, 'PATCH', userId);
+      throw new InternalServerErrorException(
+        'Failed to update identity document',
+      );
     }
   }
 }
