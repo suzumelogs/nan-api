@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MaintenanceStatus } from '@prisma/client';
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateMaintenanceDto {
   @ApiProperty({
@@ -30,6 +36,14 @@ export class CreateMaintenanceDto {
   @IsNotEmpty()
   @IsEnum(MaintenanceStatus)
   status: MaintenanceStatus;
+
+  @ApiProperty({
+    description: 'Chi phí bảo trì (tùy chọn)',
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  maintenanceCost?: number;
 
   @ApiProperty({
     description: 'ID thiết bị',
