@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Equipment, Prisma } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
+import { prismaErrorHandler } from 'src/common/messages';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { EquipmentFilterDto } from './dto/equipment-filter.dto';

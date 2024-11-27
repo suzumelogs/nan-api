@@ -17,7 +17,7 @@ import { PolicyService } from './policy.service';
 
 @ApiBearerAuth()
 @ApiTags('Policies')
-@Controller('policy')
+@Controller('policies')
 export class PolicyController {
   constructor(private readonly policyService: PolicyService) {}
 

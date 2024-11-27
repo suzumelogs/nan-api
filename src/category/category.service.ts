@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Category, Prisma } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
+import { prismaErrorHandler } from 'src/common/messages';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CategoryFilterDto } from './dto/category-filter.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -114,14 +115,14 @@ export class CategoryService {
     }
   }
 
-  async getLabelValue(): Promise<{ data: LabelValueResponse[] }> {
+  async getLabelValue(): Promise<LabelValueResponse[]> {
     try {
       const categories = await this.prisma.category.findMany();
       const categoriesLabelValue = categories.map((category) => ({
         label: category.name,
         value: category.id,
       }));
-      return { data: categoriesLabelValue };
+      return categoriesLabelValue;
     } catch (error) {
       prismaErrorHandler(error);
     }

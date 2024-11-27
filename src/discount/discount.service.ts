@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Discount, Prisma, Role } from '@prisma/client';
+import { prismaErrorHandler } from 'src/common/messages';
 import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateDiscountDto } from './dto/create-discount.dto';

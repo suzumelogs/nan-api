@@ -9,12 +9,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Category } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
 import { CategoryService } from './category.service';
 import { CategoryFilterDto } from './dto/category-filter.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category } from '@prisma/client';
 
 @ApiBearerAuth()
 @ApiTags('Categories')
@@ -82,7 +82,7 @@ export class CategoryController {
   @ApiOperation({
     summary: 'Tất cả danh mục (Định dạng label value)',
   })
-  getLabelValue(): Promise<{ data: LabelValueResponse[] }> {
+  getLabelValue(): Promise<LabelValueResponse[]> {
     return this.categoryService.getLabelValue();
   }
 }
