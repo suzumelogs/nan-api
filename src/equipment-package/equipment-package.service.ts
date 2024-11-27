@@ -83,6 +83,7 @@ export class EquipmentPackageService {
       const equipmentPackage =
         await this.prisma.equipmentPackage.findUniqueOrThrow({
           where: { id },
+          include: { equipments: true },
         });
       return { data: equipmentPackage };
     } catch (error) {
