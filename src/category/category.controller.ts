@@ -9,12 +9,13 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Category } from '@prisma/client';
+import { Category, Equipment } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
 import { CategoryService } from './category.service';
 import { CategoryFilterDto } from './dto/category-filter.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 @ApiBearerAuth()
 @ApiTags('Categories')
@@ -84,5 +85,16 @@ export class CategoryController {
   })
   getLabelValue(): Promise<LabelValueResponse[]> {
     return this.categoryService.getLabelValue();
+  }
+
+  @Get(':id/equipments/all/pagination')
+  @ApiOperation({
+    summary: 'Lấy danh sách thiết bị của danh mục (Có phân trang)',
+  })
+  async getEquipments(
+    @Param('id') id: string,
+    @Query() dto: PaginationDto,
+  ): Promise<{ data: Equipment[]; total: number }> {
+    return this.categoryService.getEquipmentsWithPagination(id, dto);
   }
 }

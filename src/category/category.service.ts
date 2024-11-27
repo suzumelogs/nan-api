@@ -3,13 +3,14 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Category, Prisma } from '@prisma/client';
+import { Category, Equipment, Prisma } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
 import { prismaErrorHandler } from 'src/common/messages';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CategoryFilterDto } from './dto/category-filter.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class CategoryService {
@@ -123,6 +124,49 @@ export class CategoryService {
         value: category.id,
       }));
       return categoriesLabelValue;
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async getEquipmentsWithPagination(
+    id: string,
+    dto: PaginationDto,
+  ): Promise<{
+    data: Equipment[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    try {
+      const category = await this.prisma.category.findUnique({
+        where: { id },
+      });
+
+      if (!category) {
+        throw new NotFoundException('Không tìm thấy danh mục này');
+      }
+
+      const { page, limit } = dto;
+      const skip = (page - 1) * limit;
+
+      const [data, total] = await Promise.all([
+        this.prisma.equipment.findMany({
+          where: { categoryId: id },
+          skip,
+          take: limit,
+        }),
+        this.prisma.equipment.count({
+          where: { categoryId: id },
+        }),
+      ]);
+
+      return {
+        data,
+        total,
+        page,
+        limit,
+      };
     } catch (error) {
       prismaErrorHandler(error);
     }
