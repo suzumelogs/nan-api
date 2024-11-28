@@ -35,7 +35,7 @@ export class RentalController {
     return this.rentalService.findAllPagination(page, limit, filters);
   }
 
-  @Get(':id')
+  @Get('get-by/:id')
   @ApiOperation({
     summary: 'Đơn thuê theo ID',
   })
@@ -43,7 +43,7 @@ export class RentalController {
     return this.rentalService.findOne(id);
   }
 
-  @Get('get-by/me')
+  @Get('by-me')
   @ApiOperation({
     summary: 'Đơn thuê của tôi theo ID',
   })
