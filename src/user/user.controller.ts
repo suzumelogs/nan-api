@@ -12,11 +12,11 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { Auth, GetUser } from 'src/auth/decorators';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateIdentityDocDto } from './dto/update-identity-doc.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
-import { UpdateIdentityDocDto } from './dto/update-identity-doc.dto';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -124,7 +124,7 @@ export class UserController {
     return this.userService.getRentals(user);
   }
 
-  @Patch(':id/identity-doc')
+  @Patch('update/identity-doc')
   @ApiOperation({
     summary: 'Cập nhật tài liệu nhận dạng của người dùng',
   })
