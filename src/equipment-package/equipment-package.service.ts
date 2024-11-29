@@ -96,20 +96,18 @@ export class EquipmentPackageService {
     try {
       const createdPackage = await this.prisma.equipmentPackage.create({
         data: {
-          ...dto,
+          name: dto.name,
+          description: dto.description,
+          pricePerDay: dto.pricePerDay,
+          pricePerWeek: dto.pricePerWeek,
+          pricePerMonth: dto.pricePerMonth,
+          equipments: {
+            create: dto.equipmentIds?.map((equipmentId) => ({
+              equipmentId,
+            })),
+          },
         },
       });
-
-      if (dto.equipmentIds && dto.equipmentIds.length > 0) {
-        const data = dto.equipmentIds.map((equipmentId) => ({
-          packageId: createdPackage.id,
-          equipmentId,
-        }));
-
-        await this.prisma.equipmentPackageOnEquipment.createMany({
-          data,
-        });
-      }
 
       return {
         message: 'Tạo gói thiết bị và thêm thiết bị vào gói thành công',
