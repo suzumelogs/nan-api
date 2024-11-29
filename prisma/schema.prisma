@@ -60,6 +60,12 @@ enum MaintenanceStatus {
   completed
 }
 
+enum DamageReportStatus {
+  pending
+  in_progress
+  resolved
+}
+
 // Người dùng
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
@@ -76,6 +82,7 @@ model User {
   notifications  Notification[]
   paymentMethods PaymentMethod[]
   supports       Support[]
+  damageReports  DamageReport[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -111,10 +118,11 @@ model Equipment {
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String   @db.ObjectId
 
-  cartItems    CartItem[]
-  rentalItems  RentalItem[]
-  packages     EquipmentPackageOnEquipment[]
-  maintenances Maintenance[]
+  cartItems     CartItem[]
+  rentalItems   RentalItem[]
+  packages      EquipmentPackageOnEquipment[]
+  maintenances  Maintenance[]
+  damageReports DamageReport[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -355,4 +363,24 @@ model Support {
   updatedAt DateTime @updatedAt
 
   @@map("supports")
+}
+
+// Báo hỏng thiết bị
+model DamageReport {
+  id          String             @id @default(auto()) @map("_id") @db.ObjectId
+  description String // Mô tả về hư hỏng
+  damageDate  DateTime           @default(now())
+  status      DamageReportStatus @default(pending)
+  image       String
+
+  equipmentId String    @db.ObjectId // Thiết bị bị hỏng
+  equipment   Equipment @relation(fields: [equipmentId], references: [id])
+
+  userId String @db.ObjectId // Người báo hỏng
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("damage_reports")
 }

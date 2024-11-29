@@ -17,6 +17,7 @@ import { CartModule } from './cart/cart.module';
 import { EquipmentModule } from './equipment/equipment.module';
 import { EquipmentPackageModule } from './equipment-package/equipment-package.module';
 import { RentalModule } from './rental/rental.module';
+import { DamageReportModule } from './damage-report/damage-report.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { RentalModule } from './rental/rental.module';
     EquipmentModule,
     EquipmentPackageModule,
     RentalModule,
+    DamageReportModule,
   ],
   controllers: [AppController],
   providers: [AppService, FirebaseService],
