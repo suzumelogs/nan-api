@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsArray,
+  IsString,
+} from 'class-validator';
 
 export class CreateEquipmentPackageDto {
   @ApiProperty({ description: 'Tên gói thiết bị' })
@@ -27,13 +33,13 @@ export class CreateEquipmentPackageDto {
   @IsNumber()
   pricePerMonth?: number;
 
-  // @ApiProperty({
-  //   description: 'Danh sách ID của thiết bị liên quan',
-  //   type: [String],
-  //   required: false,
-  // })
-  // @IsArray()
-  // @IsString({ each: true })
-  // @IsOptional()
-  // equipments?: string[];
+  @ApiProperty({
+    description: 'Danh sách ID của thiết bị liên quan',
+    type: [String],
+    required: false,
+  })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  equipmentIds?: string[];
 }

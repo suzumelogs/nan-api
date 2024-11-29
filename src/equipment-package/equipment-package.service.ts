@@ -94,11 +94,26 @@ export class EquipmentPackageService {
 
   async create(dto: CreateEquipmentPackageDto): Promise<{ message: string }> {
     try {
-      await this.prisma.equipmentPackage.create({
-        data: dto,
+      const createdPackage = await this.prisma.equipmentPackage.create({
+        data: {
+          ...dto,
+        },
       });
 
-      return { message: 'Tạo mới thành công' };
+      if (dto.equipmentIds && dto.equipmentIds.length > 0) {
+        const data = dto.equipmentIds.map((equipmentId) => ({
+          packageId: createdPackage.id,
+          equipmentId,
+        }));
+
+        await this.prisma.equipmentPackageOnEquipment.createMany({
+          data,
+        });
+      }
+
+      return {
+        message: 'Tạo gói thiết bị và thêm thiết bị vào gói thành công',
+      };
     } catch (error) {
       prismaErrorHandler(error);
     }
@@ -111,8 +126,29 @@ export class EquipmentPackageService {
     try {
       await this.prisma.equipmentPackage.update({
         where: { id },
-        data: dto,
+        data: {
+          name: dto.name,
+          description: dto.description,
+          pricePerDay: dto.pricePerDay,
+          pricePerWeek: dto.pricePerWeek,
+          pricePerMonth: dto.pricePerMonth,
+        },
       });
+
+      if (dto.equipmentIds) {
+        await this.prisma.equipmentPackageOnEquipment.deleteMany({
+          where: { packageId: id },
+        });
+
+        const data = dto.equipmentIds.map((equipmentId) => ({
+          packageId: id,
+          equipmentId: equipmentId,
+        }));
+
+        await this.prisma.equipmentPackageOnEquipment.createMany({
+          data,
+        });
+      }
 
       return { message: 'Cập nhật thành công' };
     } catch (error) {
