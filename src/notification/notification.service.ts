@@ -3,7 +3,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Notification, NotificationStatus, User } from '@prisma/client';
+import { Notification, NotificationStatus, Role, User } from '@prisma/client';
 import { prismaErrorHandler } from 'src/common/messages';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
@@ -233,6 +233,35 @@ export class NotificationService {
         message: 'Đây là một thông báo bất kỳ! Cuong Thieu',
         userId: user.id,
       });
+    }
+  }
+
+  async sendNotificationAdmin(message: string): Promise<Notification[]> {
+    try {
+      const admins = await this.prisma.user.findMany({
+        where: { role: Role.admin },
+      });
+
+      if (admins.length === 0) {
+        throw new NotFoundException(
+          'Không tìm thấy người dùng có vai trò admin',
+        );
+      }
+
+      const notifications = await Promise.all(
+        admins.map(async (admin) => {
+          const notificationDto: CreateNotificationDto = {
+            message,
+            userId: admin.id,
+            status: NotificationStatus.unread,
+          };
+          return await this.create(notificationDto);
+        }),
+      );
+
+      return notifications;
+    } catch (error) {
+      prismaErrorHandler(error);
     }
   }
 }

@@ -34,8 +34,7 @@ enum Duration {
 }
 
 enum PaymentType {
-  credit_card
-  bank_transfer
+  default
   paypal
 }
 
@@ -64,6 +63,7 @@ enum DamageReportStatus {
   pending
   in_progress
   resolved
+  canceled
 }
 
 // Người dùng

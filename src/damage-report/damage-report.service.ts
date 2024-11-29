@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DamageReport, Prisma } from '@prisma/client';
 import { prismaErrorHandler } from 'src/common/messages';
+import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateDamageReportDto } from './dto/create-damage-report.dto';
 import { DamageReportFilterDto } from './dto/damage-report-filter.dto';
@@ -8,7 +9,10 @@ import { UpdateStatus } from './dto/update-status.dto';
 
 @Injectable()
 export class DamageReportService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async findAllPagination(
     page: number,
@@ -74,18 +78,25 @@ export class DamageReportService {
 
   async createByUser(userId: string, dto: CreateDamageReportDto) {
     try {
-      await this.prisma.damageReport.create({
+      const createdDamageReport = await this.prisma.damageReport.create({
         data: {
           description: dto.description,
           image: dto.image,
-          equipment: {
-            connect: { id: dto.equipmentId },
-          },
+          equipmentId: dto.equipmentId,
+          userId,
+        },
+        include: {
           user: {
-            connect: { id: userId },
+            select: { name: true },
+          },
+          equipment: {
+            select: { name: true },
           },
         },
       });
+
+      const notificationMessage = `(Báo hỏng)Người dùng ${createdDamageReport.user.name} đã báo hỏng thiết bị ${createdDamageReport.equipment.name}`;
+      this.notificationService.sendNotificationAdmin(notificationMessage);
 
       return { message: 'Báo hỏng thành công' };
     } catch (error) {
@@ -95,11 +106,26 @@ export class DamageReportService {
 
   async updateStatus(id: string, dto: UpdateStatus) {
     try {
-      await this.prisma.damageReport.update({
+      const damageReport = await this.prisma.damageReport.update({
         where: { id },
         data: {
           status: dto.status,
         },
+        include: {
+          user: {
+            select: { id: true },
+          },
+          equipment: {
+            select: { name: true },
+          },
+        },
+      });
+
+      const notificationMessage = `(Báo hỏng)Thiết bị ${damageReport.equipment.name} đang ở trạng thái ${damageReport.status}`;
+
+      this.notificationService.sendNotification({
+        message: notificationMessage,
+        userId: damageReport.user.id,
       });
 
       return { message: 'Cập nhật trạng thái thành công' };

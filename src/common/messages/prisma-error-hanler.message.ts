@@ -4,6 +4,8 @@ import {
 } from '@nestjs/common';
 
 export const prismaErrorHandler = (error: any) => {
+  console.log(error);
+
   if (error.code === 'P2002') {
     throw new BadRequestException('Dữ liệu đã tồn tại !');
   }
