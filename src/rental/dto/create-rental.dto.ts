@@ -82,4 +82,11 @@ export class CreateRentalDto {
   @IsNumber()
   @Min(0)
   totalAmount: number;
+
+  @ApiProperty({
+    description: 'Địa chỉ',
+    type: String,
+  })
+  @IsString()
+  address: string;
 }

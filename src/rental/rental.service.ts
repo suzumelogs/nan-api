@@ -91,7 +91,7 @@ export class RentalService {
     userId: string,
     createRentalDto: CreateRentalDto,
   ): Promise<Rental> {
-    const { items, startDate, endDate, totalAmount } = createRentalDto;
+    const { items, startDate, endDate, totalAmount, address } = createRentalDto;
 
     try {
       const rental = await this.prisma.rental.create({
@@ -100,6 +100,7 @@ export class RentalService {
           endDate: new Date(endDate),
           totalAmount,
           status: RentalStatus.pending,
+          address,
           userId: userId,
           items: {
             create: items.map((item) => ({

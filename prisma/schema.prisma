@@ -216,6 +216,7 @@ model Rental {
   startDate   DateTime?
   endDate     DateTime?
   status      RentalStatus @default(pending)
+  address     String
 
   feedbacks Feedback[]
 
