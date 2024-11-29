@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DamageReport, Prisma } from '@prisma/client';
+import { DamageReport, DamageReportStatus, Prisma } from '@prisma/client';
 import { prismaErrorHandler } from 'src/common/messages';
 import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -127,6 +127,11 @@ export class DamageReportService {
         message: notificationMessage,
         userId: damageReport.user.id,
       });
+
+      if (dto.status === DamageReportStatus.canceled) {
+        await this.remove(id);
+        return { message: 'Báo cáo hư hỏng đã bị hủy bỏ và xóa thành công' };
+      }
 
       return { message: 'Cập nhật trạng thái thành công' };
     } catch (error) {
