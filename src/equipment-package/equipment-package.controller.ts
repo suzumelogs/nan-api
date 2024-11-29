@@ -16,6 +16,7 @@ import { EquipmentPackageFilterDto } from './dto/equipment-package-filter.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { UpdateEquipmentPackageDto } from './dto/update-equipment-package.dto';
 import { EquipmentPackageService } from './equipment-package.service';
+import { AddEquipmentsToPackageDto } from './dto/add-equipments-to-package.dto';
 
 @ApiBearerAuth()
 @ApiTags('Equipment Packages')
@@ -103,5 +104,12 @@ export class EquipmentPackageController {
     @Query() dto: PaginationDto,
   ): Promise<{ data: Equipment[]; total: number }> {
     return this.equipmentPackageService.getEquipmentsWithPagination(id, dto);
+  }
+
+  @Post('add/equipments-to-package')
+  async addEquipmentsToPackage(
+    @Body() dto: AddEquipmentsToPackageDto,
+  ): Promise<{ message: string }> {
+    return this.equipmentPackageService.addEquipmentsToPackage(dto);
   }
 }

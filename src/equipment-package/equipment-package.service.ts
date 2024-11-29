@@ -7,6 +7,7 @@ import { CreateEquipmentPackageDto } from './dto/create-equipment-package.dto';
 import { EquipmentPackageFilterDto } from './dto/equipment-package-filter.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { UpdateEquipmentPackageDto } from './dto/update-equipment-package.dto';
+import { AddEquipmentsToPackageDto } from './dto/add-equipments-to-package.dto';
 
 @Injectable()
 export class EquipmentPackageService {
@@ -179,6 +180,43 @@ export class EquipmentPackageService {
         page: dto.page,
         limit: dto.limit,
       };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async addEquipmentsToPackage(
+    dto: AddEquipmentsToPackageDto,
+  ): Promise<{ message: string }> {
+    try {
+      const existingEquipments =
+        await this.prisma.equipmentPackageOnEquipment.findMany({
+          where: { packageId: dto.packageId },
+          select: { equipmentId: true },
+        });
+
+      const existingEquipmentIds = existingEquipments.map(
+        (item) => item.equipmentId,
+      );
+
+      const newEquipmentIds = dto.equipmentIds.filter(
+        (id) => !existingEquipmentIds.includes(id),
+      );
+
+      if (newEquipmentIds.length === 0) {
+        return { message: 'Tất cả thiết bị đã có trong gói' };
+      }
+
+      const data = newEquipmentIds.map((equipmentId) => ({
+        packageId: dto.packageId,
+        equipmentId,
+      }));
+
+      await this.prisma.equipmentPackageOnEquipment.createMany({
+        data,
+      });
+
+      return { message: 'Thêm thiết bị vào gói thành công' };
     } catch (error) {
       prismaErrorHandler(error);
     }
