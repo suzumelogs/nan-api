@@ -337,7 +337,7 @@ model Discount {
 model PaymentMethod {
   id         String      @id @default(auto()) @map("_id") @db.ObjectId
   methodType PaymentType
-  details    String // chi tiết phương thức thanh toán
+  totalPrice Float
 
   userId String @db.ObjectId
 
