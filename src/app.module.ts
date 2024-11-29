@@ -18,6 +18,7 @@ import { EquipmentModule } from './equipment/equipment.module';
 import { EquipmentPackageModule } from './equipment-package/equipment-package.module';
 import { RentalModule } from './rental/rental.module';
 import { DamageReportModule } from './damage-report/damage-report.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { DamageReportModule } from './damage-report/damage-report.module';
     EquipmentPackageModule,
     RentalModule,
     DamageReportModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService, FirebaseService],

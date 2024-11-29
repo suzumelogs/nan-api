@@ -22,7 +22,7 @@ export class FirebaseService {
     this.storage = getStorage(initializeApp(config));
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<string> {
+  async uploadFile(file: Express.Multer.File): Promise<{ url: string }> {
     this.validateFile(file);
 
     const blobName = this.generateBlobName(file.originalname);
@@ -36,7 +36,9 @@ export class FirebaseService {
       this.handleUploadError(error);
     }
 
-    return await this.getDownloadUrl(storageRef);
+    const url = await this.getDownloadUrl(storageRef);
+
+    return { url };
   }
 
   async deleteFile(fileUrl: string): Promise<void> {
