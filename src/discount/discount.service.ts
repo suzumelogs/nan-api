@@ -18,13 +18,6 @@ export class DiscountService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  private handlePrismaError(error: any): never {
-    if (error.code === 'P2025') {
-      throw new NotFoundException('Không tìm thấy');
-    }
-    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
-  }
-
   async findAllPagination(
     page: number,
     limit: number,
@@ -49,6 +42,9 @@ export class DiscountService {
           where: whereClause,
           skip: (page - 1) * limit,
           take: limit,
+          orderBy: {
+            createdAt: 'desc',
+          },
         }),
         this.prisma.discount.count({
           where: whereClause,

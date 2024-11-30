@@ -61,6 +61,9 @@ export class UserService {
           where: whereClause,
           skip: (parsedPage - 1) * parsedLimit,
           take: parsedLimit,
+          orderBy: {
+            createdAt: 'desc',
+          },
         }),
         this.prisma.user.count({
           where: whereClause,

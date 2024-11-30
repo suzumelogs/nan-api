@@ -13,13 +13,6 @@ import { UpdateNotificationDto } from './dto/update-notification.dto';
 export class NotificationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private handlePrismaError(error: any): never {
-    if (error.code === 'P2025') {
-      throw new NotFoundException('Không tìm thấy');
-    }
-    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
-  }
-
   async findAll(): Promise<{ data: Notification[] }> {
     try {
       const notifications = await this.prisma.notification.findMany();
@@ -78,6 +71,9 @@ export class NotificationService {
     try {
       const notifications = await this.prisma.notification.findMany({
         where: { userId },
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
 
       return { data: notifications };
@@ -169,6 +165,9 @@ export class NotificationService {
     try {
       const notifications = await this.prisma.notification.findMany({
         where: { userId, status: NotificationStatus.unread },
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
 
       return { data: notifications };
@@ -222,17 +221,6 @@ export class NotificationService {
       return { message: `Đã xóa ${deletedNotifications.count} thông báo cũ` };
     } catch (error) {
       prismaErrorHandler(error);
-    }
-  }
-
-  async sendRandomNotificationToAllUsers() {
-    const users: User[] = await this.prisma.user.findMany();
-
-    for (const user of users) {
-      await this.sendNotification({
-        message: 'Đây là một thông báo bất kỳ! Cuong Thieu',
-        userId: user.id,
-      });
     }
   }
 

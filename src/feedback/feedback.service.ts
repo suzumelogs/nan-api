@@ -34,6 +34,9 @@ export class FeedbackService {
           where: whereClause,
           skip: (page - 1) * limit,
           take: limit,
+          orderBy: {
+            createdAt: 'desc',
+          },
         }),
         this.prisma.feedback.count({
           where: whereClause,

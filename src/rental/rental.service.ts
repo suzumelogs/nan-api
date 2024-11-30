@@ -44,6 +44,9 @@ export class RentalService {
           where: whereClause,
           skip: (page - 1) * limit,
           take: limit,
+          orderBy: {
+            createdAt: 'desc',
+          },
         }),
         this.prisma.rental.count({ where: whereClause }),
       ]);

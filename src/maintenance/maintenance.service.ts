@@ -15,13 +15,6 @@ import { UpdateStatusDto } from './dto/update-status.dto';
 export class MaintenanceService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private handlePrismaError(error: any): never {
-    if (error.code === 'P2025') {
-      throw new NotFoundException('Không tìm thấy');
-    }
-    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
-  }
-
   async findAllPagination(
     page: number,
     limit: number,
@@ -54,6 +47,9 @@ export class MaintenanceService {
           where: whereClause,
           skip: (page - 1) * limit,
           take: limit,
+          orderBy: {
+            createdAt: 'desc',
+          },
         }),
         this.prisma.maintenance.count({
           where: whereClause,

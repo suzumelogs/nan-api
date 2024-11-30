@@ -43,6 +43,9 @@ export class DamageReportService {
             user: true,
             equipment: true,
           },
+          orderBy: {
+            createdAt: 'desc',
+          },
         }),
         this.prisma.damageReport.count({
           where: whereClause,
