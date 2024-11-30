@@ -276,8 +276,6 @@ export class UserService {
 
   async updateIdentityDocStatus(userId: string, dto: UpdateStatusDto) {
     try {
-      const { statusIdentityDoc } = dto;
-
       const status = await this.prisma.user.update({
         where: { id: userId },
         data: dto,
