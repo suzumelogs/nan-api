@@ -1,14 +1,10 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, Rental, RentalStatus } from '@prisma/client';
 import { prismaErrorHandler } from 'src/common/messages';
+import { NotificationService } from 'src/notification/notification.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRentalDto } from './dto/create-rental.dto';
 import { RentalFilterDto } from './dto/rental-filter.dto';
-import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class RentalService {
@@ -190,9 +186,19 @@ export class RentalService {
 
       const updatedRental = await this.prisma.rental.update({
         where: { id },
+        include: {
+          user: true,
+        },
         data: {
           status: RentalStatus.confirmed,
         },
+      });
+
+      const notificationMessage = `Đã xác nhận đơn thuê `;
+
+      this.notificationService.sendNotification({
+        message: notificationMessage,
+        userId: updatedRental.userId,
       });
 
       return updatedRental;
@@ -215,9 +221,16 @@ export class RentalService {
         throw new Error('Chỉ có thể hủy đơn thuê khi trạng thái là pending.');
       }
 
-      await this.prisma.rental.update({
+      const updatedRental = await this.prisma.rental.update({
         where: { id },
         data: { status: RentalStatus.canceled },
+      });
+
+      const notificationMessage = `Đã huỷ đơn thuê `;
+
+      this.notificationService.sendNotification({
+        message: notificationMessage,
+        userId: updatedRental.userId,
       });
 
       return { message: 'Đơn thuê đã được hủy thành công.' };
