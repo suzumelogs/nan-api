@@ -177,7 +177,14 @@ export class CartService {
     try {
       const cart = await this.prisma.cart.findUnique({
         where: { userId },
-        include: { items: true },
+        include: {
+          items: {
+            include: {
+              equipment: true,
+              package: true,
+            },
+          },
+        },
       });
 
       if (!cart) {
