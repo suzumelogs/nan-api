@@ -3,6 +3,13 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateProfileDto {
   @ApiProperty({
+    description: 'Tên',
+  })
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiProperty({
     description: 'Chứng minh thư',
   })
   @IsOptional()
