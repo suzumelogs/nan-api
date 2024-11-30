@@ -41,6 +41,15 @@ export class RentalService {
           where: whereClause,
           skip: (page - 1) * limit,
           take: limit,
+          include: {
+            user: true,
+            items: {
+              include: {
+                equipment: true,
+                package: true,
+              },
+            },
+          },
           orderBy: {
             createdAt: 'desc',
           },
