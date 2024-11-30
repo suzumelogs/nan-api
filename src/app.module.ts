@@ -20,6 +20,7 @@ import { RentalModule } from './rental/rental.module';
 import { DamageReportModule } from './damage-report/damage-report.module';
 import { UploadModule } from './upload/upload.module';
 import { RepairRecordModule } from './repair-record/repair-record.module';
+import { UsageRecordModule } from './usage-record/usage-record.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { RepairRecordModule } from './repair-record/repair-record.module';
     DamageReportModule,
     UploadModule,
     RepairRecordModule,
+    UsageRecordModule,
   ],
   controllers: [AppController],
   providers: [AppService, FirebaseService],
