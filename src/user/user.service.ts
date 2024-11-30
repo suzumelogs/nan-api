@@ -278,9 +278,9 @@ export class UserService {
     try {
       const { statusIdentityDoc } = dto;
 
-      const status = this.prisma.user.update({
+      const status = await this.prisma.user.update({
         where: { id: userId },
-        data: { statusIdentityDoc },
+        data: dto,
       });
 
       return { data: status };
