@@ -10,12 +10,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { DiscountFilterDto } from './dto/discount-filter.dto';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class DiscountService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService,
+    private readonly mailService: MailService,
   ) {}
 
   async findAllPagination(
@@ -186,4 +188,35 @@ export class DiscountService {
       }
     }
   }
+
+  // async notifyUsersAboutUpcomingDiscounts() {
+  //   const currentDate = new Date();
+  //   const upcomingDiscounts = await this.prisma.discount.findMany({
+  //     where: {
+  //       AND: [
+  //         { validFrom: { gte: currentDate } },
+  //         {
+  //           validFrom: {
+  //             lte: new Date(currentDate.getTime() + 3 * 24 * 60 * 60 * 1000),
+  //           },
+  //         },
+  //       ],
+  //       isActive: true,
+  //     },
+  //   });
+
+  //   const users = await this.prisma.user.findMany({
+  //     where: { email: { not: null } },
+  //   });
+
+  //   for (const discount of upcomingDiscounts) {
+  //     for (const user of users) {
+  //       await this.mailService.sendUpcomingDiscountEmail(
+  //         user.email,
+  //         discount.code,
+  //         discount.validFrom,
+  //       );
+  //     }
+  //   }
+  // }
 }
