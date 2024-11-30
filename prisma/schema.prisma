@@ -122,8 +122,8 @@ model Equipment {
   name        String
   image       String
   description String
-  basePrice   Float
-  rentalPrice Float
+  basePrice   Float?
+  rentalPrice Float?
   stock       Int
 
   category   Category @relation(fields: [categoryId], references: [id])
@@ -143,12 +143,12 @@ model Equipment {
 
 // Gói thiết bị
 model EquipmentPackage {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String
-  basePrice   Float
-  rentalPrice Float
-  image       String
+  basePrice   Float?
+  rentalPrice Float?
+  image       String?
 
   equipments  EquipmentPackageOnEquipment[]
   cartItems   CartItem[]

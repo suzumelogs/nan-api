@@ -8,17 +8,14 @@ import { prismaErrorHandler } from 'src/common/messages';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRentalDto } from './dto/create-rental.dto';
 import { RentalFilterDto } from './dto/rental-filter.dto';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class RentalService {
-  constructor(private readonly prisma: PrismaService) {}
-
-  private handlePrismaError(error: any): never {
-    if (error.code === 'P2025') {
-      throw new NotFoundException('Không tìm thấy');
-    }
-    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async findAllPagination(
     page: number,
