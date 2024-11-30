@@ -79,4 +79,53 @@ export class UsageRecordController {
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.usageRecordService.remove(id);
   }
+
+  @Get('statistics')
+  @ApiOperation({
+    summary: 'Thống kê lịch sử sử dụng',
+  })
+  getStatistics(): Promise<{
+    totalUsage: number;
+    totalDuration: number;
+    totalIncidents: number;
+  }> {
+    return this.usageRecordService.getStatistics();
+  }
+
+  @Get('unreturned')
+  @ApiOperation({
+    summary: 'Danh sách phiếu sử dụng chưa trả',
+  })
+  findUnreturnedRecords(): Promise<{ data: UsageRecord[] }> {
+    return this.usageRecordService.findUnreturnedRecords();
+  }
+
+  @Delete('bulk-delete')
+  @ApiOperation({
+    summary: 'Xóa nhiều phiếu sử dụng',
+  })
+  bulkDelete(@Body('ids') ids: string[]): Promise<{ message: string }> {
+    return this.usageRecordService.bulkDelete(ids);
+  }
+
+  @Get('equipment/:equipmentId')
+  @ApiOperation({
+    summary: 'Lấy lịch sử sử dụng theo thiết bị',
+  })
+  findByEquipmentId(
+    @Param('equipmentId') equipmentId: string,
+  ): Promise<{ data: UsageRecord[] }> {
+    return this.usageRecordService.findByEquipmentId(equipmentId);
+  }
+
+  @Patch('mark-as-returned/:id')
+  @ApiOperation({
+    summary: 'Đánh dấu thiết bị đã trả',
+  })
+  markAsReturned(
+    @Param('id') id: string,
+    @Body('returnDate') returnDate: Date,
+  ): Promise<{ message: string }> {
+    return this.usageRecordService.markAsReturned(id, new Date(returnDate));
+  }
 }

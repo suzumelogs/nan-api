@@ -109,4 +109,92 @@ export class UsageRecordService {
       prismaErrorHandler(error);
     }
   }
+
+  async getStatistics(): Promise<{
+    totalUsage: number;
+    totalDuration: number;
+    totalIncidents: number;
+  }> {
+    try {
+      const [totalUsage, totalDuration, totalIncidents] = await Promise.all([
+        this.prisma.usageRecord.count(),
+        this.prisma.usageRecord.aggregate({
+          _sum: { usageDuration: true },
+        }),
+        this.prisma.usageRecord.count({
+          where: { incidents: { not: null } },
+        }),
+      ]);
+
+      return {
+        totalUsage,
+        totalDuration: totalDuration._sum.usageDuration || 0,
+        totalIncidents,
+      };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async findUnreturnedRecords(): Promise<{ data: UsageRecord[] }> {
+    try {
+      const unreturnedRecords = await this.prisma.usageRecord.findMany({
+        where: { returnDate: null },
+        orderBy: { rentalDate: 'desc' },
+      });
+      return { data: unreturnedRecords };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async bulkDelete(ids: string[]): Promise<{ message: string }> {
+    try {
+      await this.prisma.usageRecord.deleteMany({
+        where: { id: { in: ids } },
+      });
+      return { message: 'Xóa thành công các bản ghi' };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async findByEquipmentId(
+    equipmentId: string,
+  ): Promise<{ data: UsageRecord[] }> {
+    try {
+      const usageRecords = await this.prisma.usageRecord.findMany({
+        where: { equipmentId },
+        orderBy: { rentalDate: 'desc' },
+      });
+      return { data: usageRecords };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async markAsReturned(
+    id: string,
+    returnDate: Date,
+  ): Promise<{ message: string }> {
+    try {
+      const usageRecord = await this.prisma.usageRecord.findUniqueOrThrow({
+        where: { id },
+      });
+
+      const usageDuration = Math.ceil(
+        (returnDate.getTime() - new Date(usageRecord.rentalDate).getTime()) /
+          (1000 * 60 * 60 * 24),
+      );
+
+      await this.prisma.usageRecord.update({
+        where: { id },
+        data: { returnDate, usageDuration },
+      });
+
+      return { message: 'Đã cập nhật trạng thái trả thiết bị' };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
 }
