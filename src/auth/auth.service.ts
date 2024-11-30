@@ -111,6 +111,12 @@ export class AuthService {
           name: true,
           email: true,
           role: true,
+          identityDoc: true,
+          phoneNumber: true,
+          dateOfBirth: true,
+          avatar: true,
+          gender: true,
+          statusIdentityDoc: true,
           createdAt: true,
         },
       });
