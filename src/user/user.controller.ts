@@ -18,6 +18,7 @@ import { UserFilterDto } from './dto/user-filter.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdateStatusDto } from './dto/update-status.sto';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -138,7 +139,20 @@ export class UserController {
   }
 
   @Patch('update/profile')
+  @ApiOperation({
+    summary: 'Cập nhật thông tin của tôi',
+  })
+  @Auth(Role.user)
   async updateProfile(@GetUser() user: User, @Body() dto: UpdateProfileDto) {
     return this.userService.updateProfile(user.id, dto);
+  }
+
+  @Patch(':id/identity-doc-status')
+  @ApiOperation({ summary: 'Cập nhật trạng thái của chứng minh thư' })
+  async updateIdentityDocStatus(
+    @Param('id') userId: string,
+    @Body() dto: UpdateStatusDto,
+  ) {
+    return this.userService.updateIdentityDocStatus(userId, dto);
   }
 }

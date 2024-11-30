@@ -16,6 +16,7 @@ import { User } from './entities/user.entity';
 import { UpdateIdentityDocDto } from './dto/update-identity-doc.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { prismaErrorHandler } from 'src/common/messages';
+import { UpdateStatusDto } from './dto/update-status.sto';
 
 @Injectable()
 export class UserService {
@@ -276,6 +277,21 @@ export class UserService {
       });
 
       return { data: profile };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async updateIdentityDocStatus(userId: string, dto: UpdateStatusDto) {
+    try {
+      const { statusIdentityDoc } = dto;
+
+      const status = this.prisma.user.update({
+        where: { id: userId },
+        data: { statusIdentityDoc },
+      });
+
+      return { data: status };
     } catch (error) {
       prismaErrorHandler(error);
     }
