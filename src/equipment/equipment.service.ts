@@ -55,6 +55,9 @@ export class EquipmentService {
           where: whereClause,
           skip: (page - 1) * limit,
           take: limit,
+          include: {
+            category: true,
+          },
           orderBy: {
             createdAt: 'desc',
           },

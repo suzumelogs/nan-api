@@ -9,7 +9,8 @@ const equipmentPackages = [
     description: 'Gói thiết bị gồm các sản phẩm làm mát như quạt và điều hòa.',
     basePrice: 400000,
     rentalPrice: 400000,
-    image: 'https://example.com/images/cooling-package.jpg',
+    image:
+      'https://cellphones.com.vn/media/wysiwyg/May-anh/DSLR/may-anh-dslr-1.jpg',
   },
   {
     id: '5fbb1a2c3c9d440000e12351',
@@ -18,7 +19,8 @@ const equipmentPackages = [
       'Gói thiết bị gồm các sản phẩm gia đình thiết yếu như quạt, máy lọc không khí.',
     basePrice: 250000,
     rentalPrice: 250000,
-    image: 'https://example.com/images/family-package.jpg',
+    image:
+      'https://cellphones.com.vn/media/wysiwyg/May-anh/DSLR/may-anh-dslr-1.jpg',
   },
   {
     id: '5fbb1a2c3c9d440000e12352',
@@ -27,7 +29,8 @@ const equipmentPackages = [
       'Gói thiết bị gồm các sản phẩm phục vụ cho nhà bếp như lò vi sóng và máy rửa chén.',
     basePrice: 500000,
     rentalPrice: 500000,
-    image: 'https://example.com/images/kitchen-package.jpg',
+    image:
+      'https://cellphones.com.vn/media/wysiwyg/May-anh/DSLR/may-anh-dslr-1.jpg',
   },
 ];
 
