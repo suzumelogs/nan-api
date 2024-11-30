@@ -14,6 +14,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
 import { User } from './entities/user.entity';
 import { UpdateIdentityDocDto } from './dto/update-identity-doc.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { prismaErrorHandler } from 'src/common/messages';
 
 @Injectable()
 export class UserService {
@@ -255,6 +257,27 @@ export class UserService {
       throw new InternalServerErrorException(
         'Failed to update identity document',
       );
+    }
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    try {
+      const { identityDoc, phoneNumber, dateOfBirth, avatar, gender } = dto;
+
+      const profile = this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          identityDoc,
+          phoneNumber,
+          dateOfBirth,
+          avatar,
+          gender,
+        },
+      });
+
+      return { data: profile };
+    } catch (error) {
+      prismaErrorHandler(error);
     }
   }
 }

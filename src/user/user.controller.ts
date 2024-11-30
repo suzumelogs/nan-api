@@ -17,6 +17,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserFilterDto } from './dto/user-filter.dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -134,5 +135,10 @@ export class UserController {
     @Body() dto: UpdateIdentityDocDto,
   ) {
     return this.userService.updateIdentityDoc(user.id, dto);
+  }
+
+  @Patch('update/profile')
+  async updateProfile(@GetUser() user: User, @Body() dto: UpdateProfileDto) {
+    return this.userService.updateProfile(user.id, dto);
   }
 }

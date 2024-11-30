@@ -74,7 +74,12 @@ model User {
   emailVerified DateTime?
   password      String
   role          Role      @default(user)
-  identityDoc   String?
+
+  identityDoc String?
+  phoneNumber Int?
+  dateOfBirth DateTime?
+  avatar      String?
+  gender      String?
 
   rentals        Rental[]
   feedbacks      Feedback[]
