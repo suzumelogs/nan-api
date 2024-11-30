@@ -1,14 +1,10 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Injectable } from '@nestjs/common';
 import { Prisma, RepairRecord } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 import { prismaErrorHandler } from 'src/common/messages';
-import { RepairRecordFilterDto } from './dto/repair-record-create.dto';
 import { CreateRepairRecordDto } from './dto/create-repair-record.dto';
+import { RepairRecordFilterDto } from './dto/repair-record-create.dto';
 import { UpdateRepairRecordDto } from './dto/update-repair-record.dto';
 
 @Injectable()
@@ -107,6 +103,81 @@ export class RepairRecordService {
     try {
       await this.prisma.repairRecord.delete({ where: { id } });
       return { message: 'Xóa thành công' };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async getStatistics(): Promise<{
+    totalRepairs: number;
+    totalCost: number;
+    equipmentSummary: { equipmentId: string; repairCount: number }[];
+  }> {
+    try {
+      const [totalRepairs, totalCost, equipmentSummary] = await Promise.all([
+        this.prisma.repairRecord.count(),
+        this.prisma.repairRecord.aggregate({
+          _sum: { repairCost: true },
+        }),
+        this.prisma.repairRecord.groupBy({
+          by: ['equipmentId'],
+          _count: { id: true },
+        }),
+      ]);
+
+      return {
+        totalRepairs,
+        totalCost: totalCost._sum.repairCost || 0,
+        equipmentSummary: equipmentSummary.map((item) => ({
+          equipmentId: item.equipmentId,
+          repairCount: item._count.id,
+        })),
+      };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async checkWarranty(id: string): Promise<{ isUnderWarranty: boolean }> {
+    try {
+      const repairRecord = await this.prisma.repairRecord.findUniqueOrThrow({
+        where: { id },
+        select: { warranty: true },
+      });
+
+      return {
+        isUnderWarranty: repairRecord.warranty
+          ? new Date(repairRecord.warranty) >= new Date()
+          : false,
+      };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async findByEquipmentId(
+    equipmentId: string,
+  ): Promise<{ data: RepairRecord[] }> {
+    try {
+      const repairRecords = await this.prisma.repairRecord.findMany({
+        where: { equipmentId },
+        orderBy: {
+          repairDate: 'desc',
+        },
+      });
+
+      return { data: repairRecords };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async bulkDelete(ids: string[]): Promise<{ message: string }> {
+    try {
+      await this.prisma.repairRecord.deleteMany({
+        where: { id: { in: ids } },
+      });
+      return { message: 'Xóa thành công các bản ghi' };
     } catch (error) {
       prismaErrorHandler(error);
     }

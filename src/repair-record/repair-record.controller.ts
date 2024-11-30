@@ -79,4 +79,36 @@ export class RepairRecordController {
   remove(@Param('id') id: string): Promise<{ message: string }> {
     return this.repairRecordService.remove(id);
   }
+
+  @Get('statistics')
+  @ApiOperation({ summary: 'Thống kê sửa chữa' })
+  async getStatistics(): Promise<{
+    totalRepairs: number;
+    totalCost: number;
+    equipmentSummary: { equipmentId: string; repairCount: number }[];
+  }> {
+    return this.repairRecordService.getStatistics();
+  }
+
+  @Get(':id/warranty')
+  @ApiOperation({ summary: 'Kiểm tra bảo hành phiếu sửa chữa' })
+  async checkWarranty(
+    @Param('id') id: string,
+  ): Promise<{ isUnderWarranty: boolean }> {
+    return this.repairRecordService.checkWarranty(id);
+  }
+
+  @Get('equipment/:equipmentId')
+  @ApiOperation({ summary: 'Tìm phiếu sửa chữa theo thiết bị' })
+  async findByEquipmentId(
+    @Param('equipmentId') equipmentId: string,
+  ): Promise<{ data: RepairRecord[] }> {
+    return this.repairRecordService.findByEquipmentId(equipmentId);
+  }
+
+  @Delete('bulk-delete')
+  @ApiOperation({ summary: 'Xóa nhiều phiếu sửa chữa' })
+  async bulkDelete(@Body('ids') ids: string[]): Promise<{ message: string }> {
+    return this.repairRecordService.bulkDelete(ids);
+  }
 }
