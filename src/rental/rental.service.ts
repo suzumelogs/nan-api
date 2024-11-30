@@ -67,7 +67,16 @@ export class RentalService {
     try {
       const rental = await this.prisma.rental.findUniqueOrThrow({
         where: { id },
-        include: { user: true, items: true, feedbacks: true },
+        include: {
+          user: true,
+          items: {
+            include: {
+              equipment: true,
+              package: true,
+            },
+          },
+          feedbacks: true,
+        },
       });
       return { data: rental };
     } catch (error) {
