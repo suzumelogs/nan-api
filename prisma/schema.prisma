@@ -304,7 +304,7 @@ model Maintenance {
   maintenanceDate          DateTime
   description              String?
   suggestedNextMaintenance DateTime?
-  maintenanceType          MaintenanceType
+  // maintenanceType          MaintenanceType
   status                   MaintenanceStatus @default(pending)
   maintenanceCost          Float?
 

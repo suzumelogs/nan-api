@@ -12,6 +12,8 @@ export class CartService {
   constructor(private readonly prisma: PrismaService) {}
 
   async addToCart(userId: string, addToCartDto: AddToCartDto) {
+    console.log(addToCartDto);
+
     try {
       let cart = await this.prisma.cart.findUnique({
         where: { userId: userId },
@@ -42,7 +44,8 @@ export class CartService {
           updatedItem = await this.prisma.cartItem.update({
             where: { id: existingItem.id },
             data: {
-              quantity: { increment: addToCartDto.quantity },
+              quantity: addToCartDto.quantity,
+              price: addToCartDto.price || existingItem.price,
             },
           });
         } else {
@@ -64,7 +67,8 @@ export class CartService {
           updatedItem = await this.prisma.cartItem.update({
             where: { id: existingItem.id },
             data: {
-              quantity: { increment: addToCartDto.quantity },
+              quantity: addToCartDto.quantity,
+              price: addToCartDto.price || existingItem.price,
             },
           });
         } else {
@@ -94,7 +98,7 @@ export class CartService {
       });
 
       const totalAmount = cartItems.reduce((sum, item) => {
-        return sum + item.price * item.quantity;
+        return sum + (item.price || 0) * item.quantity;
       }, 0);
 
       await this.prisma.cart.update({
