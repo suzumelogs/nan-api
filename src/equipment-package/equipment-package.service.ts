@@ -129,6 +129,7 @@ export class EquipmentPackageService {
           description: dto.description,
           basePrice: dto.basePrice,
           rentalPrice: dto.rentalPrice,
+          image: dto.image,
         },
       });
 
