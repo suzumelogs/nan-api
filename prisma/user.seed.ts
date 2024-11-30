@@ -5,6 +5,13 @@ const prisma = new PrismaClient();
 
 const users = [
   {
+    name: 'SuperAdmin',
+    email: 'super-admin@gmail.com',
+    password: 'admin@123',
+    role: Role.super_admin,
+    emailVerified: new Date(),
+  },
+  {
     name: 'User',
     email: 'user@gmail.com',
     password: 'user@123',
