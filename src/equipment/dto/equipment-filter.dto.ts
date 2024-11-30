@@ -20,22 +20,19 @@ export class EquipmentFilterDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ description: 'Giá mỗi ngày', required: false })
+  @ApiProperty({ description: 'Giá gốc', required: false })
   @IsOptional()
   @IsNumber()
-  pricePerDay?: number;
+  @IsPositive()
+  basePrice?: number;
 
-  @ApiProperty({ description: 'Giá mỗi tuần', required: false })
+  @ApiProperty({ description: 'Giá thuê', required: false })
   @IsOptional()
   @IsNumber()
-  pricePerWeek?: number;
+  @IsPositive()
+  rentalPrice?: number;
 
-  @ApiProperty({ description: 'Giá mỗi tháng', required: false })
-  @IsOptional()
-  @IsNumber()
-  pricePerMonth?: number;
-
-  @ApiProperty({ description: 'Số lượng thiết bị', required: false })
+  @ApiProperty({ description: 'Số lượng', required: false })
   @IsOptional()
   @IsInt()
   @IsPositive()

@@ -1,12 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class RemoveItemToCartDto {
   @ApiProperty({
     description: 'ID của item',
-    type: String,
-    required: true,
   })
+  @IsNotEmpty()
   @IsString()
-  cartItemId: string;
+  itemId: string;
 }

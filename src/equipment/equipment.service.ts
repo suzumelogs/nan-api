@@ -15,13 +15,6 @@ import { UpdateEquipmentDto } from './dto/update-equipment.dto';
 export class EquipmentService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private handlePrismaError(error: any): never {
-    if (error.code === 'P2025') {
-      throw new NotFoundException('Không tìm thấy');
-    }
-    throw new InternalServerErrorException(error.message || 'Lỗi máy chủ');
-  }
-
   async findAllPagination(
     page: number,
     limit: number,
@@ -43,14 +36,11 @@ export class EquipmentService {
             mode: Prisma.QueryMode.insensitive,
           },
         }),
-        ...(filters.pricePerDay && {
-          pricePerDay: { gte: filters.pricePerDay },
+        ...(filters.basePrice && {
+          basePrice: { gte: filters.basePrice },
         }),
-        ...(filters.pricePerWeek && {
-          pricePerWeek: { gte: filters.pricePerWeek },
-        }),
-        ...(filters.pricePerMonth && {
-          pricePerMonth: { gte: filters.pricePerMonth },
+        ...(filters.rentalPrice && {
+          rentalPrice: { gte: filters.rentalPrice },
         }),
         ...(filters.stock && {
           stock: { gte: filters.stock },
@@ -65,6 +55,9 @@ export class EquipmentService {
           where: whereClause,
           skip: (page - 1) * limit,
           take: limit,
+          orderBy: {
+            createdAt: 'desc',
+          },
         }),
         this.prisma.equipment.count({
           where: whereClause,

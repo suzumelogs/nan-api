@@ -18,20 +18,20 @@ export class CreateEquipmentPackageDto {
   @IsNotEmpty()
   description: string;
 
-  @ApiProperty({ description: 'Giá theo ngày', required: false })
-  @IsOptional()
-  @IsNumber()
-  pricePerDay?: number;
+  @ApiProperty({ description: 'Hình ảnh' })
+  @IsString()
+  @IsNotEmpty()
+  image: string;
 
-  @ApiProperty({ description: 'Giá theo tuần', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Giá gốc', required: false })
+  @IsNotEmpty()
   @IsNumber()
-  pricePerWeek?: number;
+  basePrice?: number;
 
-  @ApiProperty({ description: 'Giá theo tháng', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Giá thuê', required: false })
+  @IsNotEmpty()
   @IsNumber()
-  pricePerMonth?: number;
+  rentalPrice?: number;
 
   @ApiProperty({
     description: 'Danh sách ID của thiết bị liên quan',

@@ -18,7 +18,7 @@ export class CreateEquipmentDto {
   name: string;
 
   @ApiProperty({
-    description: 'Hình ảnh của thiết bị',
+    description: 'Hình ảnh',
   })
   @IsNotEmpty()
   @IsString()
@@ -27,38 +27,30 @@ export class CreateEquipmentDto {
   @ApiProperty({
     description: 'Mô tả',
   })
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   description: string;
 
   @ApiProperty({
-    description: 'Giá theo ngày',
+    description: 'Giá gốc',
   })
-  @IsOptional()
+  @IsNotEmpty()
   @IsNumber()
   @IsPositive()
-  pricePerDay: number;
+  basePrice: number;
 
   @ApiProperty({
-    description: 'Giá theo tuần',
+    description: 'Giá thuê',
   })
-  @IsOptional()
+  @IsNotEmpty()
   @IsNumber()
   @IsPositive()
-  pricePerWeek: number;
+  rentalPrice: number;
 
   @ApiProperty({
-    description: 'Giá theo tháng',
+    description: 'Số lượng',
   })
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  pricePerMonth: number;
-
-  @ApiProperty({
-    description: 'Số lượng tồn kho',
-  })
-  @IsOptional()
+  @IsNotEmpty()
   @IsInt()
   @IsPositive()
   stock: number;

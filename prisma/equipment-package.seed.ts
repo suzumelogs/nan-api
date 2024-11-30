@@ -7,27 +7,27 @@ const equipmentPackages = [
     id: '5fbb1a2c3c9d440000e12350',
     name: 'Gói thiết bị làm mát',
     description: 'Gói thiết bị gồm các sản phẩm làm mát như quạt và điều hòa.',
-    pricePerDay: 400000,
-    pricePerWeek: 2400000,
-    pricePerMonth: 9600000,
+    basePrice: 400000,
+    rentalPrice: 400000,
+    image: 'https://example.com/images/cooling-package.jpg',
   },
   {
     id: '5fbb1a2c3c9d440000e12351',
     name: 'Gói thiết bị gia đình',
     description:
       'Gói thiết bị gồm các sản phẩm gia đình thiết yếu như quạt, máy lọc không khí.',
-    pricePerDay: 250000,
-    pricePerWeek: 1500000,
-    pricePerMonth: 6000000,
+    basePrice: 250000,
+    rentalPrice: 250000,
+    image: 'https://example.com/images/family-package.jpg',
   },
   {
     id: '5fbb1a2c3c9d440000e12352',
     name: 'Gói thiết bị nhà bếp',
     description:
       'Gói thiết bị gồm các sản phẩm phục vụ cho nhà bếp như lò vi sóng và máy rửa chén.',
-    pricePerDay: 500000,
-    pricePerWeek: 3000000,
-    pricePerMonth: 12000000,
+    basePrice: 500000,
+    rentalPrice: 500000,
+    image: 'https://example.com/images/kitchen-package.jpg',
   },
 ];
 
@@ -40,17 +40,17 @@ const seedEquipmentPackage = async (
       update: {
         name: equipmentPackage.name,
         description: equipmentPackage.description,
-        pricePerDay: equipmentPackage.pricePerDay,
-        pricePerWeek: equipmentPackage.pricePerWeek,
-        pricePerMonth: equipmentPackage.pricePerMonth,
+        basePrice: equipmentPackage.basePrice,
+        rentalPrice: equipmentPackage.rentalPrice,
+        image: equipmentPackage.image,
       },
       create: {
         id: equipmentPackage.id,
         name: equipmentPackage.name,
         description: equipmentPackage.description,
-        pricePerDay: equipmentPackage.pricePerDay,
-        pricePerWeek: equipmentPackage.pricePerWeek,
-        pricePerMonth: equipmentPackage.pricePerMonth,
+        basePrice: equipmentPackage.basePrice,
+        rentalPrice: equipmentPackage.rentalPrice,
+        image: equipmentPackage.image,
       },
     });
 

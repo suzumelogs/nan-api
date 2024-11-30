@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsInt, IsDate } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateProfileDto {
@@ -13,15 +13,15 @@ export class UpdateProfileDto {
     description: 'Số điện thoại',
   })
   @IsOptional()
-  @IsInt()
-  phoneNumber?: number;
+  @IsString()
+  phoneNumber?: string;
 
   @ApiProperty({
     description: 'Ngày sinh',
   })
   @IsOptional()
-  @IsDate()
-  dateOfBirth?: Date;
+  @IsString()
+  dateOfBirth?: string;
 
   @ApiProperty({
     description: 'Ảnh đại diện',

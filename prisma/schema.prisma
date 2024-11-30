@@ -81,7 +81,7 @@ model User {
   role          Role      @default(user)
 
   identityDoc String?
-  phoneNumber Int?
+  phoneNumber String?
   dateOfBirth DateTime?
   avatar      String?
   gender      String?
@@ -118,14 +118,13 @@ model Category {
 
 // Thiết bị
 model Equipment {
-  id            String @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  image         String
-  description   String
-  pricePerDay   Float?
-  pricePerWeek  Float?
-  pricePerMonth Float?
-  stock         Int?
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  image       String
+  description String
+  basePrice   Float
+  rentalPrice Float
+  stock       Int
 
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String   @db.ObjectId
@@ -144,12 +143,12 @@ model Equipment {
 
 // Gói thiết bị
 model EquipmentPackage {
-  id            String @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  description   String
-  pricePerDay   Float?
-  pricePerWeek  Float?
-  pricePerMonth Float?
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  basePrice   Float
+  rentalPrice Float
+  image       String
 
   equipments  EquipmentPackageOnEquipment[]
   cartItems   CartItem[]
@@ -184,9 +183,7 @@ model Cart {
 
   items CartItem[]
 
-  totalAmountDay   Float @default(0)
-  totalAmountWeek  Float @default(0)
-  totalAmountMonth Float @default(0)
+  totalAmount Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -206,10 +203,8 @@ model CartItem {
   packageId String?           @db.ObjectId
   package   EquipmentPackage? @relation(fields: [packageId], references: [id])
 
-  quantity   Int    @default(1)
-  priceDay   Float?
-  priceWeek  Float?
-  priceMonth Float?
+  quantity Int
+  price    Float
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

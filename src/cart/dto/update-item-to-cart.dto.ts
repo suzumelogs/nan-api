@@ -1,20 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class UpdateItemToCartDto {
   @ApiProperty({
     description: 'ID của item',
-    type: String,
-    required: true,
   })
+  @IsNotEmpty()
   @IsString()
-  cartItemId: string;
+  itemId: string;
 
   @ApiProperty({
-    description: 'Số lượng mới',
-    type: Number,
-    required: true,
+    description: 'Số lượng',
   })
+  @IsNotEmpty()
   @IsNumber()
-  newQuantity: number;
+  quantity: number;
 }

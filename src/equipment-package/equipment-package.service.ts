@@ -37,14 +37,11 @@ export class EquipmentPackageService {
             mode: Prisma.QueryMode.insensitive,
           },
         }),
-        ...(filters.pricePerDay && {
-          pricePerDay: { gte: filters.pricePerDay },
+        ...(filters.basePrice && {
+          basePrice: { gte: filters.basePrice },
         }),
-        ...(filters.pricePerWeek && {
-          pricePerWeek: { gte: filters.pricePerWeek },
-        }),
-        ...(filters.pricePerMonth && {
-          pricePerMonth: { gte: filters.pricePerMonth },
+        ...(filters.rentalPrice && {
+          rentalPrice: { gte: filters.rentalPrice },
         }),
       };
 
@@ -94,13 +91,13 @@ export class EquipmentPackageService {
 
   async create(dto: CreateEquipmentPackageDto): Promise<{ message: string }> {
     try {
-      const createdPackage = await this.prisma.equipmentPackage.create({
+      await this.prisma.equipmentPackage.create({
         data: {
           name: dto.name,
           description: dto.description,
-          pricePerDay: dto.pricePerDay,
-          pricePerWeek: dto.pricePerWeek,
-          pricePerMonth: dto.pricePerMonth,
+          basePrice: dto.basePrice,
+          rentalPrice: dto.rentalPrice,
+          image: dto.image,
           equipments: {
             create: dto.equipmentIds?.map((equipmentId) => ({
               equipmentId,
@@ -127,9 +124,8 @@ export class EquipmentPackageService {
         data: {
           name: dto.name,
           description: dto.description,
-          pricePerDay: dto.pricePerDay,
-          pricePerWeek: dto.pricePerWeek,
-          pricePerMonth: dto.pricePerMonth,
+          basePrice: dto.basePrice,
+          rentalPrice: dto.rentalPrice,
         },
       });
 
