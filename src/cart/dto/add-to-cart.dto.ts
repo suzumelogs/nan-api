@@ -18,16 +18,12 @@ export class AddToCartDto {
 
   @ApiProperty({
     description: 'Số lượng',
-    example: 1,
-    type: Number,
   })
   @IsInt()
   quantity: number;
 
   @ApiProperty({
     description: 'Giá cho thuê của sản phẩm hoặc gói sản phẩm',
-    example: 100,
-    type: Number,
   })
   @IsNumber()
   price: number;
