@@ -59,6 +59,12 @@ enum MaintenanceStatus {
   completed
 }
 
+enum MaintenanceType {
+  inspection
+  part_replacement
+  cleaning
+}
+
 enum DamageReportStatus {
   pending
   in_progress
@@ -134,6 +140,8 @@ model Equipment {
   packages      EquipmentPackageOnEquipment[]
   maintenances  Maintenance[]
   damageReports DamageReport[]
+  repairRecords RepairRecord[]
+  usageRecords  UsageRecord[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -183,7 +191,7 @@ model Cart {
 
   items CartItem[]
 
-  totalAmount Float
+  totalAmount Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -203,8 +211,8 @@ model CartItem {
   packageId String?           @db.ObjectId
   package   EquipmentPackage? @relation(fields: [packageId], references: [id])
 
-  quantity Int
-  price    Float
+  quantity Int?
+  price    Float?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -225,7 +233,8 @@ model Rental {
   status      RentalStatus @default(pending)
   address     String?
 
-  feedbacks Feedback[]
+  feedbacks    Feedback[]
+  usageRecords UsageRecord[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -294,9 +303,10 @@ model Maintenance {
   id                       String            @id @default(auto()) @map("_id") @db.ObjectId
   maintenanceDate          DateTime
   description              String?
-  suggestedNextMaintenance DateTime? // đề xuất lần bảo trì tiếp theo
+  suggestedNextMaintenance DateTime?
+  maintenanceType          MaintenanceType
   status                   MaintenanceStatus @default(pending)
-  maintenanceCost          Float? // chi phí bảo trì
+  maintenanceCost          Float?
 
   equipmentId String    @db.ObjectId
   equipment   Equipment @relation(fields: [equipmentId], references: [id])
@@ -391,4 +401,39 @@ model DamageReport {
   updatedAt DateTime @updatedAt
 
   @@map("damage_reports")
+}
+
+// Lịch sử sửa chữa
+model RepairRecord {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  equipmentId   String    @db.ObjectId
+  equipment     Equipment @relation(fields: [equipmentId], references: [id])
+  repairDate    DateTime
+  failureCause  String
+  partsReplaced String?
+  repairCost    Float?
+  warranty      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("repair_records")
+}
+
+// Lịch sử sử dụng
+model UsageRecord {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  equipmentId   String    @db.ObjectId
+  equipment     Equipment @relation(fields: [equipmentId], references: [id])
+  rentalId      String?   @db.ObjectId
+  rental        Rental?   @relation(fields: [rentalId], references: [id])
+  rentalDate    DateTime
+  returnDate    DateTime?
+  usageDuration Int
+  incidents     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("usage_records")
 }
