@@ -192,7 +192,7 @@ export class FeedbackController {
   @ApiOperation({
     summary: 'Lấy feedbacks theo equipmentId hoặc packageId',
   })
-  async getFeedbacksByEquipmentOrPackage(
+  async getFeedbacksByEquipmentIdOrPackageId(
     @Query('equipmentId') equipmentId?: string,
     @Query('packageId') packageId?: string,
   ) {

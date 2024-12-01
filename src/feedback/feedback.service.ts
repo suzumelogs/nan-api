@@ -308,20 +308,49 @@ export class FeedbackService {
     equipmentId?: string,
     packageId?: string,
   ) {
-    const rentalItems = await this.prisma.rentalItem.findMany({
-      where: {
-        OR: [
-          equipmentId ? { equipmentId } : undefined,
-          packageId ? { packageId } : undefined,
-        ],
-      },
-      select: { id: true },
-    });
+    if (!equipmentId && !packageId) {
+      throw new Error('Either equipmentId or packageId must be provided');
+    }
 
-    return this.prisma.feedback.findMany({
+    let rentalItemIds: string[] = [];
+
+    if (equipmentId) {
+      const rentalItems = await this.prisma.rentalItem.findMany({
+        where: {
+          equipmentId: equipmentId,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      rentalItemIds = rentalItems.map((item) => item.id);
+    }
+
+    if (packageId) {
+      const rentalItemsByPackage = await this.prisma.rentalItem.findMany({
+        where: {
+          packageId: packageId,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      rentalItemIds = [
+        ...rentalItemIds,
+        ...rentalItemsByPackage.map((item) => item.id),
+      ];
+    }
+
+    if (rentalItemIds.length === 0) {
+      return [];
+    }
+
+    const feedbacks = await this.prisma.feedback.findMany({
       where: {
         rentalItemId: {
-          in: rentalItems.map((item) => item.id),
+          in: rentalItemIds,
         },
       },
       include: {
@@ -329,5 +358,7 @@ export class FeedbackService {
         user: true,
       },
     });
+
+    return feedbacks;
   }
 }
