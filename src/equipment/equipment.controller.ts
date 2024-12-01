@@ -27,7 +27,7 @@ export class EquipmentController {
     summary: 'Tất cả thiết bị (Có phân trang và tìm kiếm)',
   })
   async findAllPagination(@Query() filterDto: EquipmentFilterDto): Promise<{
-    data: Equipment[];
+    data: (Equipment & { maintainCount: number })[];
     total: number;
     page: number;
     limit: number;

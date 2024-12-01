@@ -20,7 +20,7 @@ export class EquipmentService {
     limit: number,
     filters: Partial<EquipmentFilterDto>,
   ): Promise<{
-    data: Equipment[];
+    data: (Equipment & { maintainCount: number })[];
     total: number;
     page: number;
     limit: number;
@@ -57,6 +57,14 @@ export class EquipmentService {
           take: limit,
           include: {
             category: true,
+            maintenances: {
+              where: {
+                status: 'completed',
+              },
+              select: {
+                id: true,
+              },
+            },
           },
           orderBy: {
             createdAt: 'desc',
@@ -67,8 +75,13 @@ export class EquipmentService {
         }),
       ]);
 
+      const dataWithmaintainCount = data.map((equipment) => ({
+        ...equipment,
+        maintainCount: equipment.maintenances.length,
+      }));
+
       return {
-        data,
+        data: dataWithmaintainCount,
         total,
         page,
         limit,
