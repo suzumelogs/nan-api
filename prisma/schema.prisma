@@ -99,7 +99,6 @@ model User {
   cart           Cart?
   notifications  Notification[]
   paymentMethods PaymentMethod[]
-  supports       Support[]
   damageReports  DamageReport[]
 
   createdAt DateTime @default(now())
@@ -370,23 +369,6 @@ model PaymentMethod {
   @@map("payment_methods")
 }
 
-// Hỗ trợ
-model Support {
-  id          String           @id @default(auto()) @map("_id") @db.ObjectId
-  issueType   SupportIssueType
-  description String
-  status      SupportStatus    @default(pending)
-
-  userId String @db.ObjectId
-
-  user User @relation(fields: [userId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("supports")
-}
-
 // Báo hỏng thiết bị
 model DamageReport {
   id          String             @id @default(auto()) @map("_id") @db.ObjectId
@@ -407,7 +389,6 @@ model DamageReport {
   @@map("damage_reports")
 }
 
-// Lịch sử sửa chữa
 model RepairRecord {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   equipmentId   String    @db.ObjectId
@@ -424,7 +405,6 @@ model RepairRecord {
   @@map("repair_records")
 }
 
-// Lịch sử sử dụng
 model UsageRecord {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   equipmentId   String    @db.ObjectId

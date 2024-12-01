@@ -273,4 +273,34 @@ export class RentalService {
       prismaErrorHandler(error);
     }
   }
+
+  async getRentalCountByEquipmentId(equipmentId: string): Promise<number> {
+    try {
+      const rentalCount = await this.prisma.rentalItem.count({
+        where: {
+          equipmentId,
+        },
+      });
+
+      return rentalCount;
+    } catch (error) {
+      prismaErrorHandler(error);
+      throw new Error('Lỗi khi lấy số lần thuê thiết bị.');
+    }
+  }
+
+  async getRentalCountByPackageId(packageId: string): Promise<number> {
+    try {
+      const rentalCount = await this.prisma.rentalItem.count({
+        where: {
+          packageId,
+        },
+      });
+
+      return rentalCount;
+    } catch (error) {
+      prismaErrorHandler(error);
+      throw new Error('Lỗi khi lấy số lần thuê gói thiết bị.');
+    }
+  }
 }

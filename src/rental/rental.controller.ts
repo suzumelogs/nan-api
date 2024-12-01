@@ -94,4 +94,28 @@ export class RentalController {
   async clearAllByMe(@GetUser() user: User): Promise<{ message: string }> {
     return this.rentalService.clearAllByMe(user.id);
   }
+
+  @Get('rental-count/equipment/:equipmentId')
+  @ApiOperation({
+    summary: 'Lấy số lần thuê thiết bị theo equipmentId',
+  })
+  async getRentalCountByEquipmentId(
+    @Param('equipmentId') equipmentId: string,
+  ): Promise<{ rentalCount: number }> {
+    const rentalCount =
+      await this.rentalService.getRentalCountByEquipmentId(equipmentId);
+    return { rentalCount };
+  }
+
+  @Get('rental-count/package/:packageId')
+  @ApiOperation({
+    summary: 'Lấy số lần thuê gói thiết bị theo packageId',
+  })
+  async getRentalCountByPackageId(
+    @Param('packageId') packageId: string,
+  ): Promise<{ rentalCount: number }> {
+    const rentalCount =
+      await this.rentalService.getRentalCountByPackageId(packageId);
+    return { rentalCount };
+  }
 }
