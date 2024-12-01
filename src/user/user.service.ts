@@ -134,6 +134,14 @@ export class UserService {
   }
 
   async findOne(field: string, value: string, user: User) {
+    if (
+      value !== user[field] &&
+      user.role !== 'admin' &&
+      user.role &&
+      user.role !== 'super_admin'
+    )
+      throw new UnauthorizedException('Unauthorized');
+
     const whereData = field === 'id' ? { id: value } : { email: value };
 
     try {
@@ -163,12 +171,17 @@ export class UserService {
   }
 
   async update(field: string, value: string, dto: UpdateUserDto, user: User) {
-    if (value !== user[field] && user.role !== 'admin')
+    if (
+      value !== user[field] &&
+      user.role !== 'admin' &&
+      user.role &&
+      user.role !== 'super_admin'
+    )
       throw new UnauthorizedException('Unauthorized');
 
     const whereData = field === 'id' ? { id: value } : { email: value };
 
-    if (user.role !== 'admin') delete dto.role;
+    if (user.role !== 'admin' && user.role !== 'super_admin') delete dto.role;
 
     const { passwordconf, ...newUserData } = dto;
 
@@ -200,7 +213,12 @@ export class UserService {
   }
 
   async remove(field: string, value: string, user: User) {
-    if (value !== user[field] && user.role !== 'admin')
+    if (
+      value !== user[field] &&
+      user.role !== 'admin' &&
+      user.role &&
+      user.role !== 'super_admin'
+    )
       throw new UnauthorizedException('Unauthorized');
 
     const whereData = field === 'id' ? { id: value } : { email: value };
