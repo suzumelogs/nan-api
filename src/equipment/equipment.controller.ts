@@ -48,7 +48,9 @@ export class EquipmentController {
   @ApiOperation({
     summary: 'Thiết bị theo ID',
   })
-  findOne(@Param('id') id: string): Promise<{ data: Equipment }> {
+  findOne(
+    @Param('id') id: string,
+  ): Promise<{ data: Equipment & { maintainCount: number } }> {
     return this.equipmentService.findOne(id);
   }
 

@@ -102,15 +102,33 @@ export class EquipmentService {
     }
   }
 
-  async findOne(id: string): Promise<{ data: Equipment }> {
+  async findOne(
+    id: string,
+  ): Promise<{ data: Equipment & { maintainCount: number } }> {
     try {
       const equipment = await this.prisma.equipment.findUniqueOrThrow({
         where: { id },
         include: {
           category: true,
+          maintenances: {
+            where: {
+              status: 'completed',
+            },
+            select: {
+              id: true,
+            },
+          },
         },
       });
-      return { data: equipment };
+
+      const maintainCount = equipment.maintenances.length;
+
+      return {
+        data: {
+          ...equipment,
+          maintainCount,
+        },
+      };
     } catch (error) {
       prismaErrorHandler(error);
     }
