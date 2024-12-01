@@ -119,14 +119,14 @@ export class FeedbackService {
 
   async reply(
     id: string,
-    dto: { adminResponse: string; replyDate: Date },
+    dto: { adminResponse: string },
   ): Promise<{ message: string }> {
     try {
       await this.prisma.feedback.update({
         where: { id },
         data: {
           adminResponse: dto.adminResponse,
-          replyDate: dto.replyDate,
+          replyDate: new Date(),
         },
       });
 

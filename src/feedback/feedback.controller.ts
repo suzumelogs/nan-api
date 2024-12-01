@@ -84,7 +84,7 @@ export class FeedbackController {
   @ApiOperation({
     summary: 'Phản hồi từ admin',
   })
-  @Auth(Role.admin)
+  @Auth(Role.admin, Role.super_admin)
   async reply(
     @Param('id') id: string,
     @Body() replyDto: { adminResponse: string; replyDate: Date },
