@@ -262,6 +262,8 @@ model RentalItem {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  feedbacks Feedback[]
+
   @@map("rental_items")
 }
 
@@ -286,11 +288,13 @@ model Feedback {
   adminResponse String? // phản hồi từ admin
   replyDate     DateTime? // ngày phản hồi
 
-  userId   String @db.ObjectId
-  rentalId String @db.ObjectId
+  userId       String @db.ObjectId
+  rentalId     String @db.ObjectId
+  rentalItemId String @db.ObjectId
 
-  user   User   @relation(fields: [userId], references: [id])
-  rental Rental @relation(fields: [rentalId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+  rental     Rental     @relation(fields: [rentalId], references: [id])
+  rentalItem RentalItem @relation(fields: [rentalItemId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

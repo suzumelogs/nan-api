@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { FeedbackFilterDto } from './dto/feedback-filter.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
+import { CreateFeedbackItemDto } from './dto/create-feedback-item.dto';
 
 @Injectable()
 export class FeedbackService {
@@ -262,6 +263,42 @@ export class FeedbackService {
         },
       });
       return { message: 'Cập nhật phản hồi admin thành công' };
+    } catch (error) {
+      prismaErrorHandler(error);
+    }
+  }
+
+  async createFeedbackForRentalItem(
+    dto: CreateFeedbackItemDto,
+  ): Promise<{ message: string }> {
+    try {
+      const rentalItem = await this.prisma.rentalItem.findUnique({
+        where: { id: dto.rentalItemId },
+      });
+
+      if (!rentalItem) {
+        throw new Error('Rental item không tồn tại.');
+      }
+
+      const rental = await this.prisma.rental.findUnique({
+        where: { id: rentalItem.rentalId },
+      });
+
+      if (!rental || rental.userId !== dto.userId) {
+        throw new Error('Bạn không có quyền đánh giá thiết bị này.');
+      }
+
+      await this.prisma.feedback.create({
+        data: {
+          rentalItemId: dto.rentalItemId,
+          userId: dto.userId,
+          rating: dto.rating,
+          comment: dto.comment,
+          rentalId: rentalItem.rentalId,
+        },
+      });
+
+      return { message: 'Thêm feedback thành công.' };
     } catch (error) {
       prismaErrorHandler(error);
     }

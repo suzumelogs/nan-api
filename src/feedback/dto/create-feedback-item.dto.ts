@@ -1,14 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsNotEmpty,
-  IsOptional,
   IsInt,
-  Min,
-  Max,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
   IsString,
+  Max,
+  Min,
 } from 'class-validator';
 
-export class CreateFeedbackDto {
+export class CreateFeedbackItemDto {
+  @ApiProperty({
+    description: 'Mã ID thiết bị hoặc gói thuê',
+  })
+  @IsNotEmpty()
+  @IsString()
+  rentalItemId: string;
+
   @ApiProperty({
     description: 'Đánh giá từ 1 đến 5',
   })
@@ -32,14 +40,4 @@ export class CreateFeedbackDto {
   @IsNotEmpty()
   @IsString()
   userId: string;
-
-  @ApiProperty({
-    description: 'Mã ID thuê',
-  })
-  @IsNotEmpty()
-  @IsString()
-  rentalId: string;
-
-  @IsOptional()
-  rentalItemId: string;
 }

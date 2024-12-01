@@ -15,6 +15,7 @@ import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { FeedbackFilterDto } from './dto/feedback-filter.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
 import { FeedbackService } from './feedback.service';
+import { CreateFeedbackItemDto } from './dto/create-feedback-item.dto';
 
 @ApiBearerAuth()
 @ApiTags('Feedbacks')
@@ -176,5 +177,10 @@ export class FeedbackController {
     @Body() replyDto: { adminResponse: string; replyDate: Date },
   ): Promise<{ message: string }> {
     return this.feedbackService.updateAdminResponse(id, replyDto);
+  }
+
+  @Post('create/rental-item')
+  async createFeedback(@Body() dto: CreateFeedbackItemDto) {
+    return this.feedbackService.createFeedbackForRentalItem(dto);
   }
 }
