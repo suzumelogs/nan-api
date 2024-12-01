@@ -22,6 +22,7 @@ import { UploadModule } from './upload/upload.module';
 import { RepairRecordModule } from './repair-record/repair-record.module';
 import { UsageRecordModule } from './usage-record/usage-record.module';
 import { MailerConfigModule } from './mail/mail.module';
+import { StatisticalModule } from './statistical/statistical.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { MailerConfigModule } from './mail/mail.module';
     RepairRecordModule,
     UsageRecordModule,
     MailerConfigModule,
+    StatisticalModule,
   ],
   controllers: [AppController],
   providers: [AppService, FirebaseService],
