@@ -180,6 +180,10 @@ export class FeedbackController {
   }
 
   @Post('create/rental-item')
+  @ApiOperation({
+    summary: 'Tạo phản hồi mới cho thiết bị và gói đã thuê',
+  })
+  @Auth(Role.user)
   async createFeedback(@Body() dto: CreateFeedbackItemDto) {
     return this.feedbackService.createFeedbackForRentalItem(dto);
   }
