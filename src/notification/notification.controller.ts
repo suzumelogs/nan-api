@@ -9,8 +9,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Notification, NotificationStatus, User } from '@prisma/client';
-import { GetUser } from 'src/auth/decorators';
+import { Notification, NotificationStatus, Role, User } from '@prisma/client';
+import { Auth, GetUser } from 'src/auth/decorators';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { NotificationService } from './notification.service';
@@ -68,12 +68,16 @@ export class NotificationController {
     return this.notificationService.remove(id);
   }
 
-  @Get('by-me')
+  @Get('get/by-me')
   @ApiOperation({
     summary: 'Lấy thông báo của tôi',
   })
-  findByUserId(@GetUser() user: User): Promise<{ data: Notification[] }> {
-    return this.notificationService.findAllByUserId(user.id);
+  @Auth(Role.user, Role.super_admin, Role.admin)
+  findByUserId(
+    @GetUser() user: User,
+    @Query('status') status?: NotificationStatus,
+  ): Promise<{ data: Notification[] }> {
+    return this.notificationService.findAllByUserId(user.id, status);
   }
 
   @Patch(':id/read')
@@ -88,6 +92,7 @@ export class NotificationController {
   @ApiOperation({
     summary: 'Đánh dấu tất cả thông báo của tôi là đã đọc',
   })
+  @Auth(Role.user)
   markAllAsReadByUserId(@GetUser() user: User): Promise<{ count: number }> {
     return this.notificationService.markAllAsReadByUserId(user.id);
   }
@@ -116,6 +121,7 @@ export class NotificationController {
   @ApiOperation({
     summary: 'Lấy thông báo chưa đọc của tôi',
   })
+  @Auth(Role.user)
   findUnreadByUserId(@GetUser() user: User): Promise<{ data: Notification[] }> {
     return this.notificationService.findUnreadByUserId(user.id);
   }
@@ -132,6 +138,7 @@ export class NotificationController {
   @ApiOperation({
     summary: 'Đếm số lượng thông báo của tôi',
   })
+  @Auth(Role.user)
   countNotificationsByUserId(@GetUser() user: User): Promise<number> {
     return this.notificationService.countNotificationsByUserId(user.id);
   }

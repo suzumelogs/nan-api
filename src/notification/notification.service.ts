@@ -78,10 +78,16 @@ export class NotificationService {
     }
   }
 
-  async findAllByUserId(userId: string): Promise<{ data: Notification[] }> {
+  async findAllByUserId(
+    userId: string,
+    status?: NotificationStatus,
+  ): Promise<{ data: Notification[] }> {
     try {
       const notifications = await this.prisma.notification.findMany({
-        where: { userId },
+        where: {
+          userId,
+          status,
+        },
         orderBy: {
           createdAt: 'desc',
         },
