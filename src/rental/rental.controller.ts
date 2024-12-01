@@ -118,4 +118,24 @@ export class RentalController {
       await this.rentalService.getRentalCountByPackageId(packageId);
     return { rentalCount };
   }
+
+  @Get('items/equipment/:equipmentId')
+  @ApiOperation({
+    summary: 'Lấy danh sách mục thuê theo equipmentId',
+  })
+  async getRentalItemByEquipmentId(
+    @Param('equipmentId') equipmentId: string,
+  ): Promise<{ data: Rental[] }> {
+    return this.rentalService.getRentalItemByEquipmentId(equipmentId);
+  }
+
+  @Get('items/package/:packageId')
+  @ApiOperation({
+    summary: 'Lấy danh sách mục thuê theo packageId',
+  })
+  async getRentalItemByPackageId(
+    @Param('packageId') packageId: string,
+  ): Promise<{ data: Rental[] }> {
+    return this.rentalService.getRentalItemByPackageId(packageId);
+  }
 }

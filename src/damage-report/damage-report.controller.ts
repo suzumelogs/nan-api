@@ -45,7 +45,7 @@ export class DamageReportController {
   @ApiOperation({
     summary: 'Báo hỏng',
   })
-  @Auth(Role.user, Role.admin)
+  @Auth(Role.user, Role.admin, Role.super_admin)
   async createByUser(
     @GetUser() user: User,
     @Body() dto: CreateDamageReportDto,

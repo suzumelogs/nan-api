@@ -303,4 +303,61 @@ export class RentalService {
       throw new Error('Lỗi khi lấy số lần thuê gói thiết bị.');
     }
   }
+
+  async getRentalItemByEquipmentId(
+    equipmentId: string,
+  ): Promise<{ data: Rental[] }> {
+    try {
+      const rentalItems = await this.prisma.rentalItem.findMany({
+        where: { equipmentId },
+        include: {
+          rental: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      });
+
+      if (!rentalItems.length) {
+        return { data: [] };
+      }
+
+      const rentals = rentalItems.map((item) => item.rental);
+
+      return { data: rentals };
+    } catch (error) {
+      prismaErrorHandler(error);
+      throw new Error('Lỗi khi lấy các mục thuê theo equipmentId.');
+    }
+  }
+
+  async getRentalItemByPackageId(
+    packageId: string,
+  ): Promise<{ data: Rental[] }> {
+    try {
+      const rentalItems = await this.prisma.rentalItem.findMany({
+        where: { packageId },
+        include: {
+          equipment: true,
+          rental: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      });
+
+      if (!rentalItems.length) {
+        return { data: [] };
+      }
+
+      const rentals = rentalItems.map((item) => item.rental);
+
+      return { data: rentals };
+    } catch (error) {
+      prismaErrorHandler(error);
+      throw new Error('Lỗi khi lấy các mục thuê theo packageId.');
+    }
+  }
 }
