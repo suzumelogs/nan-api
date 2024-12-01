@@ -13,9 +13,20 @@ import { UpdateNotificationDto } from './dto/update-notification.dto';
 export class NotificationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<{ data: Notification[] }> {
+  async findAll(params?: {
+    status?: NotificationStatus;
+  }): Promise<{ data: Notification[] }> {
     try {
-      const notifications = await this.prisma.notification.findMany();
+      const filterConditions: any = {};
+
+      if (params?.status) {
+        filterConditions.status = params.status;
+      }
+
+      const notifications = await this.prisma.notification.findMany({
+        where: filterConditions,
+      });
+
       return { data: notifications };
     } catch (error) {
       prismaErrorHandler(error);

@@ -6,9 +6,10 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Notification, User } from '@prisma/client';
+import { Notification, NotificationStatus, User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorators';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
@@ -24,8 +25,10 @@ export class NotificationController {
   @ApiOperation({
     summary: 'Lấy tất cả thông báo (Không phân trang)',
   })
-  findAll(): Promise<{ data: Notification[] }> {
-    return this.notificationService.findAll();
+  findAll(
+    @Query('status') status?: NotificationStatus,
+  ): Promise<{ data: Notification[] }> {
+    return this.notificationService.findAll({ status });
   }
 
   @Get(':id')
