@@ -105,7 +105,7 @@ export class FeedbackController {
   @ApiOperation({
     summary: 'Thống kê tổng quan về feedback',
   })
-  @Auth(Role.admin)
+  @Auth(Role.admin, Role.super_admin)
   async feedbackStatistics(): Promise<{
     total: number;
     ratingCounts: Record<number, number>;
@@ -127,7 +127,7 @@ export class FeedbackController {
   @ApiOperation({
     summary: 'Lấy các phản hồi đã được trả lời',
   })
-  @Auth(Role.admin)
+  @Auth(Role.admin, Role.super_admin)
   async findRepliedFeedbacks(): Promise<{ data: Feedback[] }> {
     return this.feedbackService.findRepliedFeedbacks();
   }
@@ -136,7 +136,7 @@ export class FeedbackController {
   @ApiOperation({
     summary: 'Tính điểm đánh giá trung bình của tất cả phản hồi',
   })
-  @Auth(Role.admin)
+  @Auth(Role.admin, Role.super_admin)
   async averageRating(): Promise<{ average: number }> {
     return this.feedbackService.averageRating();
   }
@@ -145,7 +145,7 @@ export class FeedbackController {
   @ApiOperation({
     summary: 'Phân tích số lượng phản hồi theo điểm đánh giá',
   })
-  @Auth(Role.admin)
+  @Auth(Role.admin, Role.super_admin)
   async getRatingBreakdown(): Promise<{
     ratingCounts: Record<number, number>;
   }> {
@@ -156,7 +156,7 @@ export class FeedbackController {
   @ApiOperation({
     summary: 'Lấy phản hồi trong một khoảng ngày cụ thể',
   })
-  @Auth(Role.admin)
+  @Auth(Role.admin, Role.super_admin)
   async findFeedbacksByDateRange(
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
@@ -171,7 +171,7 @@ export class FeedbackController {
   @ApiOperation({
     summary: 'Cập nhật phản hồi admin',
   })
-  @Auth(Role.admin)
+  @Auth(Role.admin, Role.super_admin)
   async updateAdminResponse(
     @Param('id') id: string,
     @Body() replyDto: { adminResponse: string; replyDate: Date },
