@@ -94,8 +94,16 @@ export class EquipmentService {
   async findAll(): Promise<{ data: Equipment[] }> {
     try {
       const equipments = await this.prisma.equipment.findMany({
-        include: { category: true },
+        include: {
+          category: true,
+          maintenances: {
+            where: {
+              status: { not: 'pending' },
+            },
+          },
+        },
       });
+
       return { data: equipments };
     } catch (error) {
       prismaErrorHandler(error);
