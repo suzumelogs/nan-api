@@ -67,8 +67,8 @@ enum MaintenanceType {
 
 enum DamageReportStatus {
   pending
-  in_progress
-  resolved
+  normal
+  heavy
   canceled
 }
 

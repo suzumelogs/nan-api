@@ -109,6 +109,7 @@ export class DamageReportService {
 
   async updateStatus(id: string, dto: UpdateStatus) {
     try {
+      // Cập nhật trạng thái của báo cáo hư hỏng
       const damageReport = await this.prisma.damageReport.update({
         where: { id },
         data: {
@@ -124,7 +125,29 @@ export class DamageReportService {
         },
       });
 
-      const notificationMessage = `(Báo hỏng)Thiết bị ${damageReport.equipment.name} đang ở trạng thái ${damageReport.status}`;
+      let notificationMessage: string;
+
+      switch (dto.status) {
+        case DamageReportStatus.normal:
+          notificationMessage = `(Báo hỏng) Thiết bị ${damageReport.equipment.name} đang ở trạng thái hư hỏng nhẹ sẽ sửa chữa với phí 10%-30% giá trị sản phẩm.`;
+          break;
+
+        case DamageReportStatus.heavy:
+          notificationMessage = `(Báo hỏng) Thiết bị ${damageReport.equipment.name} đang ở trạng thái hư hỏng nghiêm trọng sẽ đền bù 80%-100% giá trị sản phẩm.`;
+          break;
+
+        case DamageReportStatus.pending:
+          notificationMessage = `(Báo hỏng) Thiết bị ${damageReport.equipment.name} đang ở trạng thái chờ xử lý. Vui lòng kiểm tra sau.`;
+          break;
+
+        case DamageReportStatus.canceled:
+          notificationMessage = `(Báo hỏng) Báo cáo về thiết bị ${damageReport.equipment.name} đã bị hủy bỏ.`;
+          break;
+
+        default:
+          notificationMessage = `(Báo hỏng) Thiết bị ${damageReport.equipment.name} đang ở trạng thái ${dto.status}.`;
+          break;
+      }
 
       this.notificationService.sendNotification({
         message: notificationMessage,
@@ -138,6 +161,7 @@ export class DamageReportService {
 
       return { message: 'Cập nhật trạng thái thành công' };
     } catch (error) {
+      // Xử lý lỗi từ Prisma
       prismaErrorHandler(error);
     }
   }

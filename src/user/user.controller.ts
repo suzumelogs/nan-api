@@ -41,7 +41,7 @@ export class UserController {
   @ApiOperation({
     summary: 'Tạo mới người dùng',
   })
-  @Auth(Role.admin)
+  @Auth(Role.admin, Role.super_admin)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
@@ -50,7 +50,7 @@ export class UserController {
   @ApiOperation({
     summary: 'Tìm tất cả người dùng (Không phân trang)',
   })
-  @Auth(Role.admin)
+  @Auth(Role.admin, Role.super_admin)
   findAll() {
     return this.userService.findAll();
   }
@@ -59,7 +59,7 @@ export class UserController {
   @ApiOperation({
     summary: 'Tìm người dùng theo ID',
   })
-  @Auth(Role.admin, Role.user)
+  @Auth(Role.admin, Role.user, Role.super_admin)
   findOne(@Param('id') id: string, @GetUser() user: User) {
     return this.userService.findOne('id', id, user);
   }
@@ -68,7 +68,7 @@ export class UserController {
   @ApiOperation({
     summary: 'Tìm người dùng theo EMAIL',
   })
-  @Auth(Role.admin, Role.user)
+  @Auth(Role.admin, Role.user, Role.super_admin)
   findOneByEmail(@Param('email') email: string, @GetUser() user: User) {
     return this.userService.findOne('email', email, user);
   }
@@ -77,7 +77,7 @@ export class UserController {
   @ApiOperation({
     summary: 'Cập nhật người dùng theo ID',
   })
-  @Auth(Role.admin, Role.user)
+  @Auth(Role.admin, Role.user, Role.super_admin)
   update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -90,7 +90,7 @@ export class UserController {
   @ApiOperation({
     summary: 'Cập nhật người dùng theo EMAIL',
   })
-  @Auth(Role.admin, Role.user)
+  @Auth(Role.admin, Role.user, Role.super_admin)
   updateByEmail(
     @Param('email') email: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -103,7 +103,7 @@ export class UserController {
   @ApiOperation({
     summary: 'Xoá người dùng theo ID',
   })
-  @Auth(Role.admin, Role.user)
+  @Auth(Role.admin, Role.user, Role.super_admin)
   remove(@Param('id') id: string, @GetUser() user: User) {
     return this.userService.remove('id', id, user);
   }
@@ -112,7 +112,7 @@ export class UserController {
   @ApiOperation({
     summary: 'Xoá người dùng theo EMAIL',
   })
-  @Auth(Role.admin, Role.user)
+  @Auth(Role.admin, Role.user, Role.super_admin)
   removeByEmail(@Param('email') email: string, @GetUser() user: User) {
     return this.userService.remove('email', email, user);
   }
@@ -130,7 +130,7 @@ export class UserController {
   @ApiOperation({
     summary: 'Cập nhật tài liệu nhận dạng của người dùng',
   })
-  @Auth(Role.admin, Role.user)
+  @Auth(Role.admin, Role.user, Role.super_admin)
   async updateIdentityDoc(
     @GetUser() user: User,
     @Body() dto: UpdateIdentityDocDto,
