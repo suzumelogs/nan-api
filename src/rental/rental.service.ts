@@ -85,6 +85,9 @@ export class RentalService {
       const rentals = await this.prisma.rental.findMany({
         where: { userId },
         include: { items: true, feedbacks: true },
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
       return { data: rentals };
     } catch (error) {
