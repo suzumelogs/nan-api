@@ -134,9 +134,6 @@ export class UserService {
   }
 
   async findOne(field: string, value: string, user: User) {
-    if (value !== user[field] && user.role !== 'admin')
-      throw new UnauthorizedException('Unauthorized');
-
     const whereData = field === 'id' ? { id: value } : { email: value };
 
     try {
