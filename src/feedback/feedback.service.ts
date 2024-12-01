@@ -303,4 +303,31 @@ export class FeedbackService {
       prismaErrorHandler(error);
     }
   }
+
+  async getFeedbacksByEquipmentIdOrPackageId(
+    equipmentId?: string,
+    packageId?: string,
+  ) {
+    const rentalItems = await this.prisma.rentalItem.findMany({
+      where: {
+        OR: [
+          equipmentId ? { equipmentId } : undefined,
+          packageId ? { packageId } : undefined,
+        ],
+      },
+      select: { id: true },
+    });
+
+    return this.prisma.feedback.findMany({
+      where: {
+        rentalItemId: {
+          in: rentalItems.map((item) => item.id),
+        },
+      },
+      include: {
+        rentalItem: true,
+        user: true,
+      },
+    });
+  }
 }

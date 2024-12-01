@@ -187,4 +187,18 @@ export class FeedbackController {
   async createFeedback(@Body() dto: CreateFeedbackItemDto) {
     return this.feedbackService.createFeedbackForRentalItem(dto);
   }
+
+  @Get('by-equipment-or-package')
+  @ApiOperation({
+    summary: 'Lấy feedbacks theo equipmentId hoặc packageId',
+  })
+  async getFeedbacksByEquipmentOrPackage(
+    @Query('equipmentId') equipmentId?: string,
+    @Query('packageId') packageId?: string,
+  ) {
+    return this.feedbackService.getFeedbacksByEquipmentIdOrPackageId(
+      equipmentId,
+      packageId,
+    );
+  }
 }
