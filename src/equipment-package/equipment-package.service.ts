@@ -100,7 +100,13 @@ export class EquipmentPackageService {
       const equipmentPackage =
         await this.prisma.equipmentPackage.findUniqueOrThrow({
           where: { id },
-          include: { equipments: true },
+          include: {
+            equipments: {
+              include: {
+                equipment: true,
+              },
+            },
+          },
         });
       return { data: equipmentPackage };
     } catch (error) {
