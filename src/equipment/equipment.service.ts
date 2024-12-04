@@ -3,7 +3,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Equipment, Prisma } from '@prisma/client';
+import { Equipment, EquipmentPackage, Prisma } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
 import { prismaErrorHandler } from 'src/common/messages';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -187,6 +187,43 @@ export class EquipmentService {
       return { data: equipmentsLabelValue };
     } catch (error) {
       prismaErrorHandler(error);
+    }
+  }
+
+  async searchEquipmentOrPackage(keyword: string): Promise<{
+    data: (
+      | (Equipment & { type: 'equipment' })
+      | (EquipmentPackage & { type: 'package' })
+    )[];
+  }> {
+    try {
+      const equipments = await this.prisma.equipment.findMany({
+        where: {
+          name: {
+            contains: keyword,
+            mode: Prisma.QueryMode.insensitive,
+          },
+        },
+      });
+
+      const equipmentPackages = await this.prisma.equipmentPackage.findMany({
+        where: {
+          name: {
+            contains: keyword,
+            mode: Prisma.QueryMode.insensitive,
+          },
+        },
+      });
+
+      return {
+        data: [
+          ...equipments.map((e) => ({ ...e, type: 'equipment' as const })),
+          ...equipmentPackages.map((e) => ({ ...e, type: 'package' as const })),
+        ],
+      };
+    } catch (error) {
+      prismaErrorHandler(error);
+      throw new Error('Error while searching equipment or packages.'); // Ensure meaningful error propagation
     }
   }
 }

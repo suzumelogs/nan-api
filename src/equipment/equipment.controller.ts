@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Equipment } from '@prisma/client';
+import { Equipment, EquipmentPackage } from '@prisma/client';
 import { LabelValueResponse } from 'src/common';
 import { CreateEquipmentDto } from './dto/create-equipment.dto';
 import { EquipmentFilterDto } from './dto/equipment-filter.dto';
@@ -89,5 +89,22 @@ export class EquipmentController {
   })
   getLabelValue(): Promise<{ data: LabelValueResponse[] }> {
     return this.equipmentService.getLabelValue();
+  }
+
+  @Get('search')
+  @ApiOperation({
+    summary: 'Tìm kiếm thiết bị theo từ khóa',
+  })
+  searchEquipment(@Query('keyword') keyword: string): Promise<{
+    data: (
+      | (Equipment & {
+          type: 'equipment' | 'package';
+        })
+      | (EquipmentPackage & {
+          type: 'equipment' | 'package';
+        })
+    )[];
+  }> {
+    return this.equipmentService.searchEquipmentOrPackage(keyword);
   }
 }
